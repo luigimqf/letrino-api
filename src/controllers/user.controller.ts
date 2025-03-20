@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { User } from '../config/db/models/users'
-import { z } from 'zod'
+import { z } from 'zod';
+import bcrypt from 'bcrypt';
 
 async function getUsers(_: Request, res: Response): Promise<void> {
   try {
@@ -51,9 +52,19 @@ async function createUser(req: Request, res: Response) {
     }
 
     try {
-      const newUser = new User(data)
+      const { email, password, name } = data;
+
+      const hash = bcrypt.hashSync(password, 10);
+
+      const newUser = new User({
+        name,
+        email,
+        password: hash
+      });
+
       await newUser.save()
       res.status(201).json(newUser)
+
     } catch (error) {
       res.status(400).json({
         success: false,
