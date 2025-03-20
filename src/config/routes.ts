@@ -1,3 +1,4 @@
+import { login } from '../controllers/auth.controller'
 import { getLeaderboard } from '../controllers/leaderboard.controller'
 import {
   createUser,
@@ -9,6 +10,8 @@ import {
 import { Express } from 'express'
 
 function setupRoutes(app: Express) {
+  //----------- Auth Routes ------------//
+  app.post('/login', login)
   //----------- User Routes ------------//
   app.get('/users', getUsers)
 
