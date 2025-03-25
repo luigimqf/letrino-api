@@ -1,7 +1,8 @@
 import mongoose from 'mongoose'
+import { env } from '../enviroment'
 
 function setupDatabase() {
-  mongoose.connect(process.env.MONGODB_URI ?? '')
+  mongoose.connect(env.MONGODB_URI ?? '')
 }
 
 export default setupDatabase
