@@ -5,6 +5,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { HOUR_IN_SECONDS } from '../constants/time';
 import { env } from '../config/enviroment';
+import { Errors } from '../constants/error';
+import { JwtPayloadWithId } from '../types';
+import { SessionRepository } from '../repositories/session.repository';
 
 const loginSchema = z.object({
   email: z.string({
@@ -34,7 +37,7 @@ async function login(req: Request, res: Response) {
     if (!user) {
       res.status(404).json({
         success: false,
-        error: 'User not found'
+        error: Errors.USER_NOT_FOUND
       })
       return
     }
@@ -42,9 +45,9 @@ async function login(req: Request, res: Response) {
     const isPasswordValid = bcrypt.compareSync(password, user.password);
 
     if (!isPasswordValid) {
-      res.status(401).json({
+      res.status(400).json({
         success: false,
-        error: 'Invalid credentials'
+        error: Errors.INVALID_CREDENTIALS
       })
       return
     }
@@ -56,15 +59,61 @@ async function login(req: Request, res: Response) {
     res.status(200).json({
       success: true,
       token,
-      refreshToken
+      refresh_token: refreshToken
     })
 
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'An error occurred'
+      error: Errors.SERVER_ERROR
     })
   }
 }
 
-export { login }
+const refreshTokenSchema = z.string({
+  message: 'Refresh token is required'
+});
+
+async function refreshToken(req: Request, res: Response) {
+  try {
+    const { success, data: refreshToken, error } = refreshTokenSchema.safeParse(req.body);
+
+    if (!success) {
+      res.status(400).json({
+        success: false,
+        error: error.issues[0].message
+      })
+      return;
+    }
+
+    let id;
+
+    try {
+      ({id} = jwt.verify(refreshToken, env.JWT_SECRET) as JwtPayloadWithId);
+      const newToken = jwt.sign({id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24});
+      const newRefreshToken = jwt.sign({id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24 * 7});
+
+      res.status(200).json({
+        success: true,
+        token: newToken,
+        refresh_token: newRefreshToken
+      })
+      return;
+    } catch (error) {
+      res.status(401).json({
+        success: false,
+        error: Errors.INVALID_TOKEN
+      });
+      if(id) {
+        await SessionRepository.delete(id);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: Errors.SERVER_ERROR
+    })
+  }
+}
+
+export { login,refreshToken }

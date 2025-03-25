@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { User } from '../config/db/models/users'
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import { Errors } from '../constants/error';
 
 async function getUsers(_: Request, res: Response): Promise<void> {
   try {
@@ -9,7 +10,7 @@ async function getUsers(_: Request, res: Response): Promise<void> {
     if (users.length <= 0) {
       res.status(404).send({
         success: false,
-        error: 'No users found'
+        error: Errors.USER_NOT_FOUND
       })
     }
     res.status(200).json({
@@ -19,7 +20,7 @@ async function getUsers(_: Request, res: Response): Promise<void> {
   } catch (error) {
     res.status(500).send({
       success: false,
-      error: 'An error occurred'
+      error: Errors.SERVER_ERROR
     })
   }
 }
@@ -74,7 +75,7 @@ async function createUser(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'An error occurred'
+      error: Errors.SERVER_ERROR
     })
   }
 }
@@ -100,7 +101,7 @@ async function getUser(req: Request, res: Response) {
     if (!user) {
       res.status(404).json({
         success: false,
-        error: 'User not found'
+        error: Errors.USER_NOT_FOUND
       })
       return
     }
@@ -156,7 +157,7 @@ async function updateUser(req: Request, res: Response) {
       if (!user) {
         res.status(404).json({
           success: false,
-          error: 'User not found'
+          error: Errors.USER_NOT_FOUND
         })
         return
       }
@@ -174,7 +175,7 @@ async function updateUser(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'An error occurred'
+      error: Errors.SERVER_ERROR
     })
   }
 }
@@ -195,7 +196,7 @@ async function deleteUser(req: Request, res: Response) {
     if (!deletedUser) {
       res.status(404).json({
         success: false,
-        error: 'User not found'
+        error: Errors.USER_NOT_FOUND
       })
       return
     }
@@ -208,7 +209,7 @@ async function deleteUser(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'An error occurred'
+      error: Errors.SERVER_ERROR
     })
   }
 }
