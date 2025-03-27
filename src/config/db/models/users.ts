@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
   score: {
     type: Number,
     default: 0
+  },
+  statistics: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Statistics'
   }
 },
 {timestamps: true}

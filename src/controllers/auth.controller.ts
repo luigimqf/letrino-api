@@ -1,13 +1,12 @@
 import {Request, Response} from 'express';
 import {z} from 'zod';
-import { User } from '../config/db/models/users';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { HOUR_IN_SECONDS } from '../constants/time';
-import { env } from '../config/enviroment';
 import { Errors } from '../constants/error';
-import { JwtPayloadWithId } from '../types';
-import { SessionRepository } from '../repositories/session.repository';
+import { schemaValidator } from '../utils/validator';
+import { badRequest, notFound, ok, serverError } from '../utils/http-status';
+import { UserRepository } from '../repositories/user.repository';
+import { Jwt } from '../utils/jwt';
+import { WEEK_IN_SECONDS } from '../constants/time';
 
 const loginSchema = z.object({
   email: z.string({
@@ -20,53 +19,38 @@ const loginSchema = z.object({
 
 async function login(req: Request, res: Response) {
   try {
-    const { success, data, error } = loginSchema.safeParse(req.body);
+    const schemaResult = schemaValidator(loginSchema, req.body);
 
-    if (!success) {
-      res.status(400).json({
-        success: false,
-        error: error.issues[0].message
-      })
-      return
+    if(schemaResult.isFailure()) {
+      badRequest(res, schemaResult.error);
+      return;
+    }
+    
+    const { email, password } = schemaResult.value;
+    const userResult = await UserRepository.findWhere('email', email);
+
+    if(userResult.isFailure()) {
+      notFound(res, Errors.USER_NOT_FOUND);
+      return;
     }
 
-    const { email, password } = data;
-
-    const user = await User.findOne().where('email').equals(email);
-
-    if (!user) {
-      res.status(404).json({
-        success: false,
-        error: Errors.USER_NOT_FOUND
-      })
-      return
-    }
-
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    const isPasswordValid = bcrypt.compareSync(password, userResult.value?.password ?? '');
 
     if (!isPasswordValid) {
-      res.status(400).json({
-        success: false,
-        error: Errors.INVALID_CREDENTIALS
-      })
-      return
+      badRequest(res, Errors.INVALID_PASSWORD);
+      return;
     }
 
-    const token = jwt.sign({email: user.email, id: user._id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24});
+    const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?._id});
 
-    const refreshToken = jwt.sign({email: user.email, id: user._id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24 * 7});
-
-    res.status(200).json({
-      success: true,
+    const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?._id}, WEEK_IN_SECONDS);
+  
+    ok(res,{
       token,
       refresh_token: refreshToken
     })
-
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: Errors.SERVER_ERROR
-    })
+    serverError(res);
   }
 }
 
@@ -76,43 +60,36 @@ const refreshTokenSchema = z.string({
 
 async function refreshToken(req: Request, res: Response) {
   try {
-    const { success, data: refreshToken, error } = refreshTokenSchema.safeParse(req.body);
+    const schemaResult = schemaValidator(refreshTokenSchema, req.body.refresh_token);
 
-    if (!success) {
-      res.status(400).json({
-        success: false,
-        error: error.issues[0].message
-      })
+    if (schemaResult.isFailure()) {
+      badRequest(res, schemaResult.error);
       return;
     }
 
-    let id;
+    const refreshToken = schemaResult.value;
 
-    try {
-      ({id} = jwt.verify(refreshToken, env.JWT_SECRET) as JwtPayloadWithId);
-      const newToken = jwt.sign({id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24});
-      const newRefreshToken = jwt.sign({id}, env.JWT_SECRET, {expiresIn: HOUR_IN_SECONDS * 24 * 7});
+    const jwtResult = Jwt.verify(refreshToken);
 
-      res.status(200).json({
-        success: true,
-        token: newToken,
-        refresh_token: newRefreshToken
-      })
+    if(jwtResult.isFailure()) {
+      badRequest(res, jwtResult.error);
+      //Add session delete with Id
       return;
-    } catch (error) {
-      res.status(401).json({
-        success: false,
-        error: Errors.INVALID_TOKEN
-      });
-      if(id) {
-        await SessionRepository.delete(id);
-      }
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: Errors.SERVER_ERROR
+
+    const id = jwtResult.value;
+    const newToken = Jwt.sign({id});
+    const newRefreshToken = Jwt.sign({id}, WEEK_IN_SECONDS);
+
+    ok(res, {
+      success: true,
+      token: newToken,
+      refresh_token: newRefreshToken
     })
+    return;
+    
+  } catch (error) {
+    serverError(res);
   }
 }
 

@@ -16,10 +16,6 @@ export async function authenticate(req: Request,res:Response,next: NextFunction)
     try {
       const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadWithId;
 
-      req.user = {
-        id: decoded.id
-      };
-
       next();
     } catch (error) {
       res.status(401).json({

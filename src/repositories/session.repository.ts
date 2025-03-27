@@ -1,6 +1,6 @@
 import { Session } from "../config/db/models/session";
 import { Errors } from "../constants/error";
-import { Either, Failure, Success } from "../types/either";
+import { Either, Failure, Success } from "../utils/either";
 
 
 export class SessionRepository {
