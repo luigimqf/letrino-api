@@ -38,3 +38,5 @@ export class Success<T> {
 }
 
 export type Either<T, U> = Failure<T> | Success<U>;
+
+

@@ -1,12 +1,16 @@
 import z from "zod";
-import { Either, Failure, Success } from "../types/either";
+import { Errors } from "../constants/error";
+import { Either, Failure, Success } from "./either";
 
-export function schemaValidator<T, U = unknown>(schema: z.ZodType<any, any, any>, body: U): Either<z.ZodError, T> {
+export function schemaValidator<T = unknown>(schema: z.ZodType<T, any, any>, body: T): Either<string, T> {
   try {
     const data = schema.parse(body);
     
-    return Success.create(data);
+    return Success.create<T>(data);
   } catch (error) {
-    return Failure.create(error as z.ZodError);
+    if(error instanceof z.ZodError) {
+      return Failure.create(error.issues[0].message);
+    }
+    return Failure.create(Errors.SERVER_ERROR);
   }
 }

@@ -1,27 +1,23 @@
 import {Response} from 'express';
 
-export function ok(res: Response, message?: string) {
-  if (message) {
+export function ok(res: Response, data: unknown  = null, message: string | null = null) {
     return res.status(200).json({
       success: true,
+      data,
       message
     })
-  }
-  return res.status(200);
 }
 
-export function created(res: Response, message?: string) {
-  if (message) {
-    return res.status(201).json({
-      success: true,
-      message
-    })
-  }
-  return res.status(201);
+export function created(res: Response, data: unknown  = null, message: string | null = null) {
+  return res.status(201).json({
+    success: true,
+    data,
+    message
+  });
 }
 
 export function noContent(res: Response) {
-  return res.status(204).send();
+  return res.status(204);
 }
 
 export function badRequest(res: Response, message = 'Bad Request') {
@@ -47,6 +43,13 @@ export function forbidden(res: Response, message = 'Forbidden') {
 
 export function notFound(res: Response, message = 'Not Found') {
   return res.status(404).json({
+    success: false,
+    error: message
+  })
+}
+
+export function serverError(res: Response, message = 'Server Error') {
+  return res.status(500).json({
     success: false,
     error: message
   })
