@@ -1,13 +1,13 @@
 import 'express';
+import { ObjectID } from '.';
 
 declare global {
   namespace Express {
     interface User {
-      id: string;
+      userId?: ObjectID;
     }
-
     interface Request {
-      user?: User;
+      userId?: ObjectID;
     }
   }
 }

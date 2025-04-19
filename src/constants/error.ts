@@ -7,7 +7,11 @@ export enum Errors {
   USER_NOT_FOUND = 'User not found',
   UNAUTHORIZED = 'Unauthorized',
   INVALID_TOKEN = 'Invalid token',
+  TOKEN_EXPIRED = 'Expired Token',
   NO_TOKEN = 'No token provided',
   NOT_FOUND = 'Not found',
   SERVER_ERROR = 'Internal Server error',
+  INCORRECT_ATTEMPT = 'The attempt is incorrect',
+  CORRECT_ATTEMPT = 'The attempt is correct',
+  ALREADY_ATTEMPTED = "You have already correct today's word",
 }

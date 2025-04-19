@@ -3,6 +3,7 @@ import { User } from "../config/db/models/users";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { IUser } from "../config/models/user.model";
+import { Statistic } from "../config/db/models/statistic";
 
 interface IFindAll {
   sort?: Sort;
@@ -18,6 +19,7 @@ export class UserRepository {
     try {
       const newUser = new User(data);
       await newUser.save();
+      
       return Success.create(newUser);
     } catch (error) {
       console.log(error)
@@ -46,20 +48,6 @@ export class UserRepository {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
-
-  // static async findScore(id: string): Promise<Either<Errors, IUser>> {
-  //   try {
-  //     const user = await User.findById(id);
-  //     if (!user) {
-  //       return Failure.create(Errors.NOT_FOUND);
-  //     }
-  //     const usersOrdered = await User.find().sort({score: -1});
-  //     const userScore = usersOrdered.findIndex((u) => u._id.toString() === id) + 1;
-  //     return Success.create({...user.toObject(), rank: userScore});
-  //   } catch (error) {
-  //     return Failure.create(Errors.SERVER_ERROR);
-  //   }
-  // }
 
   static async delete(id: string): Promise<Either<Errors, void>> {
     try {

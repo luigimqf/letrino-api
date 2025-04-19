@@ -16,10 +16,12 @@ export async function authenticate(req: Request,res:Response,next: NextFunction)
     try {
       const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadWithId;
 
+      req.userId = decoded.id;
+      
       next();
     } catch (error) {
       res.status(401).json({
-        message: Errors.UNAUTHORIZED
+        message: Errors.TOKEN_EXPIRED
       });
     }
   } catch (error) {
