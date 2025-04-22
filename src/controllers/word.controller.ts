@@ -21,8 +21,11 @@ export async function getWord(_: Request, res: Response) {
       const wordDoc = await WordRepository.find(todaysWord.value.wordId);
 
       if(wordDoc.isSuccess()){
-        const {word} = wordDoc.value;
-        ok(res, word);
+        const {word,isGolden} = wordDoc.value;
+        ok(res, {
+          word,
+          isGolden
+        });
         return;
       }
     }
@@ -30,14 +33,21 @@ export async function getWord(_: Request, res: Response) {
     const usedWords = await UsedWordRepository.find();
 
     if(usedWords.isSuccess() && usedWords.value) {
-      const randomWord = await WordRepository.findUnexistedWordIn(usedWords.value);
+      const randomWord = Math.random() < 0.01
+        ? await WordRepository.findOneRandom({isGolden: true})
+        :  await WordRepository.findUnexistedWordIn(usedWords.value, 1, {
+          isGolden: true
+        }) 
 
       if(randomWord.isSuccess()) {
-        const {word} = randomWord.value![0];
+        const {word,isGolden} = randomWord.value!;
         await UsedWordRepository.createUsedWord({
-          wordId: randomWord.value![0]._id
+          wordId: randomWord.value!._id
         })
-        ok(res, word)
+        ok(res, {
+          word,
+          isGolden
+        })
         return;
       }
 

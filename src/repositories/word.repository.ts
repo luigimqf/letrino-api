@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { FilterQuery, PipelineStage } from "mongoose";
 import { Word } from "../config/db/models/word";
 import { WordUsed } from "../config/db/models/wordUsed";
 import { IWord } from "../config/models/word.model";
@@ -6,6 +6,7 @@ import { Errors } from "../constants/error";
 import { dayEnd, dayStart } from "../utils/date";
 import { Either, Failure, Success } from "../utils/either";
 import { ObjectID } from "../types";
+import { badRequest } from "../utils/http-status";
 
 export class WordRepository {
 
@@ -24,14 +25,31 @@ export class WordRepository {
     }
   }
 
-  static async findUnexistedWordIn(words: unknown[], size: number = 1): Promise<Either<Errors, IWord[] | null>> {
+  static async findOneRandom(conditions: FilterQuery<IWord>): Promise<Either<Errors, IWord | null>> {
     try {
       const word = await Word.aggregate([
-        {$match: {word: {$nin: words} } },
+        {$match: conditions},
+        {$sample: {size: 1}}
+      ]);
+
+      if(!word) {
+        return Failure.create(Errors.NOT_FOUND);
+      }
+
+      return Success.create(word[0]);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR)
+    }
+  }
+
+  static async findUnexistedWordIn(words: unknown[], size: number = 1, filter?: FilterQuery<IWord>): Promise<Either<Errors, IWord | null>> {
+    try {
+      const word = await Word.aggregate([
+        {$match: {word: {$nin: words}}},
         {$sample: {size}}
       ])
 
-      return Success.create(word)
+      return Success.create(word[0])
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR)
     }
@@ -74,6 +92,16 @@ export class WordRepository {
     } catch (error) {
       console.error(error);
       return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  static async countDocuments(conditions?: FilterQuery<IWord>): Promise<Either<Errors, number>> {
+    try {
+      const totalWords = await Word.countDocuments();
+
+      return Success.create(totalWords);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR)
     }
   }
 }

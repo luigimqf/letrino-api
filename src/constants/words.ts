@@ -1,2078 +1,765 @@
-export const words: Record<string,string>[] = [
-  {
-      "word": "sagaz"
-  },
-  {
-      "word": "negro"
-  },
-  {
-      "word": "mexer"
-  },
-  {
-      "word": "termo"
-  },
-  {
-      "word": "senso"
-  },
-  {
-      "word": "nobre"
-  },
-  {
-      "word": "afeto"
-  },
-  {
-      "word": "plena"
-  },
-  {
-      "word": "sutil"
-  },
-  {
-      "word": "vigor"
-  },
-  {
-      "word": "audaz"
-  },
-  {
-      "word": "fazer"
-  },
-  {
-      "word": "ideia"
-  },
-  {
-      "word": "poder"
-  },
-  {
-      "word": "moral"
-  },
-  {
-      "word": "honra"
-  },
-  {
-      "word": "justo"
-  },
-  {
-      "word": "anexo"
-  },
-  {
-      "word": "etnia"
-  },
-  {
-      "word": "sonho"
-  },
-  {
-      "word": "expor"
-  },
-  {
-      "word": "haver"
-  },
-  {
-      "word": "amigo"
-  },
-  {
-      "word": "tempo"
-  },
-  {
-      "word": "pesar"
-  },
-  {
-      "word": "posse"
-  },
-  {
-      "word": "genro"
-  },
-  {
-      "word": "causa"
-  },
-  {
-      "word": "dizer"
-  },
-  {
-      "word": "digno"
-  },
-  {
-      "word": "dever"
-  },
-  {
-      "word": "saber"
-  },
-  {
-      "word": "ceder"
-  },
-  {
-      "word": "comum"
-  },
-  {
-      "word": "culto"
-  },
-  {
-      "word": "mundo"
-  },
-  {
-      "word": "pauta"
-  },
-  {
-      "word": "denso"
-  },
-  {
-      "word": "forte"
-  },
-  {
-      "word": "pudor"
-  },
-  {
-      "word": "regra"
-  },
-  {
-      "word": "louco"
-  },
-  {
-      "word": "banal"
-  },
-  {
-      "word": "criar"
-  },
-  {
-      "word": "impor"
-  },
-  {
-      "word": "ordem"
-  },
-  {
-      "word": "pedir"
-  },
-  {
-      "word": "viril"
-  },
-  {
-      "word": "manso"
-  },
-  {
-      "word": "ontem"
-  },
-  {
-      "word": "servo"
-  },
-  {
-      "word": "prosa"
-  },
-  {
-      "word": "feliz"
-  },
-  {
-      "word": "presa"
-  },
-  {
-      "word": "coisa"
-  },
-  {
-      "word": "afago"
-  },
-  {
-      "word": "fluir"
-  },
-  {
-      "word": "falar"
-  },
-  {
-      "word": "cunho"
-  },
-  {
-      "word": "forma"
-  },
-  {
-      "word": "meiga"
-  },
-  {
-      "word": "vendo"
-  },
-  {
-      "word": "pleno"
-  },
-  {
-      "word": "visar"
-  },
-  {
-      "word": "temer"
-  },
-  {
-      "word": "mesmo"
-  },
-  {
-      "word": "cisma"
-  },
-  {
-      "word": "limbo"
-  },
-  {
-      "word": "bruma"
-  },
-  {
-      "word": "acaso"
-  },
-  {
-      "word": "puder"
-  },
-  {
-      "word": "gerar"
-  },
-  {
-      "word": "afins"
-  },
-  {
-      "word": "obter"
-  },
-  {
-      "word": "valor"
-  },
-  {
-      "word": "lugar"
-  },
-  {
-      "word": "matiz"
-  },
-  {
-      "word": "crise"
-  },
-  {
-      "word": "senil"
-  },
-  {
-      "word": "havia"
-  },
-  {
-      "word": "certo"
-  },
-  {
-      "word": "fluxo"
-  },
-  {
-      "word": "enfim"
-  },
-  {
-      "word": "ritmo"
-  },
-  {
-      "word": "posso"
-  },
-  {
-      "word": "garbo"
-  },
-  {
-      "word": "tomar"
-  },
-  {
-      "word": "reter"
-  },
-  {
-      "word": "pulha"
-  },
-  {
-      "word": "parvo"
-  },
-  {
-      "word": "valia"
-  },
-  {
-      "word": "grato"
-  },
-  {
-      "word": "todos"
-  },
-  {
-      "word": "vital"
-  },
-  {
-      "word": "favor"
-  },
-  {
-      "word": "abrir"
-  },
-  {
-      "word": "vivaz"
-  },
-  {
-      "word": "laico"
-  },
-  {
-      "word": "bravo"
-  },
-  {
-      "word": "falso"
-  },
-  {
-      "word": "olhar"
-  },
-  {
-      "word": "levar"
-  },
-  {
-      "word": "burro"
-  },
-  {
-      "word": "selar"
-  },
-  {
-      "word": "fator"
-  },
-  {
-      "word": "citar"
-  },
-  {
-      "word": "adiar"
-  },
-  {
-      "word": "farsa"
-  },
-  {
-      "word": "achar"
-  },
-  {
-      "word": "legal"
-  },
-  {
-      "word": "morte"
-  },
-  {
-      "word": "imune"
-  },
-  {
-      "word": "sinto"
-  },
-  {
-      "word": "fardo"
-  },
-  {
-      "word": "falta"
-  },
-  {
-      "word": "exato"
-  },
-  {
-      "word": "ativo"
-  },
-  {
-      "word": "gente"
-  },
-  {
-      "word": "lavra"
-  },
-  {
-      "word": "amplo"
-  },
-  {
-      "word": "ouvir"
-  },
-  {
-      "word": "viver"
-  },
-  {
-      "word": "brega"
-  },
-  {
-      "word": "gesto"
-  },
-  {
-      "word": "cesta"
-  },
-  {
-      "word": "sonso"
-  },
-  {
-      "word": "deter"
-  },
-  {
-      "word": "passo"
-  },
-  {
-      "word": "leigo"
-  },
-  {
-      "word": "vemos"
-  },
-  {
-      "word": "atuar"
-  },
-  {
-      "word": "rever"
-  },
-  {
-      "word": "calma"
-  },
-  {
-      "word": "igual"
-  },
-  {
-      "word": "toada"
-  },
-  {
-      "word": "humor"
-  },
-  {
-      "word": "ideal"
-  },
-  {
-      "word": "hiato"
-  },
-  {
-      "word": "pobre"
-  },
-  {
-      "word": "ponto"
-  },
-  {
-      "word": "ambos"
-  },
-  {
-      "word": "claro"
-  },
-  {
-      "word": "terno"
-  },
-  {
-      "word": "velho"
-  },
-  {
-      "word": "remir"
-  },
-  {
-      "word": "probo"
-  },
-  {
-      "word": "outro"
-  },
-  {
-      "word": "leito"
-  },
-  {
-      "word": "doido"
-  },
-  {
-      "word": "horda"
-  },
-  {
-      "word": "carma"
-  },
-  {
-      "word": "linda"
-  },
-  {
-      "word": "marco"
-  },
-  {
-      "word": "jovem"
-  },
-  {
-      "word": "inata"
-  },
-  {
-      "word": "capaz"
-  },
-  {
-      "word": "fonte"
-  },
-  {
-      "word": "ajuda"
-  },
-  {
-      "word": "algum"
-  },
-  {
-      "word": "caçar"
-  },
-  {
-      "word": "velar"
-  },
-  {
-      "word": "ficar"
-  },
-  {
-      "word": "noite"
-  },
-  {
-      "word": "apoio"
-  },
-  {
-      "word": "dorso"
-  },
-  {
-      "word": "vimos"
-  },
-  {
-      "word": "rigor"
-  },
-  {
-      "word": "verso"
-  },
-  {
-      "word": "botar"
-  },
-  {
-      "word": "vazio"
-  },
-  {
-      "word": "tanto"
-  },
-  {
-      "word": "prece"
-  },
-  {
-      "word": "cruel"
-  },
-  {
-      "word": "terra"
-  },
-  {
-      "word": "morar"
-  },
-  {
-      "word": "ambas"
-  },
-  {
-      "word": "frase"
-  },
-  {
-      "word": "peste"
-  },
-  {
-      "word": "massa"
-  },
-  {
-      "word": "entre"
-  },
-  {
-      "word": "casto"
-  },
-  {
-      "word": "pouco"
-  },
-  {
-      "word": "covil"
-  },
-  {
-      "word": "fauna"
-  },
-  {
-      "word": "signo"
-  },
-  {
-      "word": "sente"
-  },
-  {
-      "word": "preso"
-  },
-  {
-      "word": "furor"
-  },
-  {
-      "word": "credo"
-  },
-  {
-      "word": "feito"
-  },
-  {
-      "word": "lazer"
-  },
-  {
-      "word": "minha"
-  },
-  {
-      "word": "vetor"
-  },
-  {
-      "word": "flora"
-  },
-  {
-      "word": "raiva"
-  },
-  {
-      "word": "aceso"
-  },
-  {
-      "word": "ciclo"
-  },
-  {
-      "word": "maior"
-  },
-  {
-      "word": "chata"
-  },
-  {
-      "word": "vulto"
-  },
-  {
-      "word": "brisa"
-  },
-  {
-      "word": "houve"
-  },
-  {
-      "word": "trama"
-  },
-  {
-      "word": "breve"
-  },
-  {
-      "word": "papel"
-  },
-  {
-      "word": "vasto"
-  },
-  {
-      "word": "setor"
-  },
-  {
-      "word": "adeus"
-  },
-  {
-      "word": "pegar"
-  },
-  {
-      "word": "salvo"
-  },
-  {
-      "word": "ardor"
-  },
-  {
-      "word": "morro"
-  },
-  {
-      "word": "segue"
-  },
-  {
-      "word": "livro"
-  },
-  {
-      "word": "nossa"
-  },
-  {
-      "word": "comer"
-  },
-  {
-      "word": "plano"
-  },
-  {
-      "word": "peixe"
-  },
-  {
-      "word": "rezar"
-  },
-  {
-      "word": "saiba"
-  },
-  {
-      "word": "meses"
-  },
-  {
-      "word": "acima"
-  },
-  {
-      "word": "sorte"
-  },
-  {
-      "word": "chulo"
-  },
-  {
-      "word": "junto"
-  },
-  {
-      "word": "nunca"
-  },
-  {
-      "word": "chuva"
-  },
-  {
-      "word": "mudar"
-  },
-  {
-      "word": "fruir"
-  },
-  {
-      "word": "parar"
-  },
-  {
-      "word": "bando"
-  },
-  {
-      "word": "treta"
-  },
-  {
-      "word": "fugir"
-  },
-  {
-      "word": "motim"
-  },
-  {
-      "word": "gerir"
-  },
-  {
-      "word": "prazo"
-  },
-  {
-      "word": "carro"
-  },
-  {
-      "word": "tosco"
-  },
-  {
-      "word": "leite"
-  },
-  {
-      "word": "norma"
-  },
-  {
-      "word": "andar"
-  },
-  {
-      "word": "grupo"
-  },
-  {
-      "word": "brava"
-  },
-  {
-      "word": "tenso"
-  },
-  {
-      "word": "exame"
-  },
-  {
-      "word": "arcar"
-  },
-  {
-      "word": "rapaz"
-  },
-  {
-      "word": "avião"
-  },
-  {
-      "word": "lenda"
-  },
-  {
-      "word": "soldo"
-  },
-  {
-      "word": "tirar"
-  },
-  {
-      "word": "parte"
-  },
-  {
-      "word": "reino"
-  },
-  {
-      "word": "campo"
-  },
-  {
-      "word": "praga"
-  },
-  {
-      "word": "exijo"
-  },
-  {
-      "word": "sumir"
-  },
-  {
-      "word": "pompa"
-  },
-  {
-      "word": "aonde"
-  },
-  {
-      "word": "logro"
-  },
-  {
-      "word": "traga"
-  },
-  {
-      "word": "fixar"
-  },
-  {
-      "word": "preto"
-  },
-  {
-      "word": "voraz"
-  },
-  {
-      "word": "corpo"
-  },
-  {
-      "word": "antes"
-  },
-  {
-      "word": "quase"
-  },
-  {
-      "word": "solto"
-  },
-  {
-      "word": "cheio"
-  },
-  {
-      "word": "turva"
-  },
-  {
-      "word": "agora"
-  },
-  {
-      "word": "certa"
-  },
-  {
-      "word": "turba"
-  },
-  {
-      "word": "alado"
-  },
-  {
-      "word": "risco"
-  },
-  {
-      "word": "apego"
-  },
-  {
-      "word": "parva"
-  },
-  {
-      "word": "filho"
-  },
-  {
-      "word": "grave"
-  },
-  {
-      "word": "caixa"
-  },
-  {
-      "word": "praia"
-  },
-  {
-      "word": "prova"
-  },
-  {
-      "word": "verve"
-  },
-  {
-      "word": "apelo"
-  },
-  {
-      "word": "pardo"
-  },
-  {
-      "word": "texto"
-  },
-  {
-      "word": "fenda"
-  },
-  {
-      "word": "ligar"
-  },
-  {
-      "word": "trupe"
-  },
-  {
-      "word": "tocar"
-  },
-  {
-      "word": "lindo"
-  },
-  {
-      "word": "dessa"
-  },
-  {
-      "word": "sabia"
-  },
-  {
-      "word": "ficha"
-  },
-  {
-      "word": "navio"
-  },
-  {
-      "word": "opaco"
-  },
-  {
-      "word": "livre"
-  },
-  {
-      "word": "fraco"
-  },
-  {
-      "word": "verba"
-  },
-  {
-      "word": "faixa"
-  },
-  {
-      "word": "elite"
-  },
-  {
-      "word": "conta"
-  },
-  {
-      "word": "autor"
-  },
-  {
-      "word": "lidar"
-  },
-  {
-      "word": "mente"
-  },
-  {
-      "word": "firme"
-  },
-  {
-      "word": "grata"
-  },
-  {
-      "word": "tinha"
-  },
-  {
-      "word": "verbo"
-  },
-  {
-      "word": "calda"
-  },
-  {
-      "word": "bater"
-  },
-  {
-      "word": "fatal"
-  },
-  {
-      "word": "fatos"
-  },
-  {
-      "word": "cousa"
-  },
-  {
-      "word": "reses"
-  },
-  {
-      "word": "magia"
-  },
-  {
-      "word": "molho"
-  },
-  {
-      "word": "turvo"
-  },
-  {
-      "word": "macio"
-  },
-  {
-      "word": "deixa"
-  },
-  {
-      "word": "torso"
-  },
-  {
-      "word": "salve"
-  },
-  {
-      "word": "abriu"
-  },
-  {
-      "word": "supor"
-  },
-  {
-      "word": "pique"
-  },
-  {
-      "word": "atual"
-  },
-  {
-      "word": "asilo"
-  },
-  {
-      "word": "rouca"
-  },
-  {
-      "word": "festa"
-  },
-  {
-      "word": "posto"
-  },
-  {
-      "word": "caber"
-  },
-  {
-      "word": "extra"
-  },
-  {
-      "word": "curso"
-  },
-  {
-      "word": "besta"
-  },
-  {
-      "word": "locus"
-  },
-  {
-      "word": "sexta"
-  },
-  {
-      "word": "judeu"
-  },
-  {
-      "word": "paira"
-  },
-  {
-      "word": "zelar"
-  },
-  {
-      "word": "vezes"
-  },
-  {
-      "word": "ereto"
-  },
-  {
-      "word": "desta"
-  },
-  {
-      "word": "finda"
-  },
-  {
-      "word": "bioma"
-  },
-  {
-      "word": "combo"
-  },
-  {
-      "word": "feudo"
-  },
-  {
-      "word": "agudo"
-  },
-  {
-      "word": "tetra"
-  },
-  {
-      "word": "facto"
-  },
-  {
-      "word": "culpa"
-  },
-  {
-      "word": "vinha"
-  },
-  {
-      "word": "porta"
-  },
-  {
-      "word": "menos"
-  },
-  {
-      "word": "longe"
-  },
-  {
-      "word": "meigo"
-  },
-  {
-      "word": "super"
-  },
-  {
-      "word": "rumor"
-  },
-  {
-      "word": "museu"
-  },
-  {
-      "word": "pilar"
-  },
-  {
-      "word": "suave"
-  },
-  {
-      "word": "geral"
-  },
-  {
-      "word": "optar"
-  },
-  {
-      "word": "medir"
-  },
-  {
-      "word": "penta"
-  },
-  {
-      "word": "turma"
-  },
-  {
-      "word": "boato"
-  },
-  {
-      "word": "chama"
-  },
-  {
-      "word": "crime"
-  },
-  {
-      "word": "letal"
-  },
-  {
-      "word": "pacto"
-  },
-  {
-      "word": "local"
-  },
-  {
-      "word": "folga"
-  },
-  {
-      "word": "cacho"
-  },
-  {
-      "word": "aroma"
-  },
-  {
-      "word": "vigia"
-  },
-  {
-      "word": "vetar"
-  },
-  {
-      "word": "finjo"
-  },
-  {
-      "word": "drama"
-  },
-  {
-      "word": "fazia"
-  },
-  {
-      "word": "pasmo"
-  },
-  {
-      "word": "brabo"
-  },
-  {
-      "word": "feroz"
-  },
-  {
-      "word": "axila"
-  },
-  {
-      "word": "rival"
-  },
-  {
-      "word": "mesma"
-  },
-  {
-      "word": "monte"
-  },
-  {
-      "word": "poema"
-  },
-  {
-      "word": "golpe"
-  },
-  {
-      "word": "ecoar"
-  },
-  {
-      "word": "coral"
-  },
-  {
-      "word": "teste"
-  },
-  {
-      "word": "forem"
-  },
-  {
-      "word": "monge"
-  },
-  {
-      "word": "aluno"
-  },
-  {
-      "word": "clima"
-  },
-  {
-      "word": "viram"
-  },
-  {
-      "word": "carta"
-  },
-  {
-      "word": "poeta"
-  },
-  {
-      "word": "venha"
-  },
-  {
-      "word": "falha"
-  },
-  {
-      "word": "chato"
-  },
-  {
-      "word": "farta"
-  },
-  {
-      "word": "briga"
-  },
-  {
-      "word": "cargo"
-  },
-  {
-      "word": "cetro"
-  },
-  {
-      "word": "ateia"
-  },
-  {
-      "word": "passa"
-  },
-  {
-      "word": "fruto"
-  },
-  {
-      "word": "tacha"
-  },
-  {
-      "word": "calmo"
-  },
-  {
-      "word": "idoso"
-  },
-  {
-      "word": "plumo"
-  },
-  {
-      "word": "busca"
-  },
-  {
-      "word": "piada"
-  },
-  {
-      "word": "virar"
-  },
-  {
-      "word": "vento"
-  },
-  {
-      "word": "roupa"
-  },
-  {
-      "word": "tarde"
-  },
-  {
-      "word": "assar"
-  },
-  {
-      "word": "chefe"
-  },
-  {
-      "word": "arado"
-  },
-  {
-      "word": "tribo"
-  },
-  {
-      "word": "aviso"
-  },
-  {
-      "word": "verde"
-  },
-  {
-      "word": "surto"
-  },
-  {
-      "word": "grama"
-  },
-  {
-      "word": "traje"
-  },
-  {
-      "word": "civil"
-  },
-  {
-      "word": "bruta"
-  },
-  {
-      "word": "saldo"
-  },
-  {
-      "word": "trato"
-  },
-  {
-      "word": "depor"
-  },
-  {
-      "word": "troca"
-  },
-  {
-      "word": "beijo"
-  },
-  {
-      "word": "nuvem"
-  },
-  {
-      "word": "irado"
-  },
-  {
-      "word": "porte"
-  },
-  {
-      "word": "pasma"
-  },
-  {
-      "word": "pedra"
-  },
-  {
-      "word": "cifra"
-  },
-  {
-      "word": "bazar"
-  },
-  {
-      "word": "gabar"
-  },
-  {
-      "word": "casar"
-  },
-  {
-      "word": "amado"
-  },
-  {
-      "word": "pavor"
-  },
-  {
-      "word": "tutor"
-  },
-  {
-      "word": "laudo"
-  },
-  {
-      "word": "bruto"
-  },
-  {
-      "word": "tiver"
-  },
-  {
-      "word": "perto"
-  },
-  {
-      "word": "rural"
-  },
-  {
-      "word": "vagar"
-  },
-  {
-      "word": "molde"
-  },
-  {
-      "word": "itens"
-  },
-  {
-      "word": "renda"
-  },
-  {
-      "word": "odiar"
-  },
-  {
-      "word": "manga"
-  },
-  {
-      "word": "vadio"
-  },
-  {
-      "word": "fossa"
-  },
-  {
-      "word": "jejum"
-  },
-  {
-      "word": "berro"
-  },
-  {
-      "word": "feita"
-  },
-  {
-      "word": "aviar"
-  },
-  {
-      "word": "paiol"
-  },
-  {
-      "word": "ileso"
-  },
-  {
-      "word": "negar"
-  },
-  {
-      "word": "largo"
-  },
-  {
-      "word": "pomar"
-  },
-  {
-      "word": "cinto"
-  },
-  {
-      "word": "canto"
-  },
-  {
-      "word": "rocha"
-  },
-  {
-      "word": "podar"
-  },
-  {
-      "word": "bolsa"
-  },
-  {
-      "word": "marca"
-  },
-  {
-      "word": "vista"
-  },
-  {
-      "word": "penso"
-  },
-  {
-      "word": "piche"
-  },
-  {
-      "word": "jogar"
-  },
-  {
-      "word": "resto"
-  },
-  {
-      "word": "cheia"
-  },
-  {
-      "word": "linha"
-  },
-  {
-      "word": "misto"
-  },
-  {
-      "word": "natal"
-  },
-  {
-      "word": "manto"
-  },
-  {
-      "word": "amada"
-  },
-  {
-      "word": "fundo"
-  },
-  {
-      "word": "mover"
-  },
-  {
-      "word": "retro"
-  },
-  {
-      "word": "tenha"
-  },
-  {
-      "word": "sigla"
-  },
-  {
-      "word": "seiva"
-  },
-  {
-      "word": "sabor"
-  },
-  {
-      "word": "firma"
-  },
-  {
-      "word": "matar"
-  },
-  {
-      "word": "louro"
-  },
-  {
-      "word": "tumba"
-  },
-  {
-      "word": "ceita"
-  },
-  {
-      "word": "barro"
-  },
-  {
-      "word": "arroz"
-  },
-  {
-      "word": "velha"
-  },
-  {
-      "word": "sinta"
-  },
-  {
-      "word": "volta"
-  },
-  {
-      "word": "solta"
-  },
-  {
-      "word": "ousar"
-  },
-  {
-      "word": "bolso"
-  },
-  {
-      "word": "santo"
-  },
-  {
-      "word": "zumbi"
-  },
-  {
-      "word": "fugiu"
-  },
-  {
-      "word": "corar"
-  },
-  {
-      "word": "letra"
-  },
-  {
-      "word": "nesta"
-  },
-  {
-      "word": "lutar"
-  },
-  {
-      "word": "final"
-  },
-  {
-      "word": "queda"
-  },
-  {
-      "word": "cacto"
-  },
-  {
-      "word": "mimar"
-  },
-  {
-      "word": "baixa"
-  },
-  {
-      "word": "veloz"
-  },
-  {
-      "word": "longo"
-  },
-  {
-      "word": "vazia"
-  },
-  {
-      "word": "burra"
-  },
-  {
-      "word": "coroa"
-  },
-  {
-      "word": "folha"
-  },
-  {
-      "word": "mania"
-  },
-  {
-      "word": "farto"
-  },
-  {
-      "word": "sugar"
-  },
-  {
-      "word": "refil"
-  },
-  {
-      "word": "justa"
-  },
-  {
-      "word": "ultra"
-  },
-  {
-      "word": "repor"
-  },
-  {
-      "word": "lucro"
-  },
-  {
-      "word": "subir"
-  },
-  {
-      "word": "logos"
-  },
-  {
-      "word": "passe"
-  },
-  {
-      "word": "urgir"
-  },
-  {
-      "word": "custo"
-  },
-  {
-      "word": "chave"
-  },
-  {
-      "word": "sexto"
-  },
-  {
-      "word": "gueto"
-  },
-  {
-      "word": "mimos"
-  },
-  {
-      "word": "valer"
-  },
-  {
-      "word": "usual"
-  },
-  {
-      "word": "lento"
-  },
-  {
-      "word": "calor"
-  },
-  {
-      "word": "calvo"
-  },
-  {
-      "word": "anzol"
-  },
-  {
-      "word": "zumba"
-  },
-  {
-      "word": "zinco"
-  },
-  {
-      "word": "votou"
-  },
-  {
-      "word": "votos"
-  },
-  {
-      "word": "vosso"
-  },
-  {
-      "word": "volvo"
-  },
-  {
-      "word": "viuvo"
-  },
-  {
-      "word": "vivos"
-  },
-  {
-      "word": "visto"
-  },
-  {
-      "word": "visou"
-  },
-  {
-      "word": "virou"
-  },
-  {
-      "word": "vinho"
-  },
-  {
-      "word": "vindo"
-  },
-  {
-      "word": "vidro"
-  },
-  {
-      "word": "vicio"
-  },
-  {
-      "word": "vibro"
-  },
-  {
-      "word": "urubu"
-  },
-  {
-      "word": "ursos"
-  },
-  {
-      "word": "urrou"
-  },
-  {
-      "word": "urros"
-  },
-  {
-      "word": "urina"
-  },
-  {
-      "word": "untou"
-  },
-  {
-      "word": "unido"
-  },
-  {
-      "word": "ungiu"
-  },
-  {
-      "word": "uivou"
-  },
-  {
-      "word": "uivos"
-  },
-  {
-      "word": "turno"
-  },
-  {
-      "word": "turco"
-  },
-  {
-      "word": "turbo"
-  },
-  {
-      "word": "tumor"
-  },
-  {
-      "word": "tubos"
-  },
-  {
-      "word": "truco"
-  },
-  {
-      "word": "trono"
-  },
-  {
-      "word": "troco"
-  },
-  {
-      "word": "trios"
-  },
-  {
-      "word": "trigo"
-  },
-  {
-      "word": "touro"
-  },
-  {
-      "word": "torto"
-  },
-  {
-      "word": "torci"
-  },
-  {
-      "word": "topou"
-  },
-  {
-      "word": "topos"
-  },
-  {
-      "word": "tonto"
-  },
-  {
-      "word": "tomou"
-  },
-  {
-      "word": "tombo"
-  },
-  {
-      "word": "tolos"
-  },
-  {
-      "word": "tocou"
-  },
-  {
-      "word": "titio"
-  },
-  {
-      "word": "tirou"
-  },
-  {
-      "word": "tiros"
-  },
-  {
-      "word": "tipos"
-  },
-  {
-      "word": "tinto"
-  },
-  {
-      "word": "sutis"
-  },
-  {
-      "word": "susto"
-  },
-  {
-      "word": "surgi"
-  },
-  {
-      "word": "surdo"
-  },
-  {
-      "word": "sumiu"
-  },
-  {
-      "word": "sujou"
-  },
-  {
-      "word": "sujos"
-  },
-  {
-      "word": "sugou"
-  },
-  {
-      "word": "sucos"
-  },
-  {
-      "word": "subiu"
-  },
-  {
-      "word": "sovou"
-  },
-  {
-      "word": "soros"
-  },
-  {
-      "word": "somos"
-  },
-  {
-      "word": "sogro"
-  },
-  {
-      "word": "sofro"
-  },
-  {
-      "word": "socou"
-  },
-  {
-      "word": "socos"
-  },
-  {
-      "word": "sitio"
-  },
-  {
-      "word": "siris"
-  },
-  {
-      "word": "sinos"
-  },
-  {
-      "word": "silos"
-  },
-  {
-      "word": "russo"
-  },
-  {
-      "word": "ruivo"
-  },
-  {
-      "word": "ruins"
-  },
-  {
-      "word": "ruido"
-  },
-  {
-      "word": "rugiu"
-  },
-  {
-      "word": "rugir"
-  },
-  {
-      "word": "rubis"
-  },
-  {
-      "word": "roxos"
-  },
-  {
-      "word": "rouco"
-  },
-  {
-      "word": "roubo"
-  },
-  {
-      "word": "rosto"
-  },
-  {
-      "word": "ronco"
-  },
-  {
-      "word": "rombo"
-  },
-  {
-      "word": "rolou"
-  },
-  {
-      "word": "rolos"
-  },
-  {
-      "word": "rodou"
-  },
-  {
-      "word": "risos"
-  },
-  {
-      "word": "rindo"
-  },
-  {
-      "word": "rimou"
-  },
-  {
-      "word": "ricos"
-  },
-  {
-      "word": "quilo"
-  },
-  {
-      "word": "puxou"
-  },
-  {
-      "word": "putos"
-  },
-  {
-      "word": "puros"
-  },
-  {
-      "word": "puniu"
-  },
-  {
-      "word": "punir"
-  },
-  {
-      "word": "punho"
-  },
-  {
-      "word": "pulso"
-  },
-  {
-      "word": "pulou"
-  },
-  {
-      "word": "pulos"
-  },
-  {
-      "word": "pudim"
-  },
-  {
-      "word": "primo"
-  },
-  {
-      "word": "povos"
-  },
-  {
-      "word": "pouso"
-  },
-  {
-      "word": "porco"
-  },
-  {
-      "word": "pombo"
-  },
-  {
-      "word": "polvo"
-  },
-  {
-      "word": "polir"
-  },
-  {
-      "word": "podou"
-  },
-  {
-      "word": "pisou"
-  },
-  {
-      "word": "pisco"
-  },
-  {
-      "word": "pinto"
-  },
-  {
-      "word": "pinos"
-  },
-  {
-      "word": "pingo"
-  },
-  {
-      "word": "pifou"
-  },
-  {
-      "word": "picou"
-  },
-  {
-      "word": "ouviu"
-  },
-  {
-      "word": "ousou"
-  },
-  {
-      "word": "ouros"
-  },
-  {
-      "word": "ossos"
-  },
-  {
-      "word": "optou"
-  },
-  {
-      "word": "ombro"
-  },
-  {
-      "word": "olhou"
-  },
-  {
-      "word": "olhos"
-  },
-  {
-      "word": "odiou"
-  },
-  {
-      "word": "obvio"
-  },
-  {
-      "word": "nulos"
-  },
-  {
-      "word": "nosso"
-  },
-  {
-      "word": "noivo"
-  },
-  {
-      "word": "nitro"
-  },
-  {
-      "word": "ninho"
-  },
-  {
-      "word": "musgo"
-  },
-  {
-      "word": "murro"
-  },
-  {
-      "word": "muros"
-  },
-  {
-      "word": "mudou"
-  },
-  {
-      "word": "mudos"
-  },
-  {
-      "word": "mucos"
-  },
-  {
-      "word": "motos"
-  },
-  {
-      "word": "motor"
-  },
-  {
-      "word": "morto"
-  },
-  {
-      "word": "morno"
-  },
-  {
-      "word": "mofou"
-  },
-  {
-      "word": "modos"
-  },
-  {
-      "word": "mitos"
-  }
+import { IWord } from "../config/models/word.model";
+
+export const words: Partial<IWord>[] = [
+    {word:"sagaz", isGolden: false},
+    {word:"negro", isGolden: false},
+    {word:"mexer", isGolden: false},
+    {word:"termo", isGolden: false},
+    {word:"senso", isGolden: false},
+    {word:"nobre", isGolden: false},
+    {word:"afeto", isGolden: false},
+    {word:"plena", isGolden: false},
+    {word:"sutil", isGolden: false},
+    {word:"vigor", isGolden: false},
+    {word:"audaz", isGolden: false},
+    {word:"fazer", isGolden: false},
+    {word:"ideia", isGolden: false},
+    {word:"poder", isGolden: false},
+    {word:"moral", isGolden: false},
+    {word:"honra", isGolden: false},
+    {word:"justo", isGolden: false},
+    {word:"anexo", isGolden: false},
+    {word:"etnia", isGolden: false},
+    {word:"sonho", isGolden: false},
+    {word:"expor", isGolden: false},
+    {word:"haver", isGolden: false},
+    {word:"amigo", isGolden: false},
+    {word:"tempo", isGolden: false},
+    {word:"pesar", isGolden: false},
+    {word:"posse", isGolden: false},
+    {word:"genro", isGolden: false},
+    {word:"causa", isGolden: false},
+    {word:"dizer", isGolden: false},
+    {word:"digno", isGolden: false},
+    {word:"dever", isGolden: false},
+    {word:"saber", isGolden: false},
+    {word:"ceder", isGolden: false},
+    {word:"comum", isGolden: false},
+    {word:"culto", isGolden: false},
+    {word:"mundo", isGolden: false},
+    {word:"pauta", isGolden: false},
+    {word:"denso", isGolden: false},
+    {word:"forte", isGolden: false},
+    {word:"pudor", isGolden: false},
+    {word:"regra", isGolden: false},
+    {word:"louco", isGolden: false},
+    {word:"banal", isGolden: false},
+    {word:"criar", isGolden: false},
+    {word:"impor", isGolden: false},
+    {word:"ordem", isGolden: false},
+    {word:"pedir", isGolden: false},
+    {word:"viril", isGolden: false},
+    {word:"manso", isGolden: false},
+    {word:"ontem", isGolden: false},
+    {word:"servo", isGolden: false},
+    {word:"prosa", isGolden: false},
+    {word:"feliz", isGolden: false},
+    {word:"presa", isGolden: false},
+    {word:"coisa", isGolden: false},
+    {word:"afago", isGolden: false},
+    {word:"fluir", isGolden: false},
+    {word:"falar", isGolden: false},
+    {word:"cunho", isGolden: false},
+    {word:"forma", isGolden: false},
+    {word:"meiga", isGolden: false},
+    {word:"vendo", isGolden: false},
+    {word:"pleno", isGolden: false},
+    {word:"visar", isGolden: false},
+    {word:"temer", isGolden: false},
+    {word:"mesmo", isGolden: false},
+    {word:"cisma", isGolden: false},
+    {word:"limbo", isGolden: false},
+    {word:"bruma", isGolden: false},
+    {word:"acaso", isGolden: false},
+    {word:"puder", isGolden: false},
+    {word:"gerar", isGolden: false},
+    {word:"afins", isGolden: false},
+    {word:"obter", isGolden: false},
+    {word:"valor", isGolden: false},
+    {word:"lugar", isGolden: false},
+    {word:"matiz", isGolden: false},
+    {word:"crise", isGolden: false},
+    {word:"senil", isGolden: false},
+    {word:"havia", isGolden: false},
+    {word:"certo", isGolden: false},
+    {word:"fluxo", isGolden: false},
+    {word:"enfim", isGolden: false},
+    {word:"ritmo", isGolden: false},
+    {word:"posso", isGolden: false},
+    {word:"garbo", isGolden: false},
+    {word:"tomar", isGolden: false},
+    {word:"reter", isGolden: false},
+    {word:"pulha", isGolden: false},
+    {word:"parvo", isGolden: false},
+    {word:"valia", isGolden: false},
+    {word:"grato", isGolden: false},
+    {word:"todos", isGolden: false},
+    {word:"vital", isGolden: false},
+    {word:"favor", isGolden: false},
+    {word:"abrir", isGolden: false},
+    {word:"vivaz", isGolden: false},
+    {word:"laico", isGolden: false},
+    {word:"bravo", isGolden: false},
+    {word:"falso", isGolden: false},
+    {word:"olhar", isGolden: false},
+    {word:"levar", isGolden: false},
+    {word:"burro", isGolden: false},
+    {word:"selar", isGolden: false},
+    {word:"fator", isGolden: false},
+    {word:"citar", isGolden: false},
+    {word:"adiar", isGolden: false},
+    {word:"farsa", isGolden: false},
+    {word:"achar", isGolden: false},
+    {word:"legal", isGolden: false},
+    {word:"morte", isGolden: false},
+    {word:"imune", isGolden: false},
+    {word:"sinto", isGolden: false},
+    {word:"fardo", isGolden: false},
+    {word:"falta", isGolden: false},
+    {word:"exato", isGolden: false},
+    {word:"ativo", isGolden: false},
+    {word:"gente", isGolden: false},
+    {word:"lavra", isGolden: false},
+    {word:"amplo", isGolden: false},
+    {word:"ouvir", isGolden: false},
+    {word:"viver", isGolden: false},
+    {word:"brega", isGolden: false},
+    {word:"gesto", isGolden: false},
+    {word:"cesta", isGolden: false},
+    {word:"sonso", isGolden: false},
+    {word:"deter", isGolden: false},
+    {word:"passo", isGolden: false},
+    {word:"leigo", isGolden: false},
+    {word:"vemos", isGolden: false},
+    {word:"atuar", isGolden: false},
+    {word:"rever", isGolden: false},
+    {word:"calma", isGolden: false},
+    {word:"igual", isGolden: false},
+    {word:"toada", isGolden: false},
+    {word:"humor", isGolden: false},
+    {word:"ideal", isGolden: false},
+    {word:"hiato", isGolden: false},
+    {word:"pobre", isGolden: false},
+    {word:"ponto", isGolden: false},
+    {word:"ambos", isGolden: false},
+    {word:"claro", isGolden: false},
+    {word:"terno", isGolden: false},
+    {word:"velho", isGolden: false},
+    {word:"remir", isGolden: false},
+    {word:"probo", isGolden: false},
+    {word:"outro", isGolden: false},
+    {word:"leito", isGolden: false},
+    {word:"doido", isGolden: false},
+    {word:"horda", isGolden: false},
+    {word:"carma", isGolden: false},
+    {word:"linda", isGolden: false},
+    {word:"marco", isGolden: false},
+    {word:"jovem", isGolden: false},
+    {word:"inata", isGolden: false},
+    {word:"capaz", isGolden: false},
+    {word:"fonte", isGolden: false},
+    {word:"ajuda", isGolden: false},
+    {word:"algum", isGolden: false},
+    {word:"caçar", isGolden: false},
+    {word:"velar", isGolden: false},
+    {word:"ficar", isGolden: false},
+    {word:"noite", isGolden: false},
+    {word:"apoio", isGolden: false},
+    {word:"dorso", isGolden: false},
+    {word:"vimos", isGolden: false},
+    {word:"rigor", isGolden: false},
+    {word:"verso", isGolden: false},
+    {word:"botar", isGolden: false},
+    {word:"vazio", isGolden: false},
+    {word:"tanto", isGolden: false},
+    {word:"prece", isGolden: false},
+    {word:"cruel", isGolden: false},
+    {word:"terra", isGolden: false},
+    {word:"morar", isGolden: false},
+    {word:"ambas", isGolden: false},
+    {word:"frase", isGolden: false},
+    {word:"peste", isGolden: false},
+    {word:"massa", isGolden: false},
+    {word:"entre", isGolden: false},
+    {word:"casto", isGolden: false},
+    {word:"pouco", isGolden: false},
+    {word:"covil", isGolden: false},
+    {word:"fauna", isGolden: false},
+    {word:"signo", isGolden: false},
+    {word:"sente", isGolden: false},
+    {word:"preso", isGolden: false},
+    {word:"furor", isGolden: false},
+    {word:"credo", isGolden: false},
+    {word:"feito", isGolden: false},
+    {word:"lazer", isGolden: false},
+    {word:"minha", isGolden: false},
+    {word:"vetor", isGolden: false},
+    {word:"flora", isGolden: false},
+    {word:"raiva", isGolden: false},
+    {word:"aceso", isGolden: false},
+    {word:"ciclo", isGolden: false},
+    {word:"maior", isGolden: false},
+    {word:"chata", isGolden: false},
+    {word:"vulto", isGolden: false},
+    {word:"brisa", isGolden: false},
+    {word:"houve", isGolden: false},
+    {word:"trama", isGolden: false},
+    {word:"breve", isGolden: false},
+    {word:"papel", isGolden: false},
+    {word:"vasto", isGolden: false},
+    {word:"setor", isGolden: false},
+    {word:"adeus", isGolden: false},
+    {word:"pegar", isGolden: false},
+    {word:"salvo", isGolden: false},
+    {word:"ardor", isGolden: false},
+    {word:"morro", isGolden: false},
+    {word:"segue", isGolden: false},
+    {word:"livro", isGolden: false},
+    {word:"nossa", isGolden: false},
+    {word:"comer", isGolden: false},
+    {word:"plano", isGolden: false},
+    {word:"peixe", isGolden: false},
+    {word:"rezar", isGolden: false},
+    {word:"saiba", isGolden: false},
+    {word:"meses", isGolden: false},
+    {word:"acima", isGolden: false},
+    {word:"sorte", isGolden: false},
+    {word:"chulo", isGolden: false},
+    {word:"junto", isGolden: false},
+    {word:"nunca", isGolden: false},
+    {word:"chuva", isGolden: false},
+    {word:"mudar", isGolden: false},
+    {word:"fruir", isGolden: false},
+    {word:"parar", isGolden: false},
+    {word:"bando", isGolden: false},
+    {word:"treta", isGolden: false},
+    {word:"fugir", isGolden: false},
+    {word:"motim", isGolden: false},
+    {word:"gerir", isGolden: false},
+    {word:"prazo", isGolden: false},
+    {word:"carro", isGolden: false},
+    {word:"tosco", isGolden: false},
+    {word:"leite", isGolden: false},
+    {word:"norma", isGolden: false},
+    {word:"andar", isGolden: false},
+    {word:"grupo", isGolden: false},
+    {word:"brava", isGolden: false},
+    {word:"tenso", isGolden: false},
+    {word:"exame", isGolden: false},
+    {word:"arcar", isGolden: false},
+    {word:"rapaz", isGolden: false},
+    {word:"avião", isGolden: false},
+    {word:"lenda", isGolden: false},
+    {word:"soldo", isGolden: false},
+    {word:"tirar", isGolden: false},
+    {word:"parte", isGolden: false},
+    {word:"reino", isGolden: false},
+    {word:"campo", isGolden: false},
+    {word:"praga", isGolden: false},
+    {word:"exijo", isGolden: false},
+    {word:"sumir", isGolden: false},
+    {word:"pompa", isGolden: false},
+    {word:"aonde", isGolden: false},
+    {word:"logro", isGolden: false},
+    {word:"traga", isGolden: false},
+    {word:"fixar", isGolden: false},
+    {word:"preto", isGolden: false},
+    {word:"voraz", isGolden: false},
+    {word:"corpo", isGolden: false},
+    {word:"antes", isGolden: false},
+    {word:"quase", isGolden: false},
+    {word:"solto", isGolden: false},
+    {word:"cheio", isGolden: false},
+    {word:"turva", isGolden: false},
+    {word:"agora", isGolden: false},
+    {word:"certa", isGolden: false},
+    {word:"turba", isGolden: false},
+    {word:"alado", isGolden: false},
+    {word:"risco", isGolden: false},
+    {word:"apego", isGolden: false},
+    {word:"parva", isGolden: false},
+    {word:"filho", isGolden: false},
+    {word:"grave", isGolden: false},
+    {word:"caixa", isGolden: false},
+    {word:"praia", isGolden: false},
+    {word:"prova", isGolden: false},
+    {word:"verve", isGolden: false},
+    {word:"apelo", isGolden: false},
+    {word:"pardo", isGolden: false},
+    {word:"texto", isGolden: false},
+    {word:"fenda", isGolden: false},
+    {word:"ligar", isGolden: false},
+    {word:"trupe", isGolden: false},
+    {word:"tocar", isGolden: false},
+    {word:"lindo", isGolden: false},
+    {word:"dessa", isGolden: false},
+    {word:"sabia", isGolden: false},
+    {word:"ficha", isGolden: false},
+    {word:"navio", isGolden: false},
+    {word:"opaco", isGolden: false},
+    {word:"livre", isGolden: false},
+    {word:"fraco", isGolden: false},
+    {word:"verba", isGolden: false},
+    {word:"faixa", isGolden: false},
+    {word:"elite", isGolden: false},
+    {word:"conta", isGolden: false},
+    {word:"autor", isGolden: false},
+    {word:"lidar", isGolden: false},
+    {word:"mente", isGolden: false},
+    {word:"firme", isGolden: false},
+    {word:"grata", isGolden: false},
+    {word:"tinha", isGolden: false},
+    {word:"verbo", isGolden: false},
+    {word:"calda", isGolden: false},
+    {word:"bater", isGolden: false},
+    {word:"fatal", isGolden: false},
+    {word:"fatos", isGolden: false},
+    {word:"cousa", isGolden: false},
+    {word:"reses", isGolden: false},
+    {word:"magia", isGolden: false},
+    {word:"molho", isGolden: false},
+    {word:"turvo", isGolden: false},
+    {word:"macio", isGolden: false},
+    {word:"deixa", isGolden: false},
+    {word:"torso", isGolden: false},
+    {word:"salve", isGolden: false},
+    {word:"abriu", isGolden: false},
+    {word:"supor", isGolden: false},
+    {word:"pique", isGolden: false},
+    {word:"atual", isGolden: false},
+    {word:"asilo", isGolden: false},
+    {word:"rouca", isGolden: false},
+    {word:"festa", isGolden: false},
+    {word:"posto", isGolden: false},
+    {word:"caber", isGolden: false},
+    {word:"extra", isGolden: false},
+    {word:"curso", isGolden: false},
+    {word:"besta", isGolden: false},
+    {word:"locus", isGolden: false},
+    {word:"sexta", isGolden: false},
+    {word:"judeu", isGolden: false},
+    {word:"paira", isGolden: false},
+    {word:"zelar", isGolden: false},
+    {word:"vezes", isGolden: false},
+    {word:"ereto", isGolden: false},
+    {word:"desta", isGolden: false},
+    {word:"finda", isGolden: false},
+    {word:"bioma", isGolden: false},
+    {word:"combo", isGolden: false},
+    {word:"feudo", isGolden: false},
+    {word:"agudo", isGolden: false},
+    {word:"tetra", isGolden: false},
+    {word:"facto", isGolden: false},
+    {word:"culpa", isGolden: false},
+    {word:"vinha", isGolden: false},
+    {word:"porta", isGolden: false},
+    {word:"menos", isGolden: false},
+    {word:"longe", isGolden: false},
+    {word:"meigo", isGolden: false},
+    {word:"super", isGolden: false},
+    {word:"rumor", isGolden: false},
+    {word:"museu", isGolden: false},
+    {word:"pilar", isGolden: false},
+    {word:"suave", isGolden: false},
+    {word:"geral", isGolden: false},
+    {word:"optar", isGolden: false},
+    {word:"medir", isGolden: false},
+    {word:"penta", isGolden: false},
+    {word:"turma", isGolden: false},
+    {word:"boato", isGolden: false},
+    {word:"chama", isGolden: false},
+    {word:"crime", isGolden: false},
+    {word:"letal", isGolden: false},
+    {word:"pacto", isGolden: false},
+    {word:"local", isGolden: false},
+    {word:"folga", isGolden: false},
+    {word:"cacho", isGolden: false},
+    {word:"aroma", isGolden: false},
+    {word:"vigia", isGolden: false},
+    {word:"vetar", isGolden: false},
+    {word:"finjo", isGolden: false},
+    {word:"drama", isGolden: false},
+    {word:"fazia", isGolden: false},
+    {word:"pasmo", isGolden: false},
+    {word:"brabo", isGolden: false},
+    {word:"feroz", isGolden: false},
+    {word:"axila", isGolden: false},
+    {word:"rival", isGolden: false},
+    {word:"mesma", isGolden: false},
+    {word:"monte", isGolden: false},
+    {word:"poema", isGolden: false},
+    {word:"golpe", isGolden: false},
+    {word:"ecoar", isGolden: false},
+    {word:"coral", isGolden: false},
+    {word:"teste", isGolden: false},
+    {word:"forem", isGolden: false},
+    {word:"monge", isGolden: false},
+    {word:"aluno", isGolden: false},
+    {word:"clima", isGolden: false},
+    {word:"viram", isGolden: false},
+    {word:"carta", isGolden: false},
+    {word:"poeta", isGolden: false},
+    {word:"venha", isGolden: false},
+    {word:"falha", isGolden: false},
+    {word:"chato", isGolden: false},
+    {word:"farta", isGolden: false},
+    {word:"briga", isGolden: false},
+    {word:"cargo", isGolden: false},
+    {word:"cetro", isGolden: false},
+    {word:"ateia", isGolden: false},
+    {word:"passa", isGolden: false},
+    {word:"fruto", isGolden: false},
+    {word:"tacha", isGolden: false},
+    {word:"calmo", isGolden: false},
+    {word:"idoso", isGolden: false},
+    {word:"plumo", isGolden: false},
+    {word:"busca", isGolden: false},
+    {word:"piada", isGolden: false},
+    {word:"virar", isGolden: false},
+    {word:"vento", isGolden: false},
+    {word:"roupa", isGolden: false},
+    {word:"tarde", isGolden: false},
+    {word:"assar", isGolden: false},
+    {word:"chefe", isGolden: false},
+    {word:"arado", isGolden: false},
+    {word:"tribo", isGolden: false},
+    {word:"aviso", isGolden: false},
+    {word:"verde", isGolden: false},
+    {word:"surto", isGolden: false},
+    {word:"grama", isGolden: false},
+    {word:"traje", isGolden: false},
+    {word:"civil", isGolden: false},
+    {word:"bruta", isGolden: false},
+    {word:"saldo", isGolden: false},
+    {word:"trato", isGolden: false},
+    {word:"depor", isGolden: false},
+    {word:"troca", isGolden: false},
+    {word:"beijo", isGolden: false},
+    {word:"nuvem", isGolden: false},
+    {word:"irado", isGolden: false},
+    {word:"porte", isGolden: false},
+    {word:"pasma", isGolden: false},
+    {word:"pedra", isGolden: false},
+    {word:"cifra", isGolden: false},
+    {word:"bazar", isGolden: false},
+    {word:"gabar", isGolden: false},
+    {word:"casar", isGolden: false},
+    {word:"amado", isGolden: false},
+    {word:"pavor", isGolden: false},
+    {word:"tutor", isGolden: false},
+    {word:"laudo", isGolden: false},
+    {word:"bruto", isGolden: false},
+    {word:"tiver", isGolden: false},
+    {word:"perto", isGolden: false},
+    {word:"rural", isGolden: false},
+    {word:"vagar", isGolden: false},
+    {word:"molde", isGolden: false},
+    {word:"itens", isGolden: false},
+    {word:"renda", isGolden: false},
+    {word:"odiar", isGolden: false},
+    {word:"manga", isGolden: false},
+    {word:"vadio", isGolden: false},
+    {word:"fossa", isGolden: false},
+    {word:"jejum", isGolden: false},
+    {word:"berro", isGolden: false},
+    {word:"feita", isGolden: false},
+    {word:"aviar", isGolden: false},
+    {word:"paiol", isGolden: false},
+    {word:"ileso", isGolden: false},
+    {word:"negar", isGolden: false},
+    {word:"largo", isGolden: false},
+    {word:"pomar", isGolden: false},
+    {word:"cinto", isGolden: false},
+    {word:"canto", isGolden: false},
+    {word:"rocha", isGolden: false},
+    {word:"podar", isGolden: false},
+    {word:"bolsa", isGolden: false},
+    {word:"marca", isGolden: false},
+    {word:"vista", isGolden: false},
+    {word:"penso", isGolden: false},
+    {word:"piche", isGolden: false},
+    {word:"jogar", isGolden: false},
+    {word:"resto", isGolden: false},
+    {word:"cheia", isGolden: false},
+    {word:"linha", isGolden: false},
+    {word:"misto", isGolden: false},
+    {word:"natal", isGolden: false},
+    {word:"manto", isGolden: false},
+    {word:"amada", isGolden: false},
+    {word:"fundo", isGolden: false},
+    {word:"mover", isGolden: false},
+    {word:"retro", isGolden: false},
+    {word:"tenha", isGolden: false},
+    {word:"sigla", isGolden: false},
+    {word:"seiva", isGolden: false},
+    {word:"sabor", isGolden: false},
+    {word:"firma", isGolden: false},
+    {word:"matar", isGolden: false},
+    {word:"louro", isGolden: false},
+    {word:"tumba", isGolden: false},
+    {word:"ceita", isGolden: false},
+    {word:"barro", isGolden: false},
+    {word:"arroz", isGolden: false},
+    {word:"velha", isGolden: false},
+    {word:"sinta", isGolden: false},
+    {word:"volta", isGolden: false},
+    {word:"solta", isGolden: false},
+    {word:"ousar", isGolden: false},
+    {word:"bolso", isGolden: false},
+    {word:"santo", isGolden: false},
+    {word:"zumbi", isGolden: false},
+    {word:"fugiu", isGolden: false},
+    {word:"corar", isGolden: false},
+    {word:"letra", isGolden: false},
+    {word:"nesta", isGolden: false},
+    {word:"lutar", isGolden: false},
+    {word:"final", isGolden: false},
+    {word:"queda", isGolden: false},
+    {word:"cacto", isGolden: false},
+    {word:"mimar", isGolden: false},
+    {word:"baixa", isGolden: false},
+    {word:"veloz", isGolden: false},
+    {word:"longo", isGolden: false},
+    {word:"vazia", isGolden: false},
+    {word:"burra", isGolden: false},
+    {word:"coroa", isGolden: false},
+    {word:"folha", isGolden: false},
+    {word:"mania", isGolden: false},
+    {word:"farto", isGolden: false},
+    {word:"sugar", isGolden: false},
+    {word:"refil", isGolden: false},
+    {word:"justa", isGolden: false},
+    {word:"ultra", isGolden: false},
+    {word:"repor", isGolden: false},
+    {word:"lucro", isGolden: false},
+    {word:"subir", isGolden: false},
+    {word:"logos", isGolden: false},
+    {word:"passe", isGolden: false},
+    {word:"urgir", isGolden: false},
+    {word:"custo", isGolden: false},
+    {word:"chave", isGolden: false},
+    {word:"sexto", isGolden: false},
+    {word:"gueto", isGolden: false},
+    {word:"mimos", isGolden: false},
+    {word:"valer", isGolden: false},
+    {word:"usual", isGolden: false},
+    {word:"lento", isGolden: false},
+    {word:"calor", isGolden: false},
+    {word:"calvo", isGolden: false},
+    {word:"anzol", isGolden: false},
+    {word:"zumba", isGolden: false},
+    {word:"zinco", isGolden: false},
+    {word:"votou", isGolden: false},
+    {word:"votos", isGolden: false},
+    {word:"vosso", isGolden: false},
+    {word:"volvo", isGolden: false},
+    {word:"viuvo", isGolden: false},
+    {word:"vivos", isGolden: false},
+    {word:"visto", isGolden: false},
+    {word:"visou", isGolden: false},
+    {word:"virou", isGolden: false},
+    {word:"vinho", isGolden: false},
+    {word:"vindo", isGolden: false},
+    {word:"vidro", isGolden: false},
+    {word:"vicio", isGolden: false},
+    {word:"vibro", isGolden: false},
+    {word:"urubu", isGolden: false},
+    {word:"ursos", isGolden: false},
+    {word:"urrou", isGolden: false},
+    {word:"urros", isGolden: false},
+    {word:"urina", isGolden: false},
+    {word:"untou", isGolden: false},
+    {word:"unido", isGolden: false},
+    {word:"ungiu", isGolden: false},
+    {word:"uivou", isGolden: false},
+    {word:"uivos", isGolden: false},
+    {word:"turno", isGolden: false},
+    {word:"turco", isGolden: false},
+    {word:"turbo", isGolden: false},
+    {word:"tumor", isGolden: false},
+    {word:"tubos", isGolden: false},
+    {word:"truco", isGolden: false},
+    {word:"trono", isGolden: false},
+    {word:"troco", isGolden: false},
+    {word:"trios", isGolden: false},
+    {word:"trigo", isGolden: false},
+    {word:"touro", isGolden: false},
+    {word:"torto", isGolden: false},
+    {word:"torci", isGolden: false},
+    {word:"topou", isGolden: false},
+    {word:"topos", isGolden: false},
+    {word:"tonto", isGolden: false},
+    {word:"tomou", isGolden: false},
+    {word:"tombo", isGolden: false},
+    {word:"tolos", isGolden: false},
+    {word:"tocou", isGolden: false},
+    {word:"titio", isGolden: false},
+    {word:"tirou", isGolden: false},
+    {word:"tiros", isGolden: false},
+    {word:"tipos", isGolden: false},
+    {word:"tinto", isGolden: false},
+    {word:"sutis", isGolden: false},
+    {word:"susto", isGolden: false},
+    {word:"surgi", isGolden: false},
+    {word:"surdo", isGolden: false},
+    {word:"sumiu", isGolden: false},
+    {word:"sujou", isGolden: false},
+    {word:"sujos", isGolden: false},
+    {word:"sugou", isGolden: false},
+    {word:"sucos", isGolden: false},
+    {word:"subiu", isGolden: false},
+    {word:"sovou", isGolden: false},
+    {word:"soros", isGolden: false},
+    {word:"somos", isGolden: false},
+    {word:"sogro", isGolden: false},
+    {word:"sofro", isGolden: false},
+    {word:"socou", isGolden: false},
+    {word:"socos", isGolden: false},
+    {word:"sitio", isGolden: false},
+    {word:"siris", isGolden: false},
+    {word:"sinos", isGolden: false},
+    {word:"silos", isGolden: false},
+    {word:"russo", isGolden: false},
+    {word:"ruivo", isGolden: false},
+    {word:"ruins", isGolden: false},
+    {word:"ruido", isGolden: false},
+    {word:"rugiu", isGolden: false},
+    {word:"rugir", isGolden: false},
+    {word:"rubis", isGolden: false},
+    {word:"roxos", isGolden: false},
+    {word:"rouco", isGolden: false},
+    {word:"roubo", isGolden: false},
+    {word:"rosto", isGolden: false},
+    {word:"ronco", isGolden: false},
+    {word:"rombo", isGolden: false},
+    {word:"rolou", isGolden: false},
+    {word:"rolos", isGolden: false},
+    {word:"rodou", isGolden: false},
+    {word:"risos", isGolden: false},
+    {word:"rindo", isGolden: false},
+    {word:"rimou", isGolden: false},
+    {word:"ricos", isGolden: false},
+    {word:"quilo", isGolden: false},
+    {word:"puxou", isGolden: false},
+    {word:"putos", isGolden: false},
+    {word:"puros", isGolden: false},
+    {word:"puniu", isGolden: false},
+    {word:"punir", isGolden: false},
+    {word:"punho", isGolden: false},
+    {word:"pulso", isGolden: false},
+    {word:"pulou", isGolden: false},
+    {word:"pulos", isGolden: false},
+    {word:"pudim", isGolden: false},
+    {word:"primo", isGolden: false},
+    {word:"povos", isGolden: false},
+    {word:"pouso", isGolden: false},
+    {word:"porco", isGolden: false},
+    {word:"pombo", isGolden: false},
+    {word:"polvo", isGolden: false},
+    {word:"polir", isGolden: false},
+    {word:"podou", isGolden: false},
+    {word:"pisou", isGolden: false},
+    {word:"pisco", isGolden: false},
+    {word:"pinto", isGolden: false},
+    {word:"pinos", isGolden: false},
+    {word:"pingo", isGolden: false},
+    {word:"pifou", isGolden: false},
+    {word:"picou", isGolden: false},
+    {word:"ouviu", isGolden: false},
+    {word:"ousou", isGolden: false},
+    {word:"ouros", isGolden: false},
+    {word:"ossos", isGolden: false},
+    {word:"optou", isGolden: false},
+    {word:"ombro", isGolden: false},
+    {word:"olhou", isGolden: false},
+    {word:"olhos", isGolden: false},
+    {word:"odiou", isGolden: false},
+    {word:"obvio", isGolden: false},
+    {word:"nulos", isGolden: false},
+    {word:"nosso", isGolden: false},
+    {word:"noivo", isGolden: false},
+    {word:"nitro", isGolden: false},
+    {word:"ninho", isGolden: false},
+    {word:"musgo", isGolden: false},
+    {word:"murro", isGolden: false},
+    {word:"muros", isGolden: false},
+    {word:"mudou", isGolden: false},
+    {word:"mudos", isGolden: false},
+    {word:"mucos", isGolden: false},
+    {word:"motos", isGolden: false},
+    {word:"motor", isGolden: false},
+    {word:"morto", isGolden: false},
+    {word:"morno", isGolden: false},
+    {word:"mofou", isGolden: false},
+    {word:"modos", isGolden: false},
+    {word:"mitos", isGolden: false},
+    { word: "acuar" , isGolden: true},
+    { word: "ardis" , isGolden: true},
+    { word: "arujo" , isGolden: true},
+    { word: "azado" , isGolden: true},
+    { word: "balda" , isGolden: true},
+    { word: "baque" , isGolden: true},
+    { word: "bilro" , isGolden: true},
+    { word: "brado" , isGolden: true},
+    { word: "brumo" , isGolden: true},
+    { word: "cabia" , isGolden: true},
+    { word: "cafua" , isGolden: true},
+    { word: "capim" , isGolden: true},
+    { word: "cerne" , isGolden: true},
+    { word: "chaga" , isGolden: true},
+    { word: "chula" , isGolden: true},
+    { word: "cocho" , isGolden: true},
+    { word: "corja" , isGolden: true},
+    { word: "cueio" , isGolden: true},
+    { word: "curul" , isGolden: true},
+    { word: "dengo" , isGolden: true},
+    { word: "depor" , isGolden: true},
+    { word: "drupa" , isGolden: true},
+    { word: "eidos" , isGolden: true},
+    { word: "eluir" , isGolden: true},
+    { word: "enodo" , isGolden: true},
+    { word: "epope" , isGolden: true},
+    { word: "ereta" , isGolden: true},
+    { word: "erres" , isGolden: true},
+    { word: "estio" , isGolden: true},
+    { word: "eteno" , isGolden: true},
+    { word: "exala" , isGolden: true},
+    { word: "faina" , isGolden: true},
+    { word: "farto" , isGolden: true},
+    { word: "feraz" , isGolden: true},
+    { word: "fitar" , isGolden: true},
+    { word: "gamar" , isGolden: true},
+    { word: "grafo" , isGolden: true},
+    { word: "grota" , isGolden: true},
+    { word: "gruir" , isGolden: true},
+    { word: "ileso" , isGolden: true},
+    { word: "impio" , isGolden: true},
+    { word: "irado" , isGolden: true},
+    { word: "jazia" , isGolden: true},
+    { word: "joios" , isGolden: true},
+    { word: "labro" , isGolden: true},
+    { word: "laivo" , isGolden: true},
+    { word: "lisar" , isGolden: true},
+    { word: "livor" , isGolden: true},
+    { word: "logro" , isGolden: true},
+    { word: "magno" , isGolden: true},
+    { word: "malta" , isGolden: true},
+    { word: "manja" , isGolden: true},
+    { word: "matiz" , isGolden: true},
+    { word: "mecha" , isGolden: true},
+    { word: "medra" , isGolden: true},
+    { word: "molar" , isGolden: true},
+    { word: "muria" , isGolden: true},
+    { word: "nabla" , isGolden: true},
+    { word: "nicho" , isGolden: true},
+    { word: "odara" , isGolden: true},
+    { word: "ornar" , isGolden: true},
+    { word: "otelo" , isGolden: true},
+    { word: "penca" , isGolden: true},
+    { word: "perua" , isGolden: true},
+    { word: "piado" , isGolden: true},
+    { word: "recua" , isGolden: true},
+    { word: "reluz" , isGolden: true},
+    { word: "reses" , isGolden: true},
 ]
+
