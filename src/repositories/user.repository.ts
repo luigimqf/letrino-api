@@ -1,9 +1,9 @@
-import { Document, UpdateQuery } from "mongoose";
-import { User } from "../config/db/models/users";
+import { FilterQuery } from "mongoose";
+import { User } from "../config/db/models/user";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { IUser } from "../config/models/user.model";
-import { Statistic } from "../config/db/models/statistic";
+import { ObjectID } from "../types";
 
 interface IFindAll {
   sort?: Sort;
@@ -27,7 +27,7 @@ export class UserRepository {
     }
   }
 
-  static async find(id: string): Promise<Either<Errors, IUser>> {
+  static async findById(id: ObjectID | string): Promise<Either<Errors, IUser>> {
     try {
       const user = await User.findById(id);
 
@@ -40,6 +40,7 @@ export class UserRepository {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
+
   static async findAll({sort,limit = Infinity}:IFindAll): Promise<Either<Errors, IUser[]>> {
     try {
       const users = await User.find().sort(sort).limit(limit);
@@ -59,9 +60,9 @@ export class UserRepository {
     }
   }
 
-  static async findWhere(field: string, value: string): Promise<Either<Errors, IUser | null>> {
+  static async findOneBy(conditions: FilterQuery<IUser>): Promise<Either<Errors, IUser | null>> {
     try {
-      const user: (IUser & Document) | null = await User.findOne().where(field).equals(value);
+      const user = await User.findOne(conditions)
 
       return Success.create(user);
     } catch (error: any) {
@@ -69,7 +70,7 @@ export class UserRepository {
     }
   }
 
-  static async update(id:string, update: Record<string, any>, options?: {new?: boolean; upsert?: boolean; runValidators?: boolean;}): Promise<Either<Errors, IUser | null>> {
+  static async update(id:ObjectID | string, update: Record<string, any>, options?: {new?: boolean; upsert?: boolean; runValidators?: boolean;}): Promise<Either<Errors, IUser | null>> {
     try {
       const result = await User.findByIdAndUpdate(id, update, options);
 

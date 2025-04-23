@@ -1,4 +1,4 @@
-import { login, refreshToken } from '../controllers/auth.controller'
+import { login, forgotPassword, refreshToken, refreshPassword } from '../controllers/auth.controller'
 import { getLeaderboard, updateScore } from '../controllers/leaderboard.controller'
 import {
   createUser,
@@ -21,6 +21,10 @@ function setupRoutes(app: Express) {
   app.post('/login', login);
 
   app.post('/refresh-token',refreshToken)
+
+  app.post('/forgot-password', forgotPassword)
+
+  app.post('/refresh-password', refreshPassword)
   
   //----------- User Routes ------------//
 

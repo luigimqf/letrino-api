@@ -5,10 +5,6 @@ import { schemaValidator } from '../utils/validator';
 import { badRequest, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 
-const idSchema = z.string({
-  message: 'Id is required'
-});
-
 const scoreSchema = z.number({
   message: 'Score must be a number'
 });
@@ -24,14 +20,14 @@ async function getLeaderboard(req: Request, res: Response) {
       return;
     }
 
-    const idResult = schemaValidator(idSchema, req.params.id);
+    const {id} = req.params
 
-    if(idResult.isFailure()) {
-      badRequest(res, idResult.error);
+    if(!id) {
+      badRequest(res, Errors.REQUIRED_ID);
       return;
     }
 
-    const user = await UserRepository.find(idResult.value);
+    const user = await UserRepository.findById(id);
 
     if(user.isFailure()) {
       notFound(res, user.error);
@@ -39,7 +35,7 @@ async function getLeaderboard(req: Request, res: Response) {
     }
     
     const leaderboard = usersResult.value.slice(0, 5);
-    const isUserInTop5 = leaderboard.find((u) => u._id.toString() === idResult.value);
+    const isUserInTop5 = leaderboard.find((u) => u._id.toString() === id);
 
     if(isUserInTop5) {
       ok(res, {
@@ -48,7 +44,7 @@ async function getLeaderboard(req: Request, res: Response) {
       return;
     }
 
-    const userScorePosition = usersResult.value.findIndex((u) => u._id.toString() === idResult.value) + 1;
+    const userScorePosition = usersResult.value.findIndex((u) => u._id.toString() === id) + 1;
 
     ok(res, {
       leaderboard,
@@ -67,10 +63,9 @@ async function getLeaderboard(req: Request, res: Response) {
 async function updateScore(req: Request, res: Response) {
   try { 
     const { id } = req.params;
-    const idResult = schemaValidator(idSchema, id);
 
-    if (idResult.isFailure()) {
-      badRequest(res, idResult.error)
+    if (!id) {
+      badRequest(res, Errors.REQUIRED_ID)
       return;
     }
 

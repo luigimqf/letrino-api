@@ -6,18 +6,33 @@ import { schemaValidator } from '../utils/validator';
 import { badRequest, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { Jwt } from '../utils/jwt';
-import { WEEK_IN_SECONDS } from '../constants/time';
+import { HOUR_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
+import nodemailer from 'nodemailer'
+import { env } from '../config/enviroment';
+import Handlebars from 'handlebars';
+import fs from "fs"
+import path from 'path';
 
 const loginSchema = z.object({
   email: z.string({
-    message: 'Email is required'
-  }).email('Email is invalid'),
+    message: Errors.REQUIRED_EMAIL
+  }).email(Errors.INVALID_EMAIL),
   password: z.string({
-    message: 'Password is required'
+    message: Errors.REQUIRED_PASSWORD
   })
 })
 
-async function login(req: Request, res: Response) {
+const refreshTokenSchema = z.string({
+  message: Errors.REFRESH_TOKEN_MISSING
+});
+
+const passwordSchema = z.string({
+  message: Errors.REQUIRED_PASSWORD
+})
+
+const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL);
+
+export async function login(req: Request, res: Response) {
   try {
     const schemaResult = schemaValidator(loginSchema, req.body);
 
@@ -27,7 +42,9 @@ async function login(req: Request, res: Response) {
     }
     
     const { email, password } = schemaResult.value;
-    const userResult = await UserRepository.findWhere('email', email);
+    const userResult = await UserRepository.findOneBy({
+      email
+    });
 
     if(userResult.isFailure()) {
       notFound(res, Errors.USER_NOT_FOUND);
@@ -54,11 +71,7 @@ async function login(req: Request, res: Response) {
   }
 }
 
-const refreshTokenSchema = z.string({
-  message: 'Refresh token is required'
-});
-
-async function refreshToken(req: Request, res: Response) {
+export async function refreshToken(req: Request, res: Response) {
   try {
     const schemaResult = schemaValidator(refreshTokenSchema, req.body.refresh_token);
 
@@ -93,4 +106,81 @@ async function refreshToken(req: Request, res: Response) {
   }
 }
 
-export { login,refreshToken }
+export async function refreshPassword(req: Request, res: Response) {
+  try {
+    const { token, newPassword } = req.body;
+
+    const passwordResult = schemaValidator(passwordSchema, newPassword);
+
+    if(passwordResult.isFailure()) {
+      badRequest(res, Errors.INVALID_CREDENTIALS)
+      return;
+    }
+
+    const decodedResult = Jwt.verify(token)
+
+    if(decodedResult.isFailure()) {
+      badRequest(res, Errors.INVALID_TOKEN)
+      return;
+    }
+
+    const updateResult = await UserRepository.update(decodedResult.value.id, {
+      password: bcrypt.hashSync(newPassword, 10)
+    });
+
+    if(updateResult.isFailure()) {
+      notFound(res, Errors.NOT_FOUND)
+      return;
+    }
+
+    ok(res)
+  } catch (error) {
+    serverError(res, Errors.SERVER_ERROR)
+  }
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+  try {
+    const emailResult = schemaValidator(emailSchema, req.body.email);
+
+    if(emailResult.isFailure()){
+      badRequest(res,Errors.INVALID_EMAIL);
+      return;
+    }
+
+    const userResult = await UserRepository.findOneBy({
+      email: emailResult.value
+    })
+
+    if(userResult.isFailure() || !userResult.value) {
+      notFound(res, Errors.NOT_FOUND)
+      return;
+    }
+
+    const token = Jwt.sign({id: userResult.value?._id}, HOUR_IN_SECONDS);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASSWORD
+      },
+    })
+
+    const emailSource = fs.readFileSync(path.join(__dirname, "../views/forgot-password.hbs"), "utf8")
+    const template = Handlebars.compile(emailSource);
+    const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}/${token}`, TOKEN: token})
+
+    await transporter.sendMail({
+      to: userResult.value.email,
+      subject: "Password Reset",
+      html
+    })
+
+    ok(res)
+
+    return;
+  } catch (error) {
+    serverError(res)
+  }
+}

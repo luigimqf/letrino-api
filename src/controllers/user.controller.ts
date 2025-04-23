@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import { User } from '../config/db/models/users'
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { Errors } from '../constants/error';
