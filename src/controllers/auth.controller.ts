@@ -169,7 +169,7 @@ export async function forgotPassword(req: Request, res: Response) {
 
     const emailSource = fs.readFileSync(path.join(__dirname, "../views/forgot-password.hbs"), "utf8")
     const template = Handlebars.compile(emailSource);
-    const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}/${token}`, TOKEN: token})
+    const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}/${token}`})
 
     await transporter.sendMail({
       to: userResult.value.email,
