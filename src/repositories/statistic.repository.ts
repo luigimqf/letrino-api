@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { FilterQuery, ObjectId } from "mongoose";
 import { Statistic } from "../config/db/models/statistic";
 import { Errors } from "../constants/error";
 import { EStatistics } from "../constants/statistic";
@@ -30,18 +30,21 @@ export class StatisticRepository {
     }
   }
   
-  static async find({type,userId}:IStatisticBase): Promise<Either<Errors, IStatistic | null>> {
+  static async findOne(conditions: FilterQuery<IStatistic>): Promise<Either<Errors, IStatistic | null>> {
     try {
-      const statistic = await Statistic.findOne({
-        userId,
-        createdAt: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-        },
-        type,
-      });
+      const statistic = await Statistic.findOne(conditions);
 
       return Success.create(statistic);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR)
+    }
+  }
+
+  static async countDocuments(conditions: FilterQuery<IStatistic>): Promise<Either<Errors, number>> {
+    try {
+      const numberOfDocs = await Statistic.countDocuments(conditions);
+
+      return Success.create(numberOfDocs)
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR)
     }

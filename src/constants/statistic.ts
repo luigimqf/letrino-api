@@ -4,3 +4,7 @@ export enum EStatistics {
   INCORRECT = "incorrect",
   SKIPPED = "skipped",
 }
+
+export const BASE_SCORE = 150;
+
+export const ATTEMPT_PENALTY = 30;

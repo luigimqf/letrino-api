@@ -20,5 +20,6 @@ export enum Errors {
   SERVER_ERROR = 'Internal Server error',
   INCORRECT_ATTEMPT = 'The attempt is incorrect',
   CORRECT_ATTEMPT = 'The attempt is correct',
-  ALREADY_ATTEMPTED = "You have already correct today's word",
+  ALREADY_GOT_RIGHT = "You have already correct today's word",
+  ALREADY_FAILED = "You have already used all attempts"
 }

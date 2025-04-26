@@ -3,11 +3,11 @@ import { schemaValidator } from "../utils/validator";
 import { Request, Response } from "express";
 import { badRequest, notFound, ok, serverError } from "../utils/http-status";
 import { StatisticRepository } from "../repositories/statistic.repository";
-import { EStatistics } from "../constants/statistic";
-import { WordUsed } from "../config/db/models/wordUsed";
+import { ATTEMPT_PENALTY, BASE_SCORE, EStatistics } from "../constants/statistic";
 import { WordRepository } from "../repositories/word.repository";
 import { UsedWordRepository } from "../repositories/used_word.repository";
 import { Errors } from "../constants/error";
+import { UserRepository } from "../repositories/user.repository";
 
 const wordSchema = z.string({
   message: 'Attempt is required'
@@ -72,13 +72,31 @@ export async function wordSuccess(req: Request, res: Response) {
       return;
     }
 
-    const todaysAttemptResult = await StatisticRepository.find({
+    const correctAttempsResult = await StatisticRepository.countDocuments({
+      userId: id,
+      createdAt: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
       type: EStatistics.CORRECT,
-      userId: id
     });
 
-    if(todaysAttemptResult.isSuccess() && todaysAttemptResult.value?._id){
-      badRequest(res, Errors.ALREADY_ATTEMPTED)
+    if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
+      badRequest(res, Errors.ALREADY_GOT_RIGHT)
+      return;
+    }
+
+    const failedAttemptsResult = await StatisticRepository.countDocuments({
+      userId: id,
+      createdAt: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
+      type: EStatistics.INCORRECT,
+    })
+
+    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 4) {
+      badRequest(res, Errors.ALREADY_FAILED)
       return;
     }
 
@@ -98,6 +116,8 @@ export async function wordSuccess(req: Request, res: Response) {
 
     const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!)
 
+
+    
     if(todaysWord.isSuccess() && todaysWord.value?.word === attemptResult.value) {
       await StatisticRepository.create({
         word: todaysWord.value._id,
@@ -106,6 +126,30 @@ export async function wordSuccess(req: Request, res: Response) {
         type: EStatistics.CORRECT
       });
   
+      const attemptsResult = await StatisticRepository.countDocuments({
+        createdAt: {
+          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+        },
+        type: EStatistics.INCORRECT
+      })
+  
+      if(attemptsResult.isFailure()) {
+        badRequest(res, "Error calculating new score")
+        return;
+      }
+
+      const score = BASE_SCORE - (ATTEMPT_PENALTY * attemptsResult.value)
+
+      const updateUserResult = await UserRepository.update(id, {
+        $inc: {score}
+      })
+
+      if(updateUserResult.isFailure()) {
+        badRequest(res, "Error updating score")
+        return;
+      }
+
       ok(res)
       return;
     }
@@ -126,13 +170,31 @@ export async function wordFail(req: Request, res: Response) {
       return;
     }
 
-    const todaysAttemptResult = await StatisticRepository.find({
+    const correctAttempsResult = await StatisticRepository.countDocuments({
+      userId: id,
+      createdAt: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
       type: EStatistics.CORRECT,
-      userId: id
     });
 
-    if(todaysAttemptResult.isSuccess() && todaysAttemptResult.value?._id){
-      badRequest(res, Errors.ALREADY_ATTEMPTED)
+    if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
+      badRequest(res, Errors.ALREADY_GOT_RIGHT)
+      return;
+    }
+
+    const failedAttemptsResult = await StatisticRepository.countDocuments({
+      userId: id,
+      createdAt: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
+      type: EStatistics.INCORRECT,
+    })
+
+    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 4) {
+      badRequest(res, Errors.ALREADY_FAILED)
       return;
     }
 

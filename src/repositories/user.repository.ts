@@ -1,4 +1,4 @@
-import { FilterQuery } from "mongoose";
+import { FilterQuery, UpdateQuery } from "mongoose";
 import { User } from "../config/db/models/user";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
@@ -70,7 +70,7 @@ export class UserRepository {
     }
   }
 
-  static async update(id:ObjectID | string, update: Record<string, any>, options?: {new?: boolean; upsert?: boolean; runValidators?: boolean;}): Promise<Either<Errors, IUser | null>> {
+  static async update(id:ObjectID | string, update: UpdateQuery<IUser>, options?: {new?: boolean; upsert?: boolean; runValidators?: boolean;}): Promise<Either<Errors, IUser | null>> {
     try {
       const result = await User.findByIdAndUpdate(id, update, options);
 
