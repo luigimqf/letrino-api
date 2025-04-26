@@ -46,7 +46,8 @@ export async function login(req: Request, res: Response) {
       email
     });
 
-    if(userResult.isFailure()) {
+    console.log(userResult)
+    if(userResult.isFailure() || !userResult.value) {
       notFound(res, Errors.USER_NOT_FOUND);
       return;
     }

@@ -9,7 +9,7 @@ export class SessionRepository {
       await Session.findOneAndDelete().where('user_id').equals(id);
 
       return Success.create(undefined);
-    } catch (error: any) {
+    } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }

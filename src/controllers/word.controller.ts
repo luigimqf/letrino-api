@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import z from "zod";
 import { schemaValidator } from "../utils/validator";
 import { Request, Response } from "express";
@@ -16,7 +17,6 @@ const wordSchema = z.string({
 export async function getWord(_: Request, res: Response) {
   try {
     const todaysWord = await UsedWordRepository.findTodaysWord();
-
     if(todaysWord.isSuccess() && todaysWord.value?.wordId) {
       const wordDoc = await WordRepository.find(todaysWord.value.wordId);
 
@@ -31,12 +31,9 @@ export async function getWord(_: Request, res: Response) {
     }
 
     const usedWords = await UsedWordRepository.find();
-
     if(usedWords.isSuccess() && usedWords.value) {
-      const randomWord = Math.random() < 0.01
-        ? await WordRepository.findOneRandom({isGolden: true})
-        :  await WordRepository.findUnexistedWordIn(usedWords.value, 1, {
-          isGolden: true
+      const randomWord = await WordRepository.findUnexistedWordIn(usedWords.value, 1, {
+          isGolden: Math.random() < 0.01 ? true : false
         }) 
 
       if(randomWord.isSuccess()) {
@@ -222,7 +219,7 @@ export async function wordFail(req: Request, res: Response) {
         userId: id,
       });
   
-      ok(res, "created")
+      ok(res)
       return;
     }
 

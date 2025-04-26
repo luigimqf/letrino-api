@@ -55,7 +55,7 @@ export class UserRepository {
       await User.findByIdAndDelete(id);
 
       return Success.create(undefined);
-    } catch (error: any) {
+    } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
@@ -65,7 +65,7 @@ export class UserRepository {
       const user = await User.findOne(conditions)
 
       return Success.create(user);
-    } catch (error: any) {
+    } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }

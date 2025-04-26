@@ -1,4 +1,4 @@
-import { FilterQuery, PipelineStage } from "mongoose";
+import { FilterQuery } from "mongoose";
 import { Word } from "../config/db/models/word";
 import { WordUsed } from "../config/db/models/wordUsed";
 import { IWord } from "../config/models/word.model";
@@ -6,7 +6,6 @@ import { Errors } from "../constants/error";
 import { dayEnd, dayStart } from "../utils/date";
 import { Either, Failure, Success } from "../utils/either";
 import { ObjectID } from "../types";
-import { badRequest } from "../utils/http-status";
 
 export class WordRepository {
 
@@ -37,7 +36,7 @@ export class WordRepository {
       }
 
       return Success.create(word[0]);
-    } catch (error) {
+    } catch (_) {
       return Failure.create(Errors.SERVER_ERROR)
     }
   }
@@ -45,7 +44,7 @@ export class WordRepository {
   static async findUnexistedWordIn(words: unknown[], size: number = 1, filter?: FilterQuery<IWord>): Promise<Either<Errors, IWord | null>> {
     try {
       const word = await Word.aggregate([
-        {$match: {word: {$nin: words}}},
+        {$match: {word: {$nin: words}, ...(filter ?? {})}},
         {$sample: {size}}
       ])
 

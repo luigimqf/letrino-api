@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "./either";
