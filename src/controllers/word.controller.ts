@@ -9,6 +9,7 @@ import { WordRepository } from "../repositories/word.repository";
 import { UsedWordRepository } from "../repositories/used_word.repository";
 import { Errors } from "../constants/error";
 import { UserRepository } from "../repositories/user.repository";
+import { SkippedWordRepository } from "../repositories/skipped_word.repository";
 
 const wordSchema = z.string({
   message: 'Attempt is required'
@@ -230,32 +231,43 @@ export async function wordFail(req: Request, res: Response) {
   }
 }
 
-// export async function wordSkipped(req: Request, res: Response) {
-//   try {
-//     const id = req.userId;
+export async function wordSkipped(req: Request, res: Response) {
+  try {
+    const id = req.userId;
 
-//     if(!id) {
-//       badRequest(res, Errors.UNAUTHORIZED)
-//       return;
-//     }
+    if(!id) {
+      badRequest(res, Errors.UNAUTHORIZED)
+      return;
+    }
 
-//     const attemptResult = schemaValidator(wordSchema, req.body.attempt);
+    const todaySkippedResult = await SkippedWordRepository.findOne({
+      userId: id,
+      createdAt: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
+    })
 
-//     if (attemptResult.isFailure()) {
-//       badRequest(res, attemptResult.error);
-//       return;
-//     }
+    if(todaySkippedResult.isSuccess() && todaySkippedResult.value?._id) {
+      badRequest(res,"Skipped Document found")
+      return;
+    }
 
-//     const createStatisticResult = await StatisticRepository.create(wordResult.value,id, EStatistics.INCORRECT);
+    const todaysWordResult = await UsedWordRepository.findTodaysWord();
 
-//     if (createStatisticResult.isFailure()) {
-//       badRequest(res, createStatisticResult.error);
-//       return;
-//     }
+    if(todaysWordResult.isFailure() || !todaysWordResult.value?._id) {
+      notFound(res)
+      return;
+    }
 
-//     ok(res);
+    await SkippedWordRepository.create({
+      userId: id,
+      wordId: todaysWordResult.value?._id
+    })
+
+    ok(res);
     
-//   } catch (error) {
-//     serverError(res);
-//   }
-// }
+  } catch (error) {
+    serverError(res);
+  }
+}

@@ -5,3 +5,5 @@ export interface ModelWithTimestamp {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type OmitedModelFields<T extends ModelWithTimestamp> = Omit<T,"_id" | "createdAt" | "updatedAt"> 

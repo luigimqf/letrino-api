@@ -1,13 +1,13 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
-import { WordUsed } from "../config/db/models/wordUsed";
+import { WordUsed } from "../config/db/models/used_word";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
-import { IUsedWord } from "../config/models/used_word";
 import { ObjectID } from "../types";
+import { IWordRelatedDocument } from "../config/models/word.model";
 
 export class UsedWordRepository {
 
-  static async find(conditions: FilterQuery<IUsedWord> = {}, distinct?: string): Promise<Either<Errors, unknown[] | null>> {
+  static async find(conditions: FilterQuery<IWordRelatedDocument> = {}, distinct?: string): Promise<Either<Errors, unknown[] | null>> {
     try {
       const usedWords = distinct 
         ? await WordUsed.find(conditions).distinct(distinct) 
@@ -33,7 +33,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async findTodaysWord(): Promise<Either<Errors,IUsedWord | null>> {
+  static async findTodaysWord(): Promise<Either<Errors,IWordRelatedDocument | null>> {
     try {
       const todaysWord = await WordUsed.findOne({createdAt: {
         $gte: new Date().setHours(0,0,0,0),
@@ -46,7 +46,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async countDocuments(conditions?: FilterQuery<IUsedWord>): Promise<Either<Errors, number>> {
+  static async countDocuments(conditions?: FilterQuery<IWordRelatedDocument>): Promise<Either<Errors, number>> {
     try {
       const totalUsedWords = await WordUsed.countDocuments(conditions);
 
@@ -56,7 +56,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async updateMany(filter: FilterQuery<IUsedWord>, update: UpdateQuery<IUsedWord>): Promise<Either<Errors, boolean>> {
+  static async updateMany(filter: FilterQuery<IWordRelatedDocument>, update: UpdateQuery<IWordRelatedDocument>): Promise<Either<Errors, boolean>> {
     try {
       await WordUsed.updateMany(filter,update)
 

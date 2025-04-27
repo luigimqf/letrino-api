@@ -1,6 +1,6 @@
 import { FilterQuery } from "mongoose";
 import { Word } from "../config/db/models/word";
-import { WordUsed } from "../config/db/models/wordUsed";
+import { WordUsed } from "../config/db/models/used_word";
 import { IWord } from "../config/models/word.model";
 import { Errors } from "../constants/error";
 import { dayEnd, dayStart } from "../utils/date";
