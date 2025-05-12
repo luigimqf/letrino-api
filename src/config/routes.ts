@@ -10,7 +10,12 @@ import { checkAttempts } from '../middlewares/attempts'
 
 function setupRoutes(app: Express) {
   //----------- Heath Check ------------//
-  app.get('/', async (_, res) => {
+
+  app.get('/', async (req, res) => {
+    res.send('Hello World!')
+  });
+  
+  app.post('/', async (_, res) => {
     try {
       res.status(200).json('Alive')
       return 
