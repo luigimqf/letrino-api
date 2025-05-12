@@ -23,7 +23,7 @@ const loginSchema = z.object({
 })
 
 const refreshTokenSchema = z.string({
-  message: Errors.REFRESH_TOKEN_MISSING
+  message: Errors.REQUIRED_REFRESH_TOKEN
 });
 
 const passwordSchema = z.string({

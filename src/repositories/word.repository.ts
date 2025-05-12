@@ -3,7 +3,6 @@ import { Word } from "../config/db/models/word";
 import { WordUsed } from "../config/db/models/used_word";
 import { IWord } from "../config/models/word.model";
 import { Errors } from "../constants/error";
-import { dayEnd, dayStart } from "../utils/date";
 import { Either, Failure, Success } from "../utils/either";
 import { ObjectID } from "../types";
 
@@ -57,8 +56,8 @@ export class WordRepository {
   static async findRandom(): Promise<Either<Errors, IWord | null>> {
     try {
       const todaysWord = await WordUsed.findOne({ createdAt: {
-        $gte: dayStart,
-        $lt: dayEnd
+        $gte: new Date(new Date().setHours(0,0,0,0)).toISOString(),
+        $lt: new Date(new Date().setHours(23,59,59,999)).toISOString()
       }});
 
       if(todaysWord) {

@@ -11,7 +11,7 @@ interface IStatisticBase {
 }
 
 interface IStatisticCreate extends IStatisticBase {
-  word: ObjectId;
+  wordId: ObjectId;
   attempt: string;
   userId: ObjectId;
   type: EStatistics;
@@ -19,9 +19,9 @@ interface IStatisticCreate extends IStatisticBase {
 
 export class StatisticRepository {
 
-  static async create({word,attempt,userId,type}:IStatisticCreate): Promise<Either<Errors, undefined>> {
+  static async create({wordId,attempt,userId,type}:IStatisticCreate): Promise<Either<Errors, undefined>> {
     try {
-      const statistic = new Statistic({ word,attempt,userId, type });
+      const statistic = new Statistic({ wordId,attempt,userId, type });
       await statistic.save();
       return Success.create(undefined);
     } catch (error) {

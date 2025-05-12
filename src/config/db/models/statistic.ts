@@ -3,15 +3,12 @@ import { EStatistics } from '../../../constants/statistic';
 import { IStatistic } from '../../models/statistic';
 
 const statisticSchema = new mongoose.Schema<IStatistic>({
-  word: {
+  wordId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Words",
     required: true,
   },
-  attempt: {
-    type: String,
-    required: true,
-  },
+  attempt: String,
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users',

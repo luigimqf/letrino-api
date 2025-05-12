@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { ISkippedWord } from "../../models/word.model";
 
-export const skippedWordSchema = new mongoose.Schema<ISkippedWord>({
+export const skippedAttemptSchema = new mongoose.Schema<ISkippedWord>({
   wordId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Words",
@@ -15,4 +15,4 @@ export const skippedWordSchema = new mongoose.Schema<ISkippedWord>({
   deletedAt: Date
 },{timestamps: true});
 
-export const WordSkipped = mongoose.model("skipped-word", skippedWordSchema);
+export const SkippedAttempt = mongoose.model("skipped-attempt", skippedAttemptSchema);

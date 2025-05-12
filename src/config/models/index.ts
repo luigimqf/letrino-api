@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import { ObjectID } from "../../types";
 
 export interface ModelWithTimestamp {
-  _id: mongoose.Schema.Types.ObjectId
+  _id: ObjectID
   createdAt: Date;
   updatedAt: Date;
 }

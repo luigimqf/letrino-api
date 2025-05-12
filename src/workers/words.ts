@@ -11,11 +11,13 @@ export const updateUsedWords = async () => {
       if(usedWordResult.value === wordsResult.value) {
         await UsedWordRepository.updateMany(
           {deletedAt: {$exists: false}},
-          {$set: {deletedAt: new Date()}}
+          {$set: {deletedAt: new Date().toISOString()}}
         )
         console.log(`Updated UsedWords`)
       }
     }
+
+    console.log("updateUsedWords")
   } catch (error) {
     console.log(error)
   }

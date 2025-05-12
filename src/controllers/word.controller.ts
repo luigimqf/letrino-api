@@ -9,7 +9,7 @@ import { WordRepository } from "../repositories/word.repository";
 import { UsedWordRepository } from "../repositories/used_word.repository";
 import { Errors } from "../constants/error";
 import { UserRepository } from "../repositories/user.repository";
-import { SkippedWordRepository } from "../repositories/skipped_word.repository";
+import { SkippedAttemptRepository } from "../repositories/skipped_attempt.repository";
 
 const wordSchema = z.string({
   message: 'Attempt is required'
@@ -61,40 +61,12 @@ export async function getWord(_: Request, res: Response) {
   }
 }
 
-export async function wordSuccess(req: Request, res: Response) {
+export async function attemptSuccess(req: Request, res: Response) {
   try {
     const id = req.userId;
 
     if(!id) {
       badRequest(res, Errors.UNAUTHORIZED);
-      return;
-    }
-
-    const correctAttempsResult = await StatisticRepository.countDocuments({
-      userId: id,
-      createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-      type: EStatistics.CORRECT,
-    });
-
-    if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
-      badRequest(res, Errors.ALREADY_GOT_RIGHT)
-      return;
-    }
-
-    const failedAttemptsResult = await StatisticRepository.countDocuments({
-      userId: id,
-      createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-      type: EStatistics.INCORRECT,
-    })
-
-    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 4) {
-      badRequest(res, Errors.ALREADY_FAILED)
       return;
     }
 
@@ -114,30 +86,28 @@ export async function wordSuccess(req: Request, res: Response) {
 
     const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!)
 
-
-    
     if(todaysWord.isSuccess() && todaysWord.value?.word === attemptResult.value) {
       await StatisticRepository.create({
-        word: todaysWord.value._id,
+        wordId: todaysWord.value._id,
         attempt: attemptResult.value,
         userId: id,
         type: EStatistics.CORRECT
       });
   
-      const attemptsResult = await StatisticRepository.countDocuments({
+      const incorrectAttemptsResult = await StatisticRepository.countDocuments({
         createdAt: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+          $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+          $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
         },
         type: EStatistics.INCORRECT
       })
   
-      if(attemptsResult.isFailure()) {
+      if(incorrectAttemptsResult.isFailure()) {
         badRequest(res, "Error calculating new score")
         return;
       }
 
-      const score = BASE_SCORE - (ATTEMPT_PENALTY * attemptsResult.value)
+      const score = BASE_SCORE - (ATTEMPT_PENALTY * incorrectAttemptsResult.value)
 
       const updateUserResult = await UserRepository.update(id, {
         $inc: {score}
@@ -159,40 +129,12 @@ export async function wordSuccess(req: Request, res: Response) {
   }
 }
 
-export async function wordFail(req: Request, res: Response) {
+export async function attemptFail(req: Request, res: Response) {
   try {
     const id = req.userId;
 
     if(!id) {
       badRequest(res, Errors.UNAUTHORIZED);
-      return;
-    }
-
-    const correctAttempsResult = await StatisticRepository.countDocuments({
-      userId: id,
-      createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-      type: EStatistics.CORRECT,
-    });
-
-    if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
-      badRequest(res, Errors.ALREADY_GOT_RIGHT)
-      return;
-    }
-
-    const failedAttemptsResult = await StatisticRepository.countDocuments({
-      userId: id,
-      createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-      },
-      type: EStatistics.INCORRECT,
-    })
-
-    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 4) {
-      badRequest(res, Errors.ALREADY_FAILED)
       return;
     }
 
@@ -215,7 +157,7 @@ export async function wordFail(req: Request, res: Response) {
     if(wordResult.isSuccess() && wordResult.value.word !== attemptResult.value) {
       await StatisticRepository.create({
         attempt: attemptResult.value,
-        word: wordResult.value._id,
+        wordId: wordResult.value._id,
         type: EStatistics.INCORRECT,
         userId: id,
       });
@@ -231,7 +173,7 @@ export async function wordFail(req: Request, res: Response) {
   }
 }
 
-export async function wordSkipped(req: Request, res: Response) {
+export async function registerSkippedAttemp(req: Request, res: Response) {
   try {
     const id = req.userId;
 
@@ -240,11 +182,11 @@ export async function wordSkipped(req: Request, res: Response) {
       return;
     }
 
-    const todaySkippedResult = await SkippedWordRepository.findOne({
+    const todaySkippedResult = await SkippedAttemptRepository.findOne({
       userId: id,
       createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
       },
     })
 
@@ -256,11 +198,11 @@ export async function wordSkipped(req: Request, res: Response) {
     const todaysWordResult = await UsedWordRepository.findTodaysWord();
 
     if(todaysWordResult.isFailure() || !todaysWordResult.value?._id) {
-      notFound(res)
+      notFound(res, Errors.WORD_NOT_FOUND)
       return;
     }
 
-    await SkippedWordRepository.create({
+    await SkippedAttemptRepository.create({
       userId: id,
       wordId: todaysWordResult.value?._id
     })
@@ -269,5 +211,32 @@ export async function wordSkipped(req: Request, res: Response) {
     
   } catch (error) {
     serverError(res);
+  }
+}
+
+export async function deleteSkippedAttempDocument(req: Request, res: Response) {
+  try {
+    const id = req.userId;
+
+    if(!id) {
+      badRequest(res, Errors.UNAUTHORIZED)
+      return;
+    }
+
+    const deleteDocResult = await SkippedAttemptRepository.delete(id)
+
+    if(deleteDocResult.isSuccess() && !deleteDocResult.value?._id) {
+      notFound(res)
+      return;
+    }
+
+    if(deleteDocResult.isSuccess() && deleteDocResult.value?._id) {
+      ok(res)
+      return;
+    }
+
+    badRequest(res)
+  } catch (error) {
+    serverError(res)
   }
 }

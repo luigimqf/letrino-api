@@ -5,7 +5,8 @@ import {
 } from '../controllers/user.controller'
 import { Express } from 'express'
 import { authenticate } from '../middlewares/authenticate'
-import { getWord, wordFail, wordSkipped, wordSuccess } from '../controllers/word.controller'
+import { getWord, attemptFail, registerSkippedAttemp,deleteSkippedAttempDocument, attemptSuccess } from '../controllers/word.controller'
+import { checkAttempts } from '../middlewares/attempts'
 
 function setupRoutes(app: Express) {
   //----------- Heath Check ------------//
@@ -36,11 +37,13 @@ function setupRoutes(app: Express) {
 
   //----------- Statistics Routes ------------//
 
-  app.post('/attempt/success', authenticate, wordSuccess);
+  app.post('/attempt/success', authenticate, checkAttempts, attemptSuccess);
 
-  app.post('/attempt/fail', authenticate, wordFail);
+  app.post('/attempt/fail', authenticate, checkAttempts, attemptFail);
 
-  app.post('/attempt/skipped', authenticate, wordSkipped);
+  app.post('/attempt/skipped/register', authenticate, checkAttempts, registerSkippedAttemp);
+
+  app.delete('/attempt/skipped/delete', authenticate, checkAttempts, deleteSkippedAttempDocument)
   
   //----------- LeaderBoard Routes ------------//
 

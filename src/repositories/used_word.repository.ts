@@ -36,8 +36,8 @@ export class UsedWordRepository {
   static async findTodaysWord(): Promise<Either<Errors,IWordRelatedDocument | null>> {
     try {
       const todaysWord = await WordUsed.findOne({createdAt: {
-        $gte: new Date().setHours(0,0,0,0),
-        $lt: new Date().setHours(23,59,59,999),
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
       }});
 
       return Success.create(todaysWord);
