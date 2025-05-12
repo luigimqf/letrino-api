@@ -1,11 +1,11 @@
-import {Response, NextFunction, Request} from 'express';
+import {Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/enviroment';
 import { Errors } from '../constants/error';
-import { JwtPayloadWithId } from '../types';
+import { AuthenticateRequest, JwtPayloadWithId } from '../types';
 
 
-export async function authenticate(req: Request,res:Response,next: NextFunction) {
+export async function authenticate(req: AuthenticateRequest,res:Response,next: NextFunction) {
   try {
     const token = req.headers.authorization?.split(' ')[1];
 
