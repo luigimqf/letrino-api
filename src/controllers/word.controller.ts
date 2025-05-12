@@ -12,8 +12,8 @@ import { UserRepository } from "../repositories/user.repository";
 import { SkippedAttemptRepository } from "../repositories/skipped_attempt.repository";
 
 const wordSchema = z.string({
-  message: 'Attempt is required'
-})
+  message: 'Attempt must be a string'
+}).nonempty('Attempt is required')
 
 export async function getWord(_: Request, res: Response) {
   try {
@@ -84,7 +84,12 @@ export async function attemptSuccess(req: Request, res: Response) {
       return;
     }
 
-    const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!)
+    const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!);
+
+    if(todaysWord.isFailure() || (todaysWord.isSuccess() && !todaysWord.value._id)){
+      notFound(res, Errors.NOT_FOUND_WORD)
+      return;
+    }
 
     if(todaysWord.isSuccess() && todaysWord.value?.word === attemptResult.value) {
       await StatisticRepository.create({
@@ -154,6 +159,11 @@ export async function attemptFail(req: Request, res: Response) {
 
     const wordResult = await WordRepository.find(todaysWordId.value?.wordId!);
 
+    if(wordResult.isFailure() || (wordResult.isSuccess() && !wordResult.value._id)) {
+      notFound(res, Errors.NOT_FOUND_WORD);
+      return;
+    }
+
     if(wordResult.isSuccess() && wordResult.value.word !== attemptResult.value) {
       await StatisticRepository.create({
         attempt: attemptResult.value,
@@ -198,7 +208,7 @@ export async function registerSkippedAttemp(req: Request, res: Response) {
     const todaysWordResult = await UsedWordRepository.findTodaysWord();
 
     if(todaysWordResult.isFailure() || !todaysWordResult.value?._id) {
-      notFound(res, Errors.WORD_NOT_FOUND)
+      notFound(res, Errors.NOT_FOUND_WORD)
       return;
     }
 
@@ -223,19 +233,18 @@ export async function deleteSkippedAttempDocument(req: Request, res: Response) {
       return;
     }
 
-    const deleteDocResult = await SkippedAttemptRepository.delete(id)
+    const deleteDocResult = await SkippedAttemptRepository.delete({
+      userId: id
+    })
 
-    if(deleteDocResult.isSuccess() && !deleteDocResult.value?._id) {
-      notFound(res)
+    console.log(deleteDocResult)
+    if(deleteDocResult.isFailure() || (deleteDocResult.isSuccess() && !deleteDocResult.value?._id)) {
+      notFound(res, Errors.NOT_FOUND_DOCUMENT)
       return;
     }
 
-    if(deleteDocResult.isSuccess() && deleteDocResult.value?._id) {
-      ok(res)
-      return;
-    }
+    ok(res)
 
-    badRequest(res)
   } catch (error) {
     serverError(res)
   }

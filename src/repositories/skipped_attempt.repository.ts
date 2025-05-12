@@ -1,9 +1,8 @@
-import { FilterQuery } from "mongoose";
+import { DeleteResult, FilterQuery } from "mongoose";
 import { SkippedAttempt } from "../config/db/models/skipped_attempt";
 import { Either, Failure, Success } from "../utils/either";
 import { ISkippedWord } from "../config/models/word.model";
 import { OmitedModelFields } from "../config/models";
-import { ObjectID } from "../types";
 import { Errors } from "../constants/error";
 
 export class SkippedAttemptRepository {
@@ -40,9 +39,9 @@ export class SkippedAttemptRepository {
     }
   }
 
-  static async delete(id: ObjectID): Promise<Either<Errors, ISkippedWord | null>> {
+  static async delete(conditions: FilterQuery<ISkippedWord>): Promise<Either<Errors, ISkippedWord | null>> {
     try {
-      const deletedDocument = await SkippedAttempt.findByIdAndDelete(id)
+      const deletedDocument = await SkippedAttempt.findOneAndDelete(conditions)
 
       return Success.create(deletedDocument)
     } catch (error) {

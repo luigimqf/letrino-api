@@ -24,13 +24,13 @@ const loginSchema = z.object({
 
 const refreshTokenSchema = z.string({
   message: Errors.REQUIRED_REFRESH_TOKEN
-});
+}).nonempty(Errors.REQUIRED_REFRESH_TOKEN);
 
 const passwordSchema = z.string({
   message: Errors.REQUIRED_PASSWORD
-})
+}).nonempty(Errors.REQUIRED_PASSWORD)
 
-const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL);
+const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL);
 
 export async function login(req: Request, res: Response) {
   try {
@@ -48,7 +48,7 @@ export async function login(req: Request, res: Response) {
 
     console.log(userResult)
     if(userResult.isFailure() || !userResult.value) {
-      notFound(res, Errors.USER_NOT_FOUND);
+      notFound(res, Errors.NOT_FOUND_USER);
       return;
     }
 
@@ -86,8 +86,7 @@ export async function refreshToken(req: Request, res: Response) {
     const jwtResult = Jwt.verify(refreshToken);
 
     if(jwtResult.isFailure()) {
-      badRequest(res, jwtResult.error);
-      //Add session delete with Id
+      badRequest(res, Errors.INVALID_TOKEN);
       return;
     }
 
@@ -114,7 +113,7 @@ export async function refreshPassword(req: Request, res: Response) {
     const passwordResult = schemaValidator(passwordSchema, newPassword);
 
     if(passwordResult.isFailure()) {
-      badRequest(res, Errors.INVALID_CREDENTIALS)
+      badRequest(res, passwordResult.error)
       return;
     }
 
@@ -145,7 +144,7 @@ export async function forgotPassword(req: Request, res: Response) {
     const emailResult = schemaValidator(emailSchema, req.body.email);
 
     if(emailResult.isFailure()){
-      badRequest(res,Errors.INVALID_EMAIL);
+      badRequest(res, emailResult.error);
       return;
     }
 
@@ -153,7 +152,7 @@ export async function forgotPassword(req: Request, res: Response) {
       email: emailResult.value
     })
 
-    if(userResult.isFailure() || !userResult.value) {
+    if(userResult.isFailure() || !userResult.value?._id) {
       notFound(res, Errors.NOT_FOUND)
       return;
     }
