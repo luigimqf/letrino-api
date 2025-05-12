@@ -25,7 +25,6 @@ export class StatisticRepository {
       await statistic.save();
       return Success.create(undefined);
     } catch (error) {
-      console.log(error)
       return Failure.create(Errors.SERVER_ERROR);
     }
   }

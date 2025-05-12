@@ -237,7 +237,6 @@ export async function deleteSkippedAttempDocument(req: Request, res: Response) {
       userId: id
     })
 
-    console.log(deleteDocResult)
     if(deleteDocResult.isFailure() || (deleteDocResult.isSuccess() && !deleteDocResult.value?._id)) {
       notFound(res, Errors.NOT_FOUND_DOCUMENT)
       return;

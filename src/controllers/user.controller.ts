@@ -48,7 +48,6 @@ export async function createUser(req: Request, res: Response) {
     ok(res);
 
   } catch (error) {
-    console.log(error);
     serverError(res, Errors.SERVER_ERROR);
   }
 };

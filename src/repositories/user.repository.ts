@@ -22,7 +22,6 @@ export class UserRepository {
       
       return Success.create(newUser);
     } catch (error) {
-      console.log(error)
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
