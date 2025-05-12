@@ -1,6 +1,8 @@
+/* eslint-disable no-useless-escape */
 import mongoose from 'mongoose'
+import { IUser } from '../../models/user.model'
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<IUser>({
   name: {
     type: String,
     required: true
@@ -24,8 +26,13 @@ const userSchema = new mongoose.Schema({
   score: {
     type: Number,
     default: 0
+  },
+  statistics: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Statistics'
   }
-})
-const User = mongoose.model('Users', userSchema)
+},
+{timestamps: true}
+)
+export const User = mongoose.model('Users', userSchema)
 
-export { User }

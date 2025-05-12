@@ -1,3 +1,4 @@
+import { setupCron } from '../workers/cron'
 import setupDatabase from './db'
 import setupRoutes from './routes'
 import express from 'express'
@@ -7,6 +8,7 @@ function setupApp() {
   app.use(express.json())
   setupDatabase()
   setupRoutes(app)
+  setupCron()
   return app
 }
 
