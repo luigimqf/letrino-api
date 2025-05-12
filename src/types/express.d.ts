@@ -3,10 +3,10 @@ import { ObjectID } from '.';
 
 declare global {
   namespace Express {
-    interface User {
+    export interface User {
       userId?: ObjectID;
     }
-    interface Request {
+    export interface Request {
       userId?: ObjectID;
     }
   }
