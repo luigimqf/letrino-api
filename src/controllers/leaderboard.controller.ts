@@ -1,15 +1,16 @@
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import z from 'zod';
 import { Errors } from '../constants/error';
 import { schemaValidator } from '../utils/validator';
 import { badRequest, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
+import { AuthenticateRequest } from '../types';
 
 const scoreSchema = z.number({
   message: 'Score must be a number'
 });
 
-async function getLeaderboard(req: Request, res: Response) {
+async function getLeaderboard(req: AuthenticateRequest, res: Response) {
   try {
     const usersResult = await UserRepository.findAll({
       sort: { score: -1 }
@@ -60,7 +61,7 @@ async function getLeaderboard(req: Request, res: Response) {
 
 
 
-async function updateScore(req: Request, res: Response) {
+async function updateScore(req: AuthenticateRequest, res: Response) {
   try { 
     const { id } = req.params;
 

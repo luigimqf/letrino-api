@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import z from "zod";
 import { schemaValidator } from "../utils/validator";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { badRequest, notFound, ok, serverError } from "../utils/http-status";
 import { StatisticRepository } from "../repositories/statistic.repository";
 import { ATTEMPT_PENALTY, BASE_SCORE, EStatistics } from "../constants/statistic";
@@ -10,12 +10,13 @@ import { UsedWordRepository } from "../repositories/used_word.repository";
 import { Errors } from "../constants/error";
 import { UserRepository } from "../repositories/user.repository";
 import { SkippedAttemptRepository } from "../repositories/skipped_attempt.repository";
+import { AuthenticateRequest } from "../types";
 
 const wordSchema = z.string({
   message: 'Attempt must be a string'
 }).nonempty('Attempt is required')
 
-export async function getWord(_: Request, res: Response) {
+export async function getWord(_: AuthenticateRequest, res: Response) {
   try {
     const todaysWord = await UsedWordRepository.findTodaysWord();
     if(todaysWord.isSuccess() && todaysWord.value?.wordId) {
@@ -61,7 +62,7 @@ export async function getWord(_: Request, res: Response) {
   }
 }
 
-export async function attemptSuccess(req: Request, res: Response) {
+export async function attemptSuccess(req: AuthenticateRequest, res: Response) {
   try {
     const id = req.userId;
 
@@ -134,7 +135,7 @@ export async function attemptSuccess(req: Request, res: Response) {
   }
 }
 
-export async function attemptFail(req: Request, res: Response) {
+export async function attemptFail(req: AuthenticateRequest, res: Response) {
   try {
     const id = req.userId;
 
@@ -183,7 +184,7 @@ export async function attemptFail(req: Request, res: Response) {
   }
 }
 
-export async function registerSkippedAttemp(req: Request, res: Response) {
+export async function registerSkippedAttemp(req: AuthenticateRequest, res: Response) {
   try {
     const id = req.userId;
 
@@ -224,7 +225,7 @@ export async function registerSkippedAttemp(req: Request, res: Response) {
   }
 }
 
-export async function deleteSkippedAttempDocument(req: Request, res: Response) {
+export async function deleteSkippedAttempDocument(req: AuthenticateRequest, res: Response) {
   try {
     const id = req.userId;
 

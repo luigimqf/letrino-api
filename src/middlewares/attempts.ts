@@ -1,10 +1,11 @@
-import {Response, NextFunction, Request} from 'express';
+import {Response, NextFunction} from 'express';
 import { StatisticRepository } from '../repositories/statistic.repository';
 import { badRequest } from '../utils/http-status';
 import { Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
+import { AuthenticateRequest } from '../types';
 
-export async function checkAttempts(req: Request,res:Response,next: NextFunction) {
+export async function checkAttempts(req: AuthenticateRequest,res:Response,next: NextFunction) {
   try {
     const id = req.userId;
 

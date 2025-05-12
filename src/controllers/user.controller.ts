@@ -1,10 +1,11 @@
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { Errors } from '../constants/error';
 import { schemaValidator } from '../utils/validator';
 import { badRequest, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
+import { AuthenticateRequest } from '../types';
 
 const createUserSchema = z.object({
   name: z
@@ -21,7 +22,7 @@ const createUserSchema = z.object({
   }).nonempty("password is required")
 })
 
-export async function createUser(req: Request, res: Response) {
+export async function createUser(req: AuthenticateRequest, res: Response) {
   try {
     const bodyResult = schemaValidator(createUserSchema, req.body);
 

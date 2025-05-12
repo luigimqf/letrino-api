@@ -1,4 +1,4 @@
-import {Request, Response} from 'express';
+import {Response} from 'express';
 import {z} from 'zod';
 import bcrypt from 'bcrypt';
 import { Errors } from '../constants/error';
@@ -12,6 +12,7 @@ import { env } from '../config/enviroment';
 import Handlebars from 'handlebars';
 import fs from "fs"
 import path from 'path';
+import { AuthenticateRequest } from '../types';
 
 const loginSchema = z.object({
   email: z.string({
@@ -32,7 +33,7 @@ const passwordSchema = z.string({
 
 const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL);
 
-export async function login(req: Request, res: Response) {
+export async function login(req: AuthenticateRequest, res: Response) {
   try {
     const schemaResult = schemaValidator(loginSchema, req.body);
 
@@ -71,7 +72,7 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-export async function refreshToken(req: Request, res: Response) {
+export async function refreshToken(req: AuthenticateRequest, res: Response) {
   try {
     const schemaResult = schemaValidator(refreshTokenSchema, req.body.refresh_token);
 
@@ -105,7 +106,7 @@ export async function refreshToken(req: Request, res: Response) {
   }
 }
 
-export async function refreshPassword(req: Request, res: Response) {
+export async function refreshPassword(req: AuthenticateRequest, res: Response) {
   try {
     const { token, newPassword } = req.body;
 
@@ -138,7 +139,7 @@ export async function refreshPassword(req: Request, res: Response) {
   }
 }
 
-export async function forgotPassword(req: Request, res: Response) {
+export async function forgotPassword(req: AuthenticateRequest, res: Response) {
   try {
     const emailResult = schemaValidator(emailSchema, req.body.email);
 
