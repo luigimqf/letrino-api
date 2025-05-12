@@ -158,17 +158,17 @@ export async function attemptFail(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const wordResult = await WordRepository.find(todaysWordId.value?.wordId!);
+    const todaysWordResult = await WordRepository.find(todaysWordId.value?.wordId!);
 
-    if(wordResult.isFailure() || (wordResult.isSuccess() && !wordResult.value._id)) {
-      notFound(res, Errors.NOT_FOUND_WORD);
+    if(todaysWordResult.isFailure() || (todaysWordResult.isSuccess() && !todaysWordResult.value._id)){
+      notFound(res, Errors.NOT_FOUND_WORD)
       return;
     }
 
-    if(wordResult.isSuccess() && wordResult.value.word !== attemptResult.value) {
+    if(todaysWordResult.isSuccess() && todaysWordResult.value.word !== attemptResult.value) {
       await StatisticRepository.create({
         attempt: attemptResult.value,
-        wordId: wordResult.value._id,
+        wordId: todaysWordResult.value._id,
         type: EStatistics.INCORRECT,
         userId: id,
       });
