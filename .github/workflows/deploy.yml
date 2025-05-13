@@ -33,8 +33,3 @@ jobs:
           else
             pm2 start ~/projects/letrino-api/src/server.ts --name server
           fi
-
-      - name: Show recent logs
-        run: |
-          echo "Showing recent PM2 logs..."
-          pm2 logs server --lines 20
