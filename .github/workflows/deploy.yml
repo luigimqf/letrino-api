@@ -1,4 +1,4 @@
-name: Deploy on EC2 Self-Hosted Runner
+name: Deploy Node App on EC2 (Git Pull Method)
 
 on:
   push:
@@ -10,13 +10,31 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Pull latest changes
+        run: |
+          echo "Pulling latest changes..."
+          cd ~/projects/letrino-api
+          git reset --hard
+          git clean -fd
+          git pull origin main
 
       - name: Install dependencies
         run: |
-          npm install
+          echo "Installing npm dependencies..."
+          cd ~/projects/letrino-api
+          npm ci
 
-      - name: Restart application
+      - name: Reload with PM2
         run: |
-          pm2 restart server || pm2 start ~/projects/letrino-api/src/server.ts --name server
+          echo "Restarting app with PM2..."
+          cd ~/projects/letrino-api
+          if pm2 list | grep -q server; then
+            pm2 restart server
+          else
+            pm2 start ~/projects/letrino-api/src/server.ts --name server
+          fi
+
+      - name: Show recent logs
+        run: |
+          echo "Showing recent PM2 logs..."
+          pm2 logs server --lines 20
