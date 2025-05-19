@@ -6,7 +6,8 @@ const schema = z.object({
   JWT_SECRET: z.string(),
   EMAIL_USER: z.string(),
   EMAIL_PASSWORD: z.string(),
-  PASSWORD_RESET_URL: z.string()
+  PASSWORD_RESET_URL: z.string(),
+  ALLOWED_ORIGIN: z.string()
 })
 
 export const env = schema.parse(process.env);
