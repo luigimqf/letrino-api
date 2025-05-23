@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import { IUser } from '../../models/user.model'
 
 const userSchema = new mongoose.Schema<IUser>({
-  name: {
+  username: {
     type: String,
     required: true
   },

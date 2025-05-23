@@ -52,10 +52,12 @@ export async function login(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, userResult.value?.password ?? '');
+    const {username, password: userPassword} = userResult.value
+
+    const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
     if (!isPasswordValid) {
-      badRequest(res, Errors.INVALID_PASSWORD);
+      badRequest(res, Errors.INVALID_CREDENTIALS);
       return;
     }
 
@@ -65,7 +67,10 @@ export async function login(req: AuthenticateRequest, res: Response) {
   
     ok(res,{
       token,
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
+      user: {
+        username
+      }
     })
   } catch (error) {
     serverError(res);
