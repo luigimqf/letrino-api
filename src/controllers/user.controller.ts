@@ -21,7 +21,7 @@ const createUserSchema = z.object({
   }).nonempty("password is required")
 })
 
-export async function createUser(req: AuthenticateRequest, res: Response) {
+export async function signIn(req: AuthenticateRequest, res: Response) {
   try {
     const bodyResult = schemaValidator(createUserSchema, req.body);
 
