@@ -1,7 +1,7 @@
 import { login, forgotPassword, refreshToken, refreshPassword } from '../controllers/auth.controller'
 import { getLeaderboard, updateScore } from '../controllers/leaderboard.controller'
 import {
-  createUser,
+  signIn,
 } from '../controllers/user.controller'
 import { Express } from 'express'
 import { authenticate } from '../middlewares/authenticate'
@@ -34,7 +34,7 @@ function setupRoutes(app: Express) {
   
   //----------- User Routes ------------//
 
-  app.post('/user', createUser)
+  app.post('/sign-in', signIn)
 
   //----------- Word Routes ------------//
 
