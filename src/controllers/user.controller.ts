@@ -3,19 +3,18 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { Errors } from '../constants/error';
 import { schemaValidator } from '../utils/validator';
-import { badRequest, ok, serverError } from '../utils/http-status';
+import { badRequest, found, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { AuthenticateRequest } from '../types';
 
 const createUserSchema = z.object({
-  name: z
-    .string({
-      message: 'Name must be a string'
+  username: z
+    .string()
+    .min(5, {message: "Must have at least 5 characteres"})
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: 'Only alphanumeric characters without spaces are allowed',
     })
-    .regex(/^[a-zA-Z\s]*$/, {
-      message: 'Name must only contain letters'
-    })
-    .nonempty("Name is required"),
+    .nonempty("Username is required"),
   email: z.string().email('Email is invalid'),
   password: z.string({
     message: 'Password must be a string'
@@ -31,12 +30,29 @@ export async function createUser(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const {email, password, name} = bodyResult.value;
+    const {email, password, username} = bodyResult.value;
+
+    const usedEmailResult = await UserRepository.findOneBy({
+      email
+    });
+
+    if(usedEmailResult.isSuccess() && usedEmailResult.value?._id) {
+      found(res, Errors.FOUND_EMAIL);
+      return;
+    }
+    const usernameResult = await UserRepository.findOneBy({
+      username
+    });
+
+    if(usernameResult.isSuccess() && usernameResult.value?._id) {
+      found(res, Errors.FOUND_USERNAME);
+      return;
+    }
 
     const hash = bcrypt.hashSync(password, 10);
 
     const newUserResult = await UserRepository.create({
-      name,
+      username,
       email,
       password: hash,
     });

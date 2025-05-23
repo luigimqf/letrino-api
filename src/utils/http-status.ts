@@ -47,6 +47,12 @@ export function notFound(res: Response, message = 'Not Found') {
     error: message
   })
 }
+export function found(res: Response, message = 'Conflict') {
+  return res.status(409).json({
+    success: false,
+    error: message
+  })
+}
 
 export function serverError(res: Response, message = 'Server Error') {
   return res.status(500).json({

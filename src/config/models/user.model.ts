@@ -4,7 +4,7 @@ import { ObjectID } from "../../types";
 
 export interface IUser extends ModelWithTimestamp {
   _id: ObjectID;
-  name: string;
+  username: string;
   email: string;
   score: number;
   password: string;
