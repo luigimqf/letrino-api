@@ -26,9 +26,10 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
     const leaderboard = usersResult.value?.slice(0, 10) ?? [];
 
     const leaderboardFormatted = leaderboard.map((rank, index) => {
-      const {username,score} = rank;
+      const {username,score,avatar} = rank;
 
       return {
+        avatar,
         username,
         score,
         position: index + 1
