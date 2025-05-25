@@ -3,7 +3,7 @@ import {z} from 'zod';
 import bcrypt from 'bcrypt';
 import { Errors } from '../constants/error';
 import { schemaValidator } from '../utils/validator';
-import { badRequest, notFound, ok, serverError } from '../utils/http-status';
+import { badRequest, found, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { Jwt } from '../utils/jwt';
 import { HOUR_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
@@ -13,6 +13,20 @@ import Handlebars from 'handlebars';
 import fs from "fs"
 import path from 'path';
 import { AuthenticateRequest } from '../types';
+
+const createUserSchema = z.object({
+  username: z
+    .string()
+    .min(5, {message: "Must have at least 5 characteres"})
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: 'Only alphanumeric characters without spaces are allowed',
+    })
+    .nonempty("Username is required"),
+  email: z.string().email('Email is invalid'),
+  password: z.string({
+    message: 'Password must be a string'
+  }).nonempty("password is required")
+})
 
 const loginSchema = z.object({
   email: z.string({
@@ -75,6 +89,81 @@ export async function signIn(req: AuthenticateRequest, res: Response) {
     })
   } catch (error) {
     serverError(res);
+  }
+}
+
+export async function signUp(req: AuthenticateRequest, res: Response) {
+  try {
+    const bodyResult = schemaValidator(createUserSchema, req.body);
+
+    if(bodyResult.isFailure()) {
+      badRequest(res, bodyResult.error);
+      return;
+    }
+
+    const {email, password, username} = bodyResult.value;
+
+    const usedEmailResult = await UserRepository.findOneBy({
+      email
+    });
+
+    if(usedEmailResult.isSuccess() && usedEmailResult.value?._id) {
+      found(res, Errors.FOUND_EMAIL);
+      return;
+    }
+    const usernameResult = await UserRepository.findOneBy({
+      username
+    });
+
+    if(usernameResult.isSuccess() && usernameResult.value?._id) {
+      found(res, Errors.FOUND_USERNAME);
+      return;
+    }
+
+    const hash = bcrypt.hashSync(password, 10);
+
+    const newUserResult = await UserRepository.create({
+      username,
+      email,
+      password: hash,
+    });
+
+    if(newUserResult.isFailure()) {
+      serverError(res, newUserResult.error);
+      return;
+    }
+
+    ok(res);
+
+  } catch (error) {
+    serverError(res, Errors.SERVER_ERROR);
+  }
+};
+
+export async function getUserData(req: AuthenticateRequest, res: Response) {
+  try {
+    const id = req.userId;
+
+    if(!id) {
+      badRequest(res, Errors.UNAUTHORIZED);
+      return;
+    }
+
+    const userResult = await UserRepository.findById(id);
+
+    if(userResult.isFailure() || !userResult.value._id) {
+      notFound(res, Errors.NOT_FOUND_USER);
+      return 
+    }
+
+    const {username,score} = userResult.value;
+
+    ok(res, {
+      username,
+      score
+    })
+  } catch (error) {
+    serverError(res)
   }
 }
 

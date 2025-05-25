@@ -1,8 +1,5 @@
-import { signIn, forgotPassword, refreshToken, refreshPassword } from '../controllers/auth.controller'
+import { signIn, forgotPassword, refreshToken, refreshPassword, signUp, getUserData } from '../controllers/auth.controller'
 import { getLeaderboard } from '../controllers/leaderboard.controller'
-import {
-  signUp,
-} from '../controllers/user.controller'
 import { Express } from 'express'
 import { authenticate } from '../middlewares/authenticate'
 import { getWord, attemptFail, registerSkippedAttemp,deleteSkippedAttempDocument, attemptSuccess } from '../controllers/word.controller'
@@ -26,15 +23,15 @@ function setupRoutes(app: Express) {
   //----------- Auth Routes ------------//
   app.post('/sign-in', signIn);
 
+  app.post('/sign-up', signUp);
+
+  app.get('/user-data',authenticate, getUserData)
+
   app.post('/refresh-token',refreshToken)
 
   app.post('/forgot-password', forgotPassword)
 
   app.post('/refresh-password', refreshPassword)
-  
-  //----------- User Routes ------------//
-
-  app.post('/sign-up', signUp)
 
   //----------- Word Routes ------------//
 
