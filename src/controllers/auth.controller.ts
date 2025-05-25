@@ -112,6 +112,7 @@ export async function signUp(req: AuthenticateRequest, res: Response) {
       found(res, Errors.FOUND_EMAIL);
       return;
     }
+    
     const usernameResult = await UserRepository.findOneBy({
       username
     });

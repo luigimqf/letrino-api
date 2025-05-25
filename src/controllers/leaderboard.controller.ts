@@ -61,11 +61,12 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
 
     const userScorePosition = usersResult.value.findIndex((u) => u._id.toString() === id) + 1;
 
-    const {username,score} = user.value;
+    const {username,score,avatar} = user.value;
 
     ok(res, {
       leaderboard: leaderboardFormatted,
       user: {
+        avatar,
         username,
         score,
         position: userScorePosition
