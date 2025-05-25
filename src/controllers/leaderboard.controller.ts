@@ -68,7 +68,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
       user: {
         username,
         score,
-        rank: userScorePosition
+        position: userScorePosition
       }
     });
   } catch (error) {
