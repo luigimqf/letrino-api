@@ -7,6 +7,10 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true
   },
+  avatar: {
+    type: String,
+    default: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jade'
+  },
   email: {
     type: String,
     unique: true,

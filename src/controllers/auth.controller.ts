@@ -66,7 +66,7 @@ export async function signIn(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const {username, password: userPassword,score} = userResult.value
+    const {username, password: userPassword,score, avatar} = userResult.value
 
     const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -83,6 +83,7 @@ export async function signIn(req: AuthenticateRequest, res: Response) {
       token,
       refresh_token: refreshToken,
       user: {
+        avatar,
         username,
         score
       }
@@ -156,9 +157,10 @@ export async function getUserData(req: AuthenticateRequest, res: Response) {
       return 
     }
 
-    const {username,score} = userResult.value;
+    const {username,score,avatar} = userResult.value;
 
     ok(res, {
+      avatar,
       username,
       score
     })
