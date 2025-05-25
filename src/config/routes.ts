@@ -1,7 +1,7 @@
-import { login, forgotPassword, refreshToken, refreshPassword } from '../controllers/auth.controller'
-import { getLeaderboard, updateScore } from '../controllers/leaderboard.controller'
+import { signIn, forgotPassword, refreshToken, refreshPassword } from '../controllers/auth.controller'
+import { getLeaderboard } from '../controllers/leaderboard.controller'
 import {
-  signIn,
+  signUp,
 } from '../controllers/user.controller'
 import { Express } from 'express'
 import { authenticate } from '../middlewares/authenticate'
@@ -24,7 +24,7 @@ function setupRoutes(app: Express) {
     }
   })
   //----------- Auth Routes ------------//
-  app.post('/login', login);
+  app.post('/sign-in', signIn);
 
   app.post('/refresh-token',refreshToken)
 
@@ -34,7 +34,7 @@ function setupRoutes(app: Express) {
   
   //----------- User Routes ------------//
 
-  app.post('/sign-in', signIn)
+  app.post('/sign-up', signUp)
 
   //----------- Word Routes ------------//
 
@@ -52,9 +52,7 @@ function setupRoutes(app: Express) {
   
   //----------- LeaderBoard Routes ------------//
 
-  app.get('/leaderboard/:id',authenticate, getLeaderboard)
-
-  app.put('/leaderboard/:id',authenticate ,updateScore)
+  app.get('/leaderboard', getLeaderboard)
 }
 
 export default setupRoutes
