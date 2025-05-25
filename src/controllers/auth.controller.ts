@@ -33,7 +33,7 @@ const passwordSchema = z.string({
 
 const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL);
 
-export async function login(req: AuthenticateRequest, res: Response) {
+export async function signIn(req: AuthenticateRequest, res: Response) {
   try {
     const schemaResult = schemaValidator(loginSchema, req.body);
 
@@ -52,7 +52,7 @@ export async function login(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const {username, password: userPassword} = userResult.value
+    const {username, password: userPassword,score} = userResult.value
 
     const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -69,7 +69,8 @@ export async function login(req: AuthenticateRequest, res: Response) {
       token,
       refresh_token: refreshToken,
       user: {
-        username
+        username,
+        score
       }
     })
   } catch (error) {

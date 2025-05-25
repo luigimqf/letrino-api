@@ -5,6 +5,7 @@ import { schemaValidator } from '../utils/validator';
 import { badRequest, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { AuthenticateRequest } from '../types';
+import { Jwt } from '../utils/jwt';
 
 const scoreSchema = z.number({
   message: 'Score must be a number'
@@ -12,6 +13,7 @@ const scoreSchema = z.number({
 
 async function getLeaderboard(req: AuthenticateRequest, res: Response) {
   try {
+
     const usersResult = await UserRepository.findAll({
       sort: { score: -1 }
     });
@@ -20,37 +22,52 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
       notFound(res, usersResult.error);
       return;
     }
+    
+    const leaderboard = usersResult.value?.slice(0, 10) ?? [];
 
-    const {id} = req.params
+    const leaderboardFormatted = leaderboard.map((rank, index) => {
+      const {username,score} = rank;
 
-    if(!id) {
-      badRequest(res, Errors.REQUIRED_ID);
-      return;
-    }
+      return {
+        username,
+        score,
+        rank: index + 1
+      }
+    });
+
+    const token = req.headers.authorization?.split(' ')[1];
+
+    const decoded = Jwt.verify(token ?? '');
+
+    const id = decoded.isSuccess() ? decoded.value.id ?? '' : '';
 
     const user = await UserRepository.findById(id);
 
-    if(user.isFailure()) {
-      notFound(res, user.error);
+    if(user.isFailure() || !user.value._id) {
+      ok(res,{
+        leaderboardFormatted
+      });
       return;
     }
-    
-    const leaderboard = usersResult.value.slice(0, 5);
+
     const isUserInTop5 = leaderboard.find((u) => u._id.toString() === id);
 
     if(isUserInTop5) {
       ok(res, {
-        leaderboard,
+        leaderboardFormatted,
       });
       return;
     }
 
     const userScorePosition = usersResult.value.findIndex((u) => u._id.toString() === id) + 1;
 
+    const {username,score} = user.value;
+
     ok(res, {
-      leaderboard,
+      leaderboardFormatted,
       user: {
-        ...user.value,
+        username,
+        score,
         rank: userScorePosition
       }
     });
