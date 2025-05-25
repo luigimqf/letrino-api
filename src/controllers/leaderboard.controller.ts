@@ -31,7 +31,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
       return {
         username,
         score,
-        rank: index + 1
+        position: index + 1
       }
     });
 
@@ -45,7 +45,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
 
     if(user.isFailure() || !user.value._id) {
       ok(res,{
-        leaderboardFormatted
+        leaderboard: leaderboardFormatted
       });
       return;
     }
@@ -54,7 +54,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
 
     if(isUserInTop5) {
       ok(res, {
-        leaderboardFormatted,
+        leaderboard: leaderboardFormatted,
       });
       return;
     }
@@ -64,7 +64,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
     const {username,score} = user.value;
 
     ok(res, {
-      leaderboardFormatted,
+      leaderboard: leaderboardFormatted,
       user: {
         username,
         score,
