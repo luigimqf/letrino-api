@@ -1,6 +1,6 @@
 import {Response} from 'express';
 import {z} from 'zod';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Errors } from '../constants/error';
 import { schemaValidator } from '../utils/validator';
 import { badRequest, found, notFound, ok, serverError } from '../utils/http-status';

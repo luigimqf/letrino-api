@@ -16,11 +16,12 @@ jobs:
           cd ~/projects/letrino-api
           git reset --hard
           git clean -fd
+          git config pull.rebase true
           git pull origin main
 
       - name: Install dependencies
         run: |
-          echo "Installing npm dependencies..."
+          echo "Installing dependencies..."
           cd ~/projects/letrino-api
           npm ci
 
