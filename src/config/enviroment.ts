@@ -7,7 +7,9 @@ const schema = z.object({
   EMAIL_USER: z.string(),
   EMAIL_PASSWORD: z.string(),
   PASSWORD_RESET_URL: z.string(),
-  ALLOWED_ORIGIN: z.string()
+  ALLOWED_ORIGIN: z.string(),
+  SENTRY_DSN: z.string().optional(),
+  NODE_ENV: z.string().default('development')
 })
 
 export const env = schema.parse(process.env);

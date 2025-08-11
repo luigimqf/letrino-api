@@ -9,7 +9,7 @@ export default tseslint.config(
     ignores: ['node_modules', 'build'],
     rules: {
       ...prettierConfig.rules,
-      "@typescript-eslint/no-unused-vars": "warn"
+      "@typescript-eslint/no-unused-vars": "off"
     }
   }
 );

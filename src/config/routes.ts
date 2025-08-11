@@ -2,10 +2,14 @@ import { signIn, forgotPassword, refreshToken, refreshPassword, signUp, getUserD
 import { getLeaderboard } from '../controllers/leaderboard.controller'
 import { Express } from 'express'
 import { authenticate } from '../middlewares/authenticate'
+import { sentryUserContext } from '../middlewares/sentry'
 import { getWord, attemptFail, registerSkippedAttemp,deleteSkippedAttempDocument, attemptSuccess } from '../controllers/word.controller'
 import { checkAttempts } from '../middlewares/attempts'
 
 function setupRoutes(app: Express) {
+  // Middleware global do Sentry para contexto
+  app.use(sentryUserContext)
+
   //----------- Heath Check ------------//
 
   app.get('/', async (req, res) => {
@@ -19,6 +23,10 @@ function setupRoutes(app: Express) {
     } catch (error) {
       res.status(500).json('Internal Server Error')
     }
+  })
+
+  app.get('/debug', async (req, res) => {
+    throw new Error('Debugging error')
   })
   //----------- Auth Routes ------------//
   app.post('/sign-in', signIn);
