@@ -1,4 +1,4 @@
-name: Deploy Node App on EC2 (Git Pull Method)
+name: Deploy Node App on EC2 (Zero Downtime)
 
 on:
   push:
@@ -7,30 +7,54 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Pull latest changes
-        run: |
-          echo "Pulling latest changes..."
-          cd ~/projects/letrino-api
-          git reset --hard
-          git clean -fd
-          git config pull.rebase true
-          git pull origin main
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and build
         run: |
-          echo "Installing dependencies..."
-          cd ~/projects/letrino-api
           npm ci
+          npm run build
 
-      - name: Reload with PM2
-        run: |
-          echo "Restarting app with PM2..."
-          cd ~/projects/letrino-api
-          if pm2 list | grep -q server; then
-            pm2 restart server
-          else
-            pm2 start ~/projects/letrino-api/src/server.ts --name server
-          fi
+      - name: Define release folder
+        id: vars
+        run: echo "RELEASE_DIR=releases/$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
+      - name: Upload build to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build/*,package.json,package-lock.json"
+          target: "~/projects/letrino-api/${{ env.RELEASE_DIR }}"
+
+      - name: SSH into EC2 - Install deps & reload PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/projects/letrino-api/${{ env.RELEASE_DIR }}
+            
+            npm ci --only=production
+
+            ln -sfn ~/projects/letrino-api/${{ env.RELEASE_DIR }} ~/projects/letrino-api/current
+
+            if pm2 list | grep -q server; then
+              pm2 reload current/build/server.js --name server
+            else
+              pm2 start current/build/server.js --name server
+            fi
+
+            cd ~/projects/letrino-api/releases
+            ls -t | tail -n +4 | xargs -r rm -rf
