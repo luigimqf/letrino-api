@@ -26,24 +26,6 @@ function setupRoutes(app: Express) {
     }
   })
 
-  app.get('/debug', async (req, res) => {
-    throw new Error('Debugging error')
-  });
-
-  app.get('/env', async (req, res) => {
-    res.status(200).json({
-      NODE_ENV: env.NODE_ENV,
-      PORT: env.PORT,
-      MONGODB_URI: env.MONGODB_URI,
-      JWT_SECRET: env.JWT_SECRET,
-      EMAIL_USER: env.EMAIL_USER,
-      EMAIL_PASSWORD: env.EMAIL_PASSWORD,
-      ALLOWED_ORIGIN: env.ALLOWED_ORIGIN,
-      SENTRY_DSN: env.SENTRY_DSN,
-      PASSWORD_RESET_URL: env.PASSWORD_RESET_URL,
-    })
-  });
-
   //----------- Auth Routes ------------//
   app.post('/sign-in', signIn);
 
