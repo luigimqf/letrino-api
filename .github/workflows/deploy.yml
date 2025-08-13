@@ -53,7 +53,7 @@ jobs:
             
             cd ~/projects/letrino-api/${{ env.RELEASE_DIR }}
             
-            npm ci --only=production
+            npm ci --omit=dev
 
             ln -sfn ~/projects/letrino-api/${{ env.RELEASE_DIR }} ~/projects/letrino-api/current
 
