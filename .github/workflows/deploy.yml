@@ -55,12 +55,13 @@ jobs:
             
             npm ci --omit=dev
 
-            ln -sfn ~/projects/letrino-api/${{ env.RELEASE_DIR }} ~/projects/letrino-api/current
+            cd ~/projects/letrino-api
+            ln -sfn ${{ env.RELEASE_DIR }} current
 
             if pm2 list | grep -q server; then
-              pm2 reload current/build/server.js --name server
+              pm2 reload ~/projects/letrino-api/current/build/server.js --name server
             else
-              pm2 start current/build/server.js --name server
+              pm2 start ~/projects/letrino-api/current/build/server.js --name server
             fi
 
             cd ~/projects/letrino-api/releases
