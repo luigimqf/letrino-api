@@ -33,14 +33,14 @@ function setupRoutes(app: Express) {
   app.get('/env', async (req, res) => {
     res.status(200).json({
       NODE_ENV: env.NODE_ENV,
-      PORT: env.NODE_ENV,
-      MONGODB_URI: env.NODE_ENV,
-      JWT_SECRET: env.NODE_ENV,
-      EMAIL_USER: env.NODE_ENV,
-      EMAIL_PASSWORD: env.NODE_ENV,
-      ALLOWED_ORIGIN: env.NODE_ENV,
-      SENTRY_DSN: env.NODE_ENV,
-      PASSWORD_RESET_URL: env.NODE_ENV,
+      PORT: env.PORT,
+      MONGODB_URI: env.MONGODB_URI,
+      JWT_SECRET: env.JWT_SECRET,
+      EMAIL_USER: env.EMAIL_USER,
+      EMAIL_PASSWORD: env.EMAIL_PASSWORD,
+      ALLOWED_ORIGIN: env.ALLOWED_ORIGIN,
+      SENTRY_DSN: env.SENTRY_DSN,
+      PASSWORD_RESET_URL: env.PASSWORD_RESET_URL,
     })
   });
 
