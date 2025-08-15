@@ -1,14 +1,15 @@
-import mongoose from "mongoose"
+import 'reflect-metadata'
 import 'dotenv/config'
+import { AppDataSource } from './config/db'
 
-function testDatabaseConnection() {
+async function testDatabaseConnection() {
   try {
-    mongoose.connect(process.env.MONGODB_URI ?? '')
-    console.log('Connect to database')
+    await AppDataSource.initialize()
+    console.log('Connected to PostgreSQL database')
   } catch (error) {
-    console.log('Error connecting to database')
+    console.log('Error connecting to database:', error)
   } finally {
-    mongoose.disconnect()
+    await AppDataSource.destroy()
   }
 }
 

@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import 'dotenv/config'
 import setupApp from './config/app'
 import { env } from './config/enviroment'

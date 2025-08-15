@@ -75,9 +75,9 @@ export async function signIn(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?._id});
+    const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id});
 
-    const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?._id}, WEEK_IN_SECONDS);
+    const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id}, WEEK_IN_SECONDS);
   
     ok(res,{
       token,
@@ -108,7 +108,7 @@ export async function signUp(req: AuthenticateRequest, res: Response) {
       email
     });
 
-    if(usedEmailResult.isSuccess() && usedEmailResult.value?._id) {
+    if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
       found(res, Errors.FOUND_EMAIL);
       return;
     }
@@ -117,7 +117,7 @@ export async function signUp(req: AuthenticateRequest, res: Response) {
       username
     });
 
-    if(usernameResult.isSuccess() && usernameResult.value?._id) {
+    if(usernameResult.isSuccess() && usernameResult.value?.id) {
       found(res, Errors.FOUND_USERNAME);
       return;
     }
@@ -153,7 +153,7 @@ export async function getUserData(req: AuthenticateRequest, res: Response) {
 
     const userResult = await UserRepository.findById(id);
 
-    if(userResult.isFailure() || !userResult.value._id) {
+    if(userResult.isFailure() || !userResult.value.id) {
       notFound(res, Errors.NOT_FOUND_USER);
       return 
     }
@@ -250,12 +250,12 @@ export async function forgotPassword(req: AuthenticateRequest, res: Response) {
       email: emailResult.value
     })
 
-    if(userResult.isFailure() || !userResult.value?._id) {
+    if(userResult.isFailure() || !userResult.value?.id) {
       notFound(res, Errors.NOT_FOUND)
       return;
     }
 
-    const token = Jwt.sign({id: userResult.value?._id}, HOUR_IN_SECONDS);
+    const token = Jwt.sign({id: userResult.value?.id}, HOUR_IN_SECONDS);
 
     const transporter = nodemailer.createTransport({
       service: "gmail",

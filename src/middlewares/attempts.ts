@@ -14,11 +14,16 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
       return;
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const correctAttempsResult = await StatisticRepository.countDocuments({
       userId: id,
       createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
+        gte: today,
+        lt: tomorrow,
       },
       type: EStatistics.CORRECT,
     });
@@ -31,8 +36,8 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
     const failedAttemptsResult = await StatisticRepository.countDocuments({
       userId: id,
       createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
+        gte: today,
+        lt: tomorrow,
       },
       type: EStatistics.INCORRECT,
     })

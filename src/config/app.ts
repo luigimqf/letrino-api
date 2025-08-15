@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { setupCron } from '../workers/cron'
 import setupDatabase from './db'
 import setupRoutes from './routes'

@@ -34,14 +34,14 @@ export async function getWord(_: AuthenticateRequest, res: Response) {
 
     const usedWords = await UsedWordRepository.find();
     if(usedWords.isSuccess() && usedWords.value) {
-      const randomWord = await WordRepository.findUnexistedWordIn(usedWords.value, 1, {
+      const randomWord = await WordRepository.findUnexistedWordIn(usedWords.value as string[], 1, {
           isGolden: Math.random() < 0.01 ? true : false
         }) 
 
       if(randomWord.isSuccess()) {
         const {word,isGolden} = randomWord.value!;
         await UsedWordRepository.createUsedWord({
-          wordId: randomWord.value!._id
+          wordId: randomWord.value!.id
         })
         ok(res, {
           word,
@@ -87,23 +87,29 @@ export async function attemptSuccess(req: AuthenticateRequest, res: Response) {
 
     const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!);
 
-    if(todaysWord.isFailure() || (todaysWord.isSuccess() && !todaysWord.value._id)){
+    if(todaysWord.isFailure() || (todaysWord.isSuccess() && !todaysWord.value.id)){
       notFound(res, Errors.NOT_FOUND_WORD)
       return;
     }
 
     if(todaysWord.isSuccess() && todaysWord.value?.word === attemptResult.value) {
       await StatisticRepository.create({
-        wordId: todaysWord.value._id,
+        wordId: todaysWord.value.id,
         attempt: attemptResult.value,
         userId: id,
         type: EStatistics.CORRECT
       });
   
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
       const incorrectAttemptsResult = await StatisticRepository.countDocuments({
+        userId: id,
         createdAt: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-          $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
+          gte: today,
+          lt: tomorrow,
         },
         type: EStatistics.INCORRECT
       })
@@ -115,9 +121,7 @@ export async function attemptSuccess(req: AuthenticateRequest, res: Response) {
 
       const score = BASE_SCORE - (ATTEMPT_PENALTY * incorrectAttemptsResult.value)
 
-      const updateUserResult = await UserRepository.update(id, {
-        $inc: {score}
-      })
+      const updateUserResult = await UserRepository.updateScore(id, score);
 
       if(updateUserResult.isFailure()) {
         badRequest(res, "Error updating score")
@@ -160,7 +164,7 @@ export async function attemptFail(req: AuthenticateRequest, res: Response) {
 
     const todaysWordResult = await WordRepository.find(todaysWordId.value?.wordId!);
 
-    if(todaysWordResult.isFailure() || (todaysWordResult.isSuccess() && !todaysWordResult.value._id)){
+    if(todaysWordResult.isFailure() || (todaysWordResult.isSuccess() && !todaysWordResult.value.id)){
       notFound(res, Errors.NOT_FOUND_WORD)
       return;
     }
@@ -168,7 +172,7 @@ export async function attemptFail(req: AuthenticateRequest, res: Response) {
     if(todaysWordResult.isSuccess() && todaysWordResult.value.word !== attemptResult.value) {
       await StatisticRepository.create({
         attempt: attemptResult.value,
-        wordId: todaysWordResult.value._id,
+        wordId: todaysWordResult.value.id,
         type: EStatistics.INCORRECT,
         userId: id,
       });
@@ -193,29 +197,34 @@ export async function registerSkippedAttemp(req: AuthenticateRequest, res: Respo
       return;
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const todaySkippedResult = await SkippedAttemptRepository.findOne({
       userId: id,
       createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
+        gte: today,
+        lt: tomorrow,
       },
     })
 
-    if(todaySkippedResult.isSuccess() && todaySkippedResult.value?._id) {
+    if(todaySkippedResult.isSuccess() && todaySkippedResult.value?.id) {
       badRequest(res,"Skipped Document found")
       return;
     }
 
     const todaysWordResult = await UsedWordRepository.findTodaysWord();
 
-    if(todaysWordResult.isFailure() || !todaysWordResult.value?._id) {
+    if(todaysWordResult.isFailure() || !todaysWordResult.value?.id) {
       notFound(res, Errors.NOT_FOUND_WORD)
       return;
     }
 
     await SkippedAttemptRepository.create({
       userId: id,
-      wordId: todaysWordResult.value?._id
+      wordId: todaysWordResult.value?.wordId!
     })
 
     ok(res);
@@ -238,7 +247,7 @@ export async function deleteSkippedAttempDocument(req: AuthenticateRequest, res:
       userId: id
     })
 
-    if(deleteDocResult.isFailure() || (deleteDocResult.isSuccess() && !deleteDocResult.value?._id)) {
+    if(deleteDocResult.isFailure() || (deleteDocResult.isSuccess() && !deleteDocResult.value?.id)) {
       notFound(res, Errors.NOT_FOUND_DOCUMENT)
       return;
     }

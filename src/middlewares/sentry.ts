@@ -3,14 +3,12 @@ import { sentryObservability } from '../config/sentry'
 
 export function sentryUserContext(req: Request, _res: Response, next: NextFunction): void {
   try {
-    // Se existe um usuário autenticado na requisição
     if (req.userId) {
       sentryObservability.setUserContext({
         id: req.userId.toString()
       })
     }
 
-    // Adiciona informações da requisição como contexto
     sentryObservability.setExtra('request_info', {
       url: req.url,
       method: req.method,
@@ -40,7 +38,6 @@ export function withSentryObservability(
       },
       async () => {
         try {
-          // Adiciona tags específicas da operação
           sentryObservability.setTags({
             controller: controllerName,
             method: req.method,
@@ -49,7 +46,6 @@ export function withSentryObservability(
 
           return await controller(req, res, next)
         } catch (error) {
-          // Captura erros do controller
           sentryObservability.captureException(error as Error, {
             controller: controllerName,
             route: req.route?.path || req.url,
@@ -59,7 +55,6 @@ export function withSentryObservability(
             params: req.params
           })
           
-          // Re-throw o erro para que seja tratado pelo error handler
           throw error
         }
       }

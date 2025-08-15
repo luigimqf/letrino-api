@@ -53,9 +53,7 @@ class SentryObservability {
       return
     }
 
-    // Error handler personalizado que integra com o Sentry
     app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-      // Captura o erro no Sentry
       Sentry.captureException(error, {
         extra: {
           url: req.url,
@@ -69,7 +67,6 @@ class SentryObservability {
         }
       })
 
-      // Continua com o handling normal do erro
       next(error)
     })
   }

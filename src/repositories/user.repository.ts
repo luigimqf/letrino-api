@@ -1,34 +1,31 @@
-import { FilterQuery, UpdateQuery } from "mongoose";
-import { User } from "../config/db/models/user";
+import { AppDataSource } from "../config/db";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { IUser } from "../config/models/user.model";
-import { ObjectID } from "../types";
+import { User } from "../config/db/entity";
 
 interface IFindAll {
-  sort?: Sort;
+  sort?: { [key: string]: 'ASC' | 'DESC' };
   limit?: number;
 }
 
-type Sort = {
-  [K in keyof IUser]?: -1 | 1;
-}
 export class UserRepository {
+  private static repository = AppDataSource.getRepository(User);
 
-  static async create(data: Partial<IUser>): Promise<Either<Errors, IUser>> {
+  static async create(data: Partial<IUser>): Promise<Either<Errors, User>> {
     try {
-      const newUser = new User(data);
-      await newUser.save();
+      const newUser = this.repository.create(data);
+      const savedUser = await this.repository.save(newUser);
       
-      return Success.create(newUser);
+      return Success.create(savedUser);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async findById(id: ObjectID | string): Promise<Either<Errors, IUser>> {
+  static async findById(id: string): Promise<Either<Errors, User>> {
     try {
-      const user = await User.findById(id);
+      const user = await this.repository.findOne({ where: { id } });
 
       if (!user) {
         return Failure.create(Errors.NOT_FOUND);
@@ -40,9 +37,21 @@ export class UserRepository {
     }
   }
 
-  static async findAll({sort,limit = Infinity}:IFindAll): Promise<Either<Errors, IUser[]>> {
+  static async findAll({ sort, limit = 999999 }: IFindAll = {}): Promise<Either<Errors, User[]>> {
     try {
-      const users = await User.find().sort(sort).limit(limit);
+      const queryBuilder = this.repository.createQueryBuilder('user');
+      
+      if (sort) {
+        Object.entries(sort).forEach(([key, direction]) => {
+          queryBuilder.addOrderBy(`user.${key}`, direction);
+        });
+      }
+      
+      if (limit !== 999999) {
+        queryBuilder.limit(limit);
+      }
+      
+      const users = await queryBuilder.getMany();
       return Success.create(users);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
@@ -51,29 +60,37 @@ export class UserRepository {
 
   static async delete(id: string): Promise<Either<Errors, void>> {
     try {
-      await User.findByIdAndDelete(id);
-
+      await this.repository.delete(id);
       return Success.create(undefined);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async findOneBy(conditions: FilterQuery<IUser>): Promise<Either<Errors, IUser | null>> {
+  static async findOneBy(conditions: Partial<User>): Promise<Either<Errors, User | null>> {
     try {
-      const user = await User.findOne(conditions)
-
+      const user = await this.repository.findOne({ where: conditions });
       return Success.create(user);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async update(id:ObjectID | string, update: UpdateQuery<IUser>, options?: {new?: boolean; upsert?: boolean; runValidators?: boolean;}): Promise<Either<Errors, IUser | null>> {
+  static async update(id: string, update: Partial<User>): Promise<Either<Errors, User | null>> {
     try {
-      const result = await User.findByIdAndUpdate(id, update, options);
+      await this.repository.update(id, update);
+      const updatedUser = await this.repository.findOne({ where: { id } });
+      return Success.create(updatedUser);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
 
-      return Success.create(result);
+  static async updateScore(id: string, scoreIncrement: number): Promise<Either<Errors, User | null>> {
+    try {
+      await this.repository.increment({ id }, 'score', scoreIncrement);
+      const updatedUser = await this.repository.findOne({ where: { id } });
+      return Success.create(updatedUser);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

@@ -15,7 +15,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
   try {
 
     const usersResult = await UserRepository.findAll({
-      sort: { score: -1 }
+      sort: { score: 'DESC' }
     });
 
     if(usersResult.isFailure()) {
@@ -44,14 +44,14 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
 
     const user = await UserRepository.findById(id);
 
-    if(user.isFailure() || !user.value._id) {
+    if(user.isFailure() || !user.value.id) {
       ok(res,{
         leaderboard: leaderboardFormatted
       });
       return;
     }
 
-    const isUserInTop5 = leaderboard.find((u) => u._id.toString() === id);
+    const isUserInTop5 = leaderboard.find((u) => u.id.toString() === id);
 
     if(isUserInTop5) {
       ok(res, {
@@ -60,7 +60,7 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    const userScorePosition = usersResult.value.findIndex((u) => u._id.toString() === id) + 1;
+    const userScorePosition = usersResult.value.findIndex((u) => u.id.toString() === id) + 1;
 
     const {username,score,avatar} = user.value;
 
@@ -77,8 +77,6 @@ async function getLeaderboard(req: AuthenticateRequest, res: Response) {
     serverError(res);
   }
 }
-
-
 
 async function updateScore(req: AuthenticateRequest, res: Response) {
   try { 
@@ -97,18 +95,17 @@ async function updateScore(req: AuthenticateRequest, res: Response) {
     }
     const score = bodyResult.value;
     
-    const updateResult = await UserRepository.update(id, {
-      $inc: { score },
-    }, { new: true });
+    const updateResult = await UserRepository.updateScore(id, score);
 
     if(updateResult.isFailure()) {
       notFound(res, updateResult.error);
       return;
     }
-    const newScore = updateResult.value;
+    
+    const updatedUser = updateResult.value;
     
     ok(res, {
-      message: `Score updated successfully: new score is ${newScore}`
+      message: `Score updated successfully: new score is ${updatedUser?.score}`
     });
   } catch (error) {
     res.status(500).json({

@@ -1,21 +1,24 @@
-import mongoose from 'mongoose';
+import 'reflect-metadata'
 import 'dotenv/config'
-import { Word } from '../config/db/models/word';
-import { words } from '../constants/words';
+import { AppDataSource } from '../config/db'
+import { words } from '../constants/words'
+import { Word } from '../config/db/entity'
 
 async function seeder() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI ?? '')
+    await AppDataSource.initialize()
     
-    await Word.insertMany(words);
+    const wordRepository = AppDataSource.getRepository(Word)
+    
+    const wordEntities = wordRepository.create(words)
+    await wordRepository.save(wordEntities)
     
     console.log('New Documents Inserted')
-    return;
     
   } catch(error) {
     console.log(error)
   } finally {
-    await mongoose.disconnect()
+    await AppDataSource.destroy()
   }
 }
 

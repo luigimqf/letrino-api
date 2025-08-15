@@ -10,7 +10,11 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier . --write",
-    "seed": "ts-node src/seeders/word.ts"
+    "seed": "ts-node src/seeders/word.ts",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "db:migrate:generate": "pnpm run typeorm -- migration:generate ./src/migrations/Init -d ./src/data-source.ts",
+    "db:migrate:run": "pnpm run typeorm -- migration:run -d ./src/data-source.ts",
+    "db:migrate:revert": "pnpm run typeorm -- migration:revert -d ./src/data-source.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,8 +30,10 @@
     "express": "^4.19.2",
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.12.1",
     "nodemailer": "^6.10.1",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.25",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -37,9 +43,9 @@
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/mongoose": "^5.11.96",
     "@types/node": "^22.13.10",
     "@types/nodemailer": "^6.4.17",
+    "@types/pg": "^8.15.5",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.2",
@@ -51,10 +57,5 @@
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript-eslint": "^8.31.0"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "bcrypt"
-    ]
   }
 }

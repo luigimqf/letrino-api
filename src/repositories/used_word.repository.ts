@@ -1,68 +1,78 @@
-import { FilterQuery, UpdateQuery } from "mongoose";
-import { WordUsed } from "../config/db/models/used_word";
+import { AppDataSource } from "../config/db";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
-import { ObjectID } from "../types";
 import { IWordRelatedDocument } from "../config/models/word.model";
+import { UsedWord } from "../config/db/entity";
 
 export class UsedWordRepository {
+  private static repository = AppDataSource.getRepository(UsedWord);
 
-  static async find(conditions: FilterQuery<IWordRelatedDocument> = {}, distinct?: string): Promise<Either<Errors, unknown[] | null>> {
+  static async find(conditions: Partial<UsedWord> = {}, distinct?: string): Promise<Either<Errors, unknown[] | null>> {
     try {
-      const usedWords = distinct 
-        ? await WordUsed.find(conditions).distinct(distinct) 
-        : await WordUsed.find(conditions);
+      let result;
+      
+      if (distinct) {
+        const queryBuilder = this.repository.createQueryBuilder('usedWord');
+        Object.entries(conditions).forEach(([key, value]) => {
+          queryBuilder.andWhere(`usedWord.${key} = :${key}`, { [key]: value });
+        });
+        result = await queryBuilder.select(`DISTINCT usedWord.${distinct}`).getRawMany();
+        result = result.map(item => item[`usedWord_${distinct}`]);
+      } else {
+        result = await this.repository.find({ where: conditions });
+      }
             
-      return Success.create(usedWords)
+      return Success.create(result);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR)
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async createUsedWord({wordId}: {wordId: ObjectID}): Promise<Either<Errors, null>> {
+  static async createUsedWord({ wordId }: { wordId: string }): Promise<Either<Errors, null>> {
     try {
-      const newUsedWord = new WordUsed({
-        wordId,
-      });
-
-      await newUsedWord.save();
-
-      return Success.create(null)
+      const newUsedWord = this.repository.create({ wordId });
+      await this.repository.save(newUsedWord);
+      return Success.create(null);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR)
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async findTodaysWord(): Promise<Either<Errors,IWordRelatedDocument | null>> {
+  static async findTodaysWord(): Promise<Either<Errors, UsedWord | null>> {
     try {
-      const todaysWord = await WordUsed.findOne({createdAt: {
-        $gte: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-        $lt: new Date(new Date().setHours(23, 59, 59, 999)).toISOString(),
-      }});
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const todaysWord = await this.repository
+        .createQueryBuilder('usedWord')
+        .where('usedWord.createdAt >= :today', { today })
+        .andWhere('usedWord.createdAt < :tomorrow', { tomorrow })
+        .andWhere('usedWord.deletedAt IS NULL')
+        .getOne();
 
       return Success.create(todaysWord);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR)
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async countDocuments(conditions?: FilterQuery<IWordRelatedDocument>): Promise<Either<Errors, number>> {
+  static async countDocuments(conditions?: Partial<UsedWord>): Promise<Either<Errors, number>> {
     try {
-      const totalUsedWords = await WordUsed.countDocuments(conditions);
-
-      return Success.create(totalUsedWords);
+      const count = await this.repository.count({ where: conditions });
+      return Success.create(count);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR)
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async updateMany(filter: FilterQuery<IWordRelatedDocument>, update: UpdateQuery<IWordRelatedDocument>): Promise<Either<Errors, boolean>> {
+  static async updateMany(filter: Partial<UsedWord>, update: Partial<UsedWord>): Promise<Either<Errors, boolean>> {
     try {
-      await WordUsed.updateMany(filter,update)
-
-      return Success.create(true)
+      await this.repository.update(filter, update);
+      return Success.create(true);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR)
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 }

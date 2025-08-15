@@ -1,5 +1,4 @@
-import { ModelWithTimestamp } from ".";
-import { ObjectID } from "../../types";
+import { ModelWithTimestamp } from "../../types";
 
 export interface IWord extends ModelWithTimestamp {
   word: string;
@@ -7,10 +6,10 @@ export interface IWord extends ModelWithTimestamp {
 }
 
 export interface IWordRelatedDocument extends ModelWithTimestamp {
-  wordId: ObjectID;
+  wordId: string;
   deletedAt?: Date;
 }
 
 export interface ISkippedWord extends IWordRelatedDocument {
-  userId: ObjectID;
+  userId: string;
 }

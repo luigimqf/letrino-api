@@ -1,14 +1,20 @@
 import { JwtPayload } from "jsonwebtoken";
-import mongoose from "mongoose";
 import {type Request} from 'express'
 
-export interface AuthenticateRequest extends Request {
-  userId?: ObjectID;
-}
-export interface JwtPayloadWithId extends JwtPayload {
-  id: ObjectID;
+export interface ModelWithTimestamp {
+  id: string
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export type ObjectID = mongoose.Schema.Types.ObjectId;
+export type OmitedModelFields<T extends ModelWithTimestamp> = Omit<T,"id" | "createdAt" | "updatedAt">
+
+export interface AuthenticateRequest extends Request {
+  userId?: string;
+}
+export interface JwtPayloadWithId extends JwtPayload {
+  id: string;
+}
+
 
 
