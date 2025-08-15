@@ -2,8 +2,6 @@ import { env } from '../enviroment'
 import { DataSource } from 'typeorm'
 import { SkippedAttempt, Statistic, UsedWord, User, Word } from './entity'
 
-const isSsl = env.DB_SSL === 'true';
-
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: env.DB_HOST,
@@ -16,7 +14,10 @@ export const AppDataSource = new DataSource({
   entities: [User, Word, UsedWord, Statistic, SkippedAttempt],
   migrations: ['src/config/db/migrations/*.ts'],
   subscribers: ['src/config/db/subscribers/*.ts'],
-  ssl: isSsl ? { rejectUnauthorized: false } : undefined,
+  ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  extra:{
+    family: env.NODE_ENV === 'production' ? 4 : undefined
+  }
 })
 
 async function setupDatabase() {
