@@ -1,4 +1,4 @@
-import { ModelWithTimestamp } from ".";
+import { ModelWithTimestamp } from "../../types";
 import { IStatistic } from "./statistic";
 
 export interface IUser extends ModelWithTimestamp {
