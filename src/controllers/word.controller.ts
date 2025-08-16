@@ -11,6 +11,7 @@ import { Errors } from "../constants/error";
 import { UserRepository } from "../repositories/user.repository";
 import { SkippedAttemptRepository } from "../repositories/skipped_attempt.repository";
 import { AuthenticateRequest } from "../types";
+import { IUsedWord } from "../config/models/used_word.model";
 
 const wordSchema = z.string({
   message: 'Attempt must be a string'
@@ -34,9 +35,10 @@ export async function getWord(_: AuthenticateRequest, res: Response) {
 
     const usedWords = await UsedWordRepository.find();
     if(usedWords.isSuccess() && usedWords.value) {
-      const randomWord = await WordRepository.findUnexistedWordIn(usedWords.value as string[], 1, {
-          isGolden: Math.random() < 0.01 ? true : false
-        }) 
+      const usedWordIds = (usedWords.value as IUsedWord[]).map((usedWord) => usedWord.wordId);
+      const randomWord = await WordRepository.findUnexistedWordIn(usedWordIds, 1, {
+        isGolden: Math.random() < 0.05 ? true : false
+      }) 
 
       if(randomWord.isSuccess()) {
         const {word,isGolden} = randomWord.value!;
@@ -50,11 +52,11 @@ export async function getWord(_: AuthenticateRequest, res: Response) {
         return;
       }
 
-      ok(res);
+      notFound(res);
       return 
     }
 
-    ok(res);
+    notFound(res);
     return; 
     
   } catch (error) {

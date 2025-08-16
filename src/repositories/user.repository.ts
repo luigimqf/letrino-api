@@ -37,7 +37,7 @@ export class UserRepository {
     }
   }
 
-  static async findAll({ sort, limit = 999999 }: IFindAll = {}): Promise<Either<Errors, User[]>> {
+  static async findAll({ sort, limit }: IFindAll = {}): Promise<Either<Errors, User[]>> {
     try {
       const queryBuilder = this.repository.createQueryBuilder('user');
       
@@ -47,7 +47,7 @@ export class UserRepository {
         });
       }
       
-      if (limit !== 999999) {
+      if (limit) {
         queryBuilder.limit(limit);
       }
       
@@ -60,7 +60,12 @@ export class UserRepository {
 
   static async delete(id: string): Promise<Either<Errors, void>> {
     try {
-      await this.repository.delete(id);
+      const result = await this.repository.delete(id);
+      
+      if (result.affected === 0) {
+        return Failure.create(Errors.NOT_FOUND);
+      }
+      
       return Success.create(undefined);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
@@ -76,9 +81,14 @@ export class UserRepository {
     }
   }
 
-  static async update(id: string, update: Partial<User>): Promise<Either<Errors, User | null>> {
+  static async update(id: string, updateData: Partial<User>): Promise<Either<Errors, User | null>> {
     try {
-      await this.repository.update(id, update);
+      const result = await this.repository.update(id, updateData);
+      
+      if (result.affected === 0) {
+        return Success.create(null);
+      }
+      
       const updatedUser = await this.repository.findOne({ where: { id } });
       return Success.create(updatedUser);
     } catch (error) {

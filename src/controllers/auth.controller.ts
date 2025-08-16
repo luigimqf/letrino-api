@@ -13,6 +13,7 @@ import Handlebars from 'handlebars';
 import fs from "fs"
 import path from 'path';
 import { AuthenticateRequest } from '../types';
+import { Success } from '../constants/success';
 
 const createUserSchema = z.object({
   username: z
@@ -135,7 +136,7 @@ export async function signUp(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    ok(res);
+    ok(res, null, Success.USER_CREATED);
 
   } catch (error) {
     serverError(res, Errors.SERVER_ERROR);
@@ -231,7 +232,7 @@ export async function refreshPassword(req: AuthenticateRequest, res: Response) {
       return;
     }
 
-    ok(res)
+    ok(res, null, Success.PASSWORD_RESET);
   } catch (error) {
     serverError(res, Errors.SERVER_ERROR)
   }
@@ -275,7 +276,7 @@ export async function forgotPassword(req: AuthenticateRequest, res: Response) {
       html
     })
 
-    ok(res)
+    ok(res, null, Success.PASSWORD_RESET_REQUESTED);
 
     return;
   } catch (error) {

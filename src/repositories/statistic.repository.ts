@@ -22,17 +22,16 @@ interface IStatisticConditions {
   userId?: string;
   type?: EStatistics;
   createdAt?: IDateRange;
-  [key: string]: unknown;
 }
 
 export class StatisticRepository {
   private static repository = AppDataSource.getRepository(Statistic);
 
-  static async create({ wordId, attempt, userId, type }: IStatisticCreate): Promise<Either<Errors, undefined>> {
+  static async create({ wordId, attempt, userId, type }: IStatisticCreate): Promise<Either<Errors, Statistic>> {
     try {
       const statistic = this.repository.create({ wordId, attempt, userId, type });
-      await this.repository.save(statistic);
-      return Success.create(undefined);
+      const savedStatistic = await this.repository.save(statistic);
+      return Success.create(savedStatistic);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
@@ -49,33 +48,44 @@ export class StatisticRepository {
 
   static async countDocuments(conditions: IStatisticConditions): Promise<Either<Errors, number>> {
     try {
-      const whereConditions: Record<string, unknown> = { ...conditions };
+      const queryBuilder = this.repository.createQueryBuilder('statistic');
+      
+      if (conditions.wordId) {
+        queryBuilder.andWhere('statistic.wordId = :wordId', { wordId: conditions.wordId });
+      }
+      
+      if (conditions.userId) {
+        queryBuilder.andWhere('statistic.userId = :userId', { userId: conditions.userId });
+      }
+      
+      if (conditions.type) {
+        queryBuilder.andWhere('statistic.type = :type', { type: conditions.type });
+      }
       
       if (conditions.createdAt) {
-        delete whereConditions.createdAt;
         const { gte, lt } = conditions.createdAt;
         
-        if (gte && lt) {
-          whereConditions.createdAt = Between(gte, lt);
-        } else if (gte) {
-          whereConditions.createdAt = MoreThanOrEqual(gte);
-        } else if (lt) {
-          whereConditions.createdAt = LessThan(lt);
+        if (gte) {
+          queryBuilder.andWhere('statistic.createdAt >= :gte', { gte });
+        }
+        
+        if (lt) {
+          queryBuilder.andWhere('statistic.createdAt < :lt', { lt });
         }
       }
       
-      const count = await this.repository.count({ where: whereConditions });
+      const count = await queryBuilder.getCount();
       return Success.create(count);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async insertMany(statistics: Partial<Statistic>[]): Promise<Either<Errors, void>> {
+  static async insertMany(statistics: Partial<Statistic>[]): Promise<Either<Errors, Statistic[]>> {
     try {
       const entities = this.repository.create(statistics);
-      await this.repository.save(entities);
-      return Success.create(undefined);
+      const savedEntities = await this.repository.save(entities);
+      return Success.create(savedEntities);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

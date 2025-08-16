@@ -39,6 +39,7 @@ export class WordRepository {
   }
 
   static async findUnexistedWordIn(excludeIds: string[], size: number = 1, filter?: Partial<Word>): Promise<Either<Errors, Word | null>> {
+    console.log({ excludeIds, size, filter });
     try {
       const queryBuilder = this.repository.createQueryBuilder('word');
       

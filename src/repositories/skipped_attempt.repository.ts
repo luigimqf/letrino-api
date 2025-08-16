@@ -21,7 +21,7 @@ interface ISkippedAttemptConditions {
 export class SkippedAttemptRepository {
   private static repository = AppDataSource.getRepository(SkippedAttempt);
 
-  static async create(data: OmitedModelFields<ISkippedWord>) {
+  static async create(data: OmitedModelFields<ISkippedWord>): Promise<Either<Errors, SkippedAttempt>> {
     try {
       const newDoc = this.repository.create(data);
       const savedDoc = await this.repository.save(newDoc);
@@ -33,40 +33,37 @@ export class SkippedAttemptRepository {
 
   static async find(conditions: ISkippedAttemptConditions): Promise<Either<Errors, SkippedAttempt[]>> {
     try {
+      const queryBuilder = this.repository.createQueryBuilder('skippedAttempt');
+      
+      if (conditions.wordId) {
+        queryBuilder.andWhere('skippedAttempt.wordId = :wordId', { wordId: conditions.wordId });
+      }
+      
+      if (conditions.userId) {
+        queryBuilder.andWhere('skippedAttempt.userId = :userId', { userId: conditions.userId });
+      }
+      
+      if (conditions.deletedAt !== undefined) {
+        if (conditions.deletedAt === null) {
+          queryBuilder.andWhere('skippedAttempt.deletedAt IS NULL');
+        } else {
+          queryBuilder.andWhere('skippedAttempt.deletedAt = :deletedAt', { deletedAt: conditions.deletedAt });
+        }
+      }
+      
       if (conditions.createdAt) {
         const { gte, lt } = conditions.createdAt;
-        const queryBuilder = this.repository.createQueryBuilder('skippedAttempt');
         
-        if (conditions.wordId) {
-          queryBuilder.andWhere('skippedAttempt.wordId = :wordId', { wordId: conditions.wordId });
-        }
-        if (conditions.userId) {
-          queryBuilder.andWhere('skippedAttempt.userId = :userId', { userId: conditions.userId });
-        }
-        if (conditions.deletedAt !== undefined) {
-          if (conditions.deletedAt === null) {
-            queryBuilder.andWhere('skippedAttempt.deletedAt IS NULL');
-          } else {
-            queryBuilder.andWhere('skippedAttempt.deletedAt = :deletedAt', { deletedAt: conditions.deletedAt });
-          }
+        if (gte) {
+          queryBuilder.andWhere('skippedAttempt.createdAt >= :gte', { gte });
         }
         
-        if (gte) queryBuilder.andWhere('skippedAttempt.createdAt >= :gte', { gte });
-        if (lt) queryBuilder.andWhere('skippedAttempt.createdAt < :lt', { lt });
-        
-        const skippedWords = await queryBuilder.getMany();
-        return Success.create(skippedWords);
+        if (lt) {
+          queryBuilder.andWhere('skippedAttempt.createdAt < :lt', { lt });
+        }
       }
       
-      const whereConditions: FindOptionsWhere<SkippedAttempt> = {};
-      
-      if (conditions.wordId) whereConditions.wordId = conditions.wordId;
-      if (conditions.userId) whereConditions.userId = conditions.userId;
-      if (conditions.deletedAt !== undefined) {
-        whereConditions.deletedAt = conditions.deletedAt === null ? IsNull() : conditions.deletedAt;
-      }
-      
-      const skippedWords = await this.repository.find({ where: whereConditions });
+      const skippedWords = await queryBuilder.getMany();
       return Success.create(skippedWords);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
@@ -75,40 +72,37 @@ export class SkippedAttemptRepository {
 
   static async findOne(conditions: ISkippedAttemptConditions): Promise<Either<Errors, SkippedAttempt | null>> {
     try {
+      const queryBuilder = this.repository.createQueryBuilder('skippedAttempt');
+      
+      if (conditions.wordId) {
+        queryBuilder.andWhere('skippedAttempt.wordId = :wordId', { wordId: conditions.wordId });
+      }
+      
+      if (conditions.userId) {
+        queryBuilder.andWhere('skippedAttempt.userId = :userId', { userId: conditions.userId });
+      }
+      
+      if (conditions.deletedAt !== undefined) {
+        if (conditions.deletedAt === null) {
+          queryBuilder.andWhere('skippedAttempt.deletedAt IS NULL');
+        } else {
+          queryBuilder.andWhere('skippedAttempt.deletedAt = :deletedAt', { deletedAt: conditions.deletedAt });
+        }
+      }
+      
       if (conditions.createdAt) {
         const { gte, lt } = conditions.createdAt;
-        const queryBuilder = this.repository.createQueryBuilder('skippedAttempt');
         
-        if (conditions.wordId) {
-          queryBuilder.andWhere('skippedAttempt.wordId = :wordId', { wordId: conditions.wordId });
-        }
-        if (conditions.userId) {
-          queryBuilder.andWhere('skippedAttempt.userId = :userId', { userId: conditions.userId });
-        }
-        if (conditions.deletedAt !== undefined) {
-          if (conditions.deletedAt === null) {
-            queryBuilder.andWhere('skippedAttempt.deletedAt IS NULL');
-          } else {
-            queryBuilder.andWhere('skippedAttempt.deletedAt = :deletedAt', { deletedAt: conditions.deletedAt });
-          }
+        if (gte) {
+          queryBuilder.andWhere('skippedAttempt.createdAt >= :gte', { gte });
         }
         
-        if (gte) queryBuilder.andWhere('skippedAttempt.createdAt >= :gte', { gte });
-        if (lt) queryBuilder.andWhere('skippedAttempt.createdAt < :lt', { lt });
-        
-        const skippedWord = await queryBuilder.getOne();
-        return Success.create(skippedWord);
+        if (lt) {
+          queryBuilder.andWhere('skippedAttempt.createdAt < :lt', { lt });
+        }
       }
       
-      const whereConditions: FindOptionsWhere<SkippedAttempt> = {};
-      
-      if (conditions.wordId) whereConditions.wordId = conditions.wordId;
-      if (conditions.userId) whereConditions.userId = conditions.userId;
-      if (conditions.deletedAt !== undefined) {
-        whereConditions.deletedAt = conditions.deletedAt === null ? IsNull() : conditions.deletedAt;
-      }
-      
-      const skippedWord = await this.repository.findOne({ where: whereConditions });
+      const skippedWord = await queryBuilder.getOne();
       return Success.create(skippedWord);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
@@ -118,10 +112,13 @@ export class SkippedAttemptRepository {
   static async delete(conditions: FindOptionsWhere<SkippedAttempt>): Promise<Either<Errors, SkippedAttempt | null>> {
     try {
       const skippedWord = await this.repository.findOne({ where: conditions });
-      if (skippedWord) {
-        await this.repository.remove(skippedWord);
+      
+      if (!skippedWord) {
+        return Success.create(null);
       }
-      return Success.create(skippedWord);
+      
+      const result = await this.repository.remove(skippedWord);
+      return Success.create(result);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

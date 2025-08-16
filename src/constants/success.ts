@@ -1,0 +1,18 @@
+export enum Success {
+  USER_CREATED = 'User created successfully',
+  USER_LOGGED_IN = 'User logged in successfully',
+  USER_DELETED = 'User deleted successfully',
+  USER_DATA_RETRIEVED = 'User data retrieved successfully',
+  TOKEN_REFRESH = 'Token refreshed successfully',
+  PASSWORD_RESET = 'Password reset successfully',
+  PASSWORD_RESET_REQUESTED = 'Password reset requested successfully',
+  WORD_RETRIEVED = 'Word retrieved successfully',
+  ATTEMPT_SUCCESS = 'Attempt marked as success',
+  ATTEMPT_FAIL = 'Attempt marked as fail',
+  SKIPPED_ATTEMPT_REGISTERED = 'Skipped attempt registered successfully',
+  SKIPPED_ATTEMPT_DELETED = 'Skipped attempt deleted successfully',
+  LEADERBOARD_RETRIEVED = 'Leaderboard retrieved successfully',
+  HEALTH_CHECK = 'Service is alive',
+  AUTHENTICATION_SUCCESS = 'Authentication successful',
+  AUTHENTICATION_FAILED = 'Authentication failed',
+}
