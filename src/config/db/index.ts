@@ -4,20 +4,13 @@ import { SkippedAttempt, Statistic, UsedWord, User, Word } from './entity'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  username: env.DB_USERNAME,
-  password: env.DB_PASSWORD,
-  database: env.DB_NAME,
+  url: env.DB_URL,
   synchronize: env.NODE_ENV === 'development',
   logging: env.NODE_ENV === 'development',
   entities: [User, Word, UsedWord, Statistic, SkippedAttempt],
   migrations: ['src/config/db/migrations/*.ts'],
   subscribers: ['src/config/db/subscribers/*.ts'],
-  ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
-  extra:{
-    family: env.NODE_ENV === 'production' ? 4 : undefined
-  }
+  ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 })
 
 async function setupDatabase() {
