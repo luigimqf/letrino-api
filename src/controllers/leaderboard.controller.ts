@@ -41,59 +41,60 @@ class LeaderboardController {
         }
       });
 
-      const token = req.headers.authorization?.split(' ')[1];
+      const response = {
+        leaderboard: leaderboardFormatted
+      };
 
+      const token = req.headers.authorization?.split(' ')[1];
       const decoded = Jwt.verify(token ?? '');
 
-      const id = decoded.isSuccess() ? decoded.value.id ?? '' : '';
+      if (decoded.isFailure()) {
+        ok(res, response);
+        return;
+      }
 
+      const id = decoded.value.id ?? '';
       const user = await UserRepository.findById(id);
 
       if(user.isFailure() || !user.value.id) {
-        ok(res,{
-          leaderboard: leaderboardFormatted
-        });
+        ok(res, response);
         return;
       }
 
       const userStatistic = await StatisticRepository.findByUserId(id);
 
       if(userStatistic.isFailure() || !userStatistic.value) {
-        ok(res,{
-          leaderboard: leaderboardFormatted
-        });
+        ok(res, response);
         return;
       }
 
       const isUserInTop10 = leaderboard.find((s) => s.userId === id);
 
       if(isUserInTop10) {
-        ok(res, {
-          leaderboard: leaderboardFormatted,
-        });
+        ok(res, response);
         return;
       }
 
-      const allStatisticsResult = await StatisticRepository.findTopScores(1000); // ou implementar método específico
+      const allStatisticsResult = await StatisticRepository.findAllScoresOrdered();
       
       if(allStatisticsResult.isSuccess()) {
         const userPosition = allStatisticsResult.value.findIndex((s) => s.userId === id) + 1;
 
-        ok(res, {
-          leaderboard: leaderboardFormatted,
+        const responseWithUser = {
+          ...response,
           user: {
             avatar: user.value.avatar,
             username: user.value.username,
             score: userStatistic.value.score,
             position: userPosition || 'Unranked'
           }
-        });
+        }
+
+        ok(res, responseWithUser);
         return;
       }
 
-      ok(res, {
-        leaderboard: leaderboardFormatted
-      });
+      ok(res, response);
 
     } catch (error) {
       serverError(res);

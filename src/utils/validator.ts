@@ -15,19 +15,40 @@ export function Validate(schemas: ValidationSchema) {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (req: Request, res: Response, next: NextFunction) {
+    descriptor.value = async function (req: Request, res: Response, next?: NextFunction) {
       try {
-        if(schemas.body) return schemas.body.parse(req.body);
-        if(schemas.query) return schemas.query.parse(req.query);
-        if(schemas.params) return schemas.params.parse(req.params);
+        if (schemas.body) {
+          const bodyValidation = schemas.body.safeParse(req.body);
+          if (!bodyValidation.success) {
+            return badRequest(res, bodyValidation.error.issues[0].message);
+          }
+          req.body = bodyValidation.data;
+        }
 
-        return originalMethod.call(this, req, res, next);
+        if (schemas.query) {
+          const queryValidation = schemas.query.safeParse(req.query);
+          if (!queryValidation.success) {
+            return badRequest(res, queryValidation.error.issues[0].message);
+          }
+          req.query = queryValidation.data;
+        }
+
+        if (schemas.params) {
+          const paramsValidation = schemas.params.safeParse(req.params);
+          if (!paramsValidation.success) {
+            return badRequest(res, paramsValidation.error.issues[0].message);
+          }
+          req.params = paramsValidation.data;
+        }
+
+        return await originalMethod.call(this, req, res, next);
       } catch (error) {
         return badRequest(res, error instanceof z.ZodError ? error.issues[0].message : Errors.SERVER_ERROR);
       }
-    }
+    };
+
     return descriptor;
-  }
+  };
 }
 
 export function schemaValidator<T = unknown>(schema: z.ZodType<T, any, any>, body: T): Either<string, T> {

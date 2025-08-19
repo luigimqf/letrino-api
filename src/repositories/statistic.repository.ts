@@ -132,4 +132,16 @@ export class StatisticRepository {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
+
+  static async findAllScoresOrdered(): Promise<Either<Errors, Statistic[]>> {
+    try {
+      const statistics = await this.repository.find({
+        relations: ['user'],
+        order: { score: 'DESC' }
+      });
+      return Success.create(statistics);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
 }

@@ -72,7 +72,7 @@ class AuthController {
         return;
       }
 
-      const {username, passwordHash: userPassword, avatar} = userResult.value
+      const {username, passwordHash: userPassword, avatar, id} = userResult.value
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -81,19 +81,19 @@ class AuthController {
         return;
       }
 
-      const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id});
-
-      const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id}, WEEK_IN_SECONDS);
+      const token = Jwt.sign({email, id}, HOUR_IN_SECONDS);
+      const refreshToken = Jwt.sign({email, id}, WEEK_IN_SECONDS);
     
-      ok(res,{
+      ok(res, {
         token,
         refresh_token: refreshToken,
         user: {
           avatar,
           username
         }
-      })
+      });
     } catch (error) {
+      console.error('SignIn error:', error);
       serverError(res);
     }
   }
