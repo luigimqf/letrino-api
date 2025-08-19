@@ -1,13 +1,6 @@
-import { Statistic } from './Statistic'
-import { Word } from './Word'
-import { SkippedAttempt } from './SkippedAttempt'
-import { UsedWord } from './UsedWord'
-import { User } from './User'
-
-export {
-  Statistic,
-  Word,
-  SkippedAttempt,
-  UsedWord,
-  User
-}
+export { User } from './User'
+export { Statistic } from './Statistic'
+export { Attempt } from './Attempt'
+export { Word } from './Word'
+export { UsedWord } from './UsedWord'
+export { SkippedAttempt } from './SkippedAttempt';

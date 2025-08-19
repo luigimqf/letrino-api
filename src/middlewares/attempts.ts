@@ -1,5 +1,5 @@
 import {Response, NextFunction} from 'express';
-import { StatisticRepository } from '../repositories/statistic.repository';
+import { AttemptRepository } from '../repositories/attempt.repository';
 import { badRequest } from '../utils/http-status';
 import { Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
@@ -19,13 +19,13 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const correctAttempsResult = await StatisticRepository.countDocuments({
+    const correctAttempsResult = await AttemptRepository.countDocuments({
       userId: id,
       createdAt: {
         gte: today,
         lt: tomorrow,
       },
-      type: EStatistics.CORRECT,
+      result: EStatistics.CORRECT,
     });
 
     if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
@@ -33,13 +33,13 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
       return;
     }
 
-    const failedAttemptsResult = await StatisticRepository.countDocuments({
+    const failedAttemptsResult = await AttemptRepository.countDocuments({
       userId: id,
       createdAt: {
         gte: today,
         lt: tomorrow,
       },
-      type: EStatistics.INCORRECT,
+      result: EStatistics.INCORRECT,
     })
 
     if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 5) {

@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import 'dotenv/config'
-import { AppDataSource } from './config/db'
+import { AppDataSource } from './config/db/data-source'
 
 async function testDatabaseConnection() {
   try {

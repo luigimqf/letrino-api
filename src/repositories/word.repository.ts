@@ -1,4 +1,4 @@
-import { AppDataSource } from "../config/db";
+import { AppDataSource } from "../config/db/data-source";
 import { UsedWord, Word } from "../config/db/entity";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AppDataSource } from "../config/db";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { UsedWord } from "../config/db/entity";
 import { IsNull } from "typeorm";
+import { AppDataSource } from "../config/db/data-source";
 
 export class UsedWordRepository {
   private static repository = AppDataSource.getRepository(UsedWord);

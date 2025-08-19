@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { Errors } from '../constants/error';
 import { badRequest, found, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
+import { StatisticRepository } from '../repositories/statistic.repository';
 import { Jwt } from '../utils/jwt';
 import { HOUR_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
 import nodemailer from 'nodemailer'
@@ -71,7 +72,7 @@ class AuthController {
         return;
       }
 
-      const {username, password: userPassword,score, avatar} = userResult.value
+      const {username, passwordHash: userPassword, avatar} = userResult.value
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -89,8 +90,7 @@ class AuthController {
         refresh_token: refreshToken,
         user: {
           avatar,
-          username,
-          score
+          username
         }
       })
     } catch (error) {
@@ -126,13 +126,17 @@ class AuthController {
       const newUserResult = await UserRepository.create({
         username,
         email,
-        password: hash,
+        passwordHash: hash,
       });
 
       if(newUserResult.isFailure()) {
         serverError(res, newUserResult.error);
         return;
       }
+
+      // Criar estatística inicial para o novo usuário
+      const newUser = newUserResult.value;
+      await StatisticRepository.create(newUser.id);
 
       ok(res, null, Success.USER_CREATED);
 
@@ -157,7 +161,15 @@ class AuthController {
         return 
       }
 
-      const {username,score,avatar} = userResult.value;
+      const {username, avatar} = userResult.value;
+
+      // Buscar estatísticas do usuário
+      let score = 0;
+      const statisticResult = await StatisticRepository.findByUserId(id);
+      
+      if(statisticResult.isSuccess() && statisticResult.value) {
+        score = statisticResult.value.score;
+      }
 
       ok(res, {
         avatar,
@@ -210,7 +222,7 @@ class AuthController {
       }
 
       const updateResult = await UserRepository.update(decodedResult.value.id, {
-        password: bcrypt.hashSync(newPassword, 10)
+        passwordHash: bcrypt.hashSync(newPassword, 10)
       });
 
       if(updateResult.isFailure()) {

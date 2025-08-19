@@ -7,6 +7,6 @@ export interface IUser extends ModelWithTimestamp {
   avatar?: string;
   email: string;
   score: number;
-  password: string;
+  passwordHash: string;
   statistics: IStatistic[];
 }

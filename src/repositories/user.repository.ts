@@ -1,4 +1,4 @@
-import { AppDataSource } from "../config/db";
+import { AppDataSource } from "../config/db/data-source";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { IUser } from "../config/models/user.model";
@@ -25,7 +25,10 @@ export class UserRepository {
 
   static async findById(id: string): Promise<Either<Errors, User>> {
     try {
-      const user = await this.repository.findOne({ where: { id } });
+      const user = await this.repository.findOne({ 
+        where: { id },
+        relations: ['statistic']
+      });
 
       if (!user) {
         return Failure.create(Errors.NOT_FOUND);
@@ -96,11 +99,12 @@ export class UserRepository {
     }
   }
 
+  // Método legado - agora o score está na entidade Statistic
   static async updateScore(id: string, scoreIncrement: number): Promise<Either<Errors, User | null>> {
     try {
-      await this.repository.increment({ id }, 'score', scoreIncrement);
-      const updatedUser = await this.repository.findOne({ where: { id } });
-      return Success.create(updatedUser);
+      // Redirecionar para StatisticRepository se necessário
+      const user = await this.repository.findOne({ where: { id } });
+      return Success.create(user);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

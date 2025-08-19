@@ -3,6 +3,7 @@ import z from 'zod';
 import { Errors } from '../constants/error';
 import { notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
+import { StatisticRepository } from '../repositories/statistic.repository';
 import { AuthenticateRequest } from '../types';
 import { Jwt } from '../utils/jwt';
 import { Validate } from '../utils/validator';
@@ -20,23 +21,21 @@ const idParamsSchema = z.object({
 class LeaderboardController {
   async getLeaderboard(req: AuthenticateRequest, res: Response) {
     try {
-      const usersResult = await UserRepository.findAll({
-        sort: { score: 'DESC' }
-      });
+      const statisticsResult = await StatisticRepository.findTopScores(10);
 
-      if(usersResult.isFailure()) {
-        notFound(res, usersResult.error);
+      if(statisticsResult.isFailure()) {
+        notFound(res, statisticsResult.error);
         return;
       }
       
-      const leaderboard = usersResult.value?.slice(0, 10) ?? [];
+      const leaderboard = statisticsResult.value ?? [];
 
-      const leaderboardFormatted = leaderboard.map((rank, index) => {
-        const {username,score,avatar} = rank;
+      const leaderboardFormatted = leaderboard.map((statistic, index) => {
+        const { user, score } = statistic;
 
         return {
-          avatar,
-          username,
+          avatar: user.avatar,
+          username: user.username,
           score,
           position: index + 1
         }
@@ -57,28 +56,46 @@ class LeaderboardController {
         return;
       }
 
-      const isUserInTop5 = leaderboard.find((u) => u.id.toString() === id);
+      const userStatistic = await StatisticRepository.findByUserId(id);
 
-      if(isUserInTop5) {
+      if(userStatistic.isFailure() || !userStatistic.value) {
+        ok(res,{
+          leaderboard: leaderboardFormatted
+        });
+        return;
+      }
+
+      const isUserInTop10 = leaderboard.find((s) => s.userId === id);
+
+      if(isUserInTop10) {
         ok(res, {
           leaderboard: leaderboardFormatted,
         });
         return;
       }
 
-      const userScorePosition = usersResult.value.findIndex((u) => u.id.toString() === id) + 1;
+      // Buscar posição do usuário no ranking geral
+      const allStatisticsResult = await StatisticRepository.findTopScores(1000); // ou implementar método específico
+      
+      if(allStatisticsResult.isSuccess()) {
+        const userPosition = allStatisticsResult.value.findIndex((s) => s.userId === id) + 1;
 
-      const {username,score,avatar} = user.value;
+        ok(res, {
+          leaderboard: leaderboardFormatted,
+          user: {
+            avatar: user.value.avatar,
+            username: user.value.username,
+            score: userStatistic.value.score,
+            position: userPosition || 'Unranked'
+          }
+        });
+        return;
+      }
 
       ok(res, {
-        leaderboard: leaderboardFormatted,
-        user: {
-          avatar,
-          username,
-          score,
-          position: userScorePosition
-        }
+        leaderboard: leaderboardFormatted
       });
+
     } catch (error) {
       serverError(res);
     }
@@ -93,17 +110,17 @@ class LeaderboardController {
       const { id } = req.params;
       const { score } = req.body;
       
-      const updateResult = await UserRepository.updateScore(id, score);
+      const updateResult = await StatisticRepository.updateGameResult(id, true, score);
 
       if(updateResult.isFailure()) {
         notFound(res, updateResult.error);
         return;
       }
       
-      const updatedUser = updateResult.value;
+      const updatedStatistic = updateResult.value;
       
       ok(res, {
-        message: `Score updated successfully: new score is ${updatedUser?.score}`
+        message: `Score updated successfully: new score is ${updatedStatistic?.score}`
       });
     } catch (error) {
       res.status(500).json({

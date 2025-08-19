@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm'
 import { Statistic } from './Statistic'
-import { SkippedAttempt } from './SkippedAttempt'
+import { Attempt } from './Attempt'
 
 @Entity('users')
 export class User {
@@ -20,16 +20,13 @@ export class User {
   email: string
 
   @Column({ type: 'varchar' })
-  password: string
+  passwordHash: string
 
-  @Column({ type: 'integer', default: 0 })
-  score: number
+  @OneToOne(() => Statistic, statistic => statistic.user)
+  statistic: Statistic
 
-  @OneToMany(() => Statistic, statistic => statistic.user)
-  statistics: Statistic[]
-
-  @OneToMany(() => SkippedAttempt, skippedAttempt => skippedAttempt.user)
-  skippedAttempts: SkippedAttempt[]
+  @OneToMany(() => Attempt, attempt => attempt.user)
+  attempts: Attempt[]
 
   @CreateDateColumn()
   createdAt: Date

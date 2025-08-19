@@ -1,0 +1,14 @@
+import { DataSource } from "typeorm";
+import { env } from "../enviroment";
+import { Attempt, SkippedAttempt, Statistic, UsedWord, User, Word } from "./entity";
+
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  url: env.DB_URL,
+  synchronize: false,
+  logging: env.NODE_ENV === 'development',
+  entities: [User, Word, UsedWord, Statistic, Attempt, SkippedAttempt],
+  migrations: ['src/config/db/migrations/*.ts'],
+  subscribers: ['src/config/db/subscribers/*.ts'],
+  ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
+});

@@ -1,17 +1,4 @@
-import { env } from '../enviroment'
-import { DataSource } from 'typeorm'
-import { SkippedAttempt, Statistic, UsedWord, User, Word } from './entity'
-
-export const AppDataSource = new DataSource({
-  type: 'postgres',
-  url: env.DB_URL,
-  synchronize: env.NODE_ENV === 'development',
-  logging: env.NODE_ENV === 'development',
-  entities: [User, Word, UsedWord, Statistic, SkippedAttempt],
-  migrations: ['src/config/db/migrations/*.ts'],
-  subscribers: ['src/config/db/subscribers/*.ts'],
-  ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
-})
+import { AppDataSource } from './data-source'
 
 async function setupDatabase() {
   try {

@@ -7,16 +7,8 @@ export class SkippedAttempt {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @ManyToOne(() => Word, word => word.skippedAttempts)
-  @JoinColumn({ name: 'wordId' })
-  word: Word
-
   @Column()
   wordId: string
-
-  @ManyToOne(() => User, user => user.skippedAttempts)
-  @JoinColumn({ name: 'userId' })
-  user: User
 
   @Column()
   userId: string

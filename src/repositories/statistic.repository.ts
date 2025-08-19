@@ -1,91 +1,133 @@
-import { AppDataSource } from "../config/db";
+import { AppDataSource } from "../config/db/data-source";
 import { Statistic } from "../config/db/entity";
 import { Errors } from "../constants/error";
-import { EStatistics } from "../constants/statistic";
 import { Either, Failure, Success } from "../utils/either";
-import { MoreThanOrEqual, LessThan, Between } from "typeorm";
 
-interface IStatisticCreate {
-  wordId: string;
-  attempt?: string;
+interface IStatisticUpdate {
+  gamesPlayed?: number;
+  gamesWon?: number;
+  gamesLost?: number;
+  winStreak?: number;
+  bestWinStreak?: number;
+  score?: number;
+}
+
+interface IStatisticBulkCreate {
   userId: string;
-  type: EStatistics;
-}
-
-interface IDateRange {
-  gte?: Date;
-  lt?: Date;
-}
-
-interface IStatisticConditions {
-  wordId?: string;
-  userId?: string;
-  type?: EStatistics;
-  createdAt?: IDateRange;
+  gamesPlayed?: number;
+  gamesWon?: number;
+  gamesLost?: number;
+  winStreak?: number;
+  bestWinStreak?: number;
+  score?: number;
 }
 
 export class StatisticRepository {
   private static repository = AppDataSource.getRepository(Statistic);
 
-  static async create({ wordId, attempt, userId, type }: IStatisticCreate): Promise<Either<Errors, Statistic>> {
+  static async create(userId: string): Promise<Either<Errors, Statistic>> {
     try {
-      const statistic = this.repository.create({ wordId, attempt, userId, type });
+      const statistic = this.repository.create({
+        userId,
+        gamesPlayed: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        winStreak: 0,
+        bestWinStreak: 0,
+        score: 0
+      });
       const savedStatistic = await this.repository.save(statistic);
       return Success.create(savedStatistic);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
-  
-  static async findOne(conditions: Partial<Statistic>): Promise<Either<Errors, Statistic | null>> {
+
+  static async insertMany(statistics: IStatisticBulkCreate[]): Promise<Either<Errors, Statistic[]>> {
     try {
-      const statistic = await this.repository.findOne({ where: conditions });
+      const statisticsToCreate = statistics.map(stat => ({
+        userId: stat.userId,
+        gamesPlayed: stat.gamesPlayed || 1,
+        gamesWon: stat.gamesWon || 0,
+        gamesLost: stat.gamesLost || 1,
+        winStreak: 0,
+        bestWinStreak: stat.bestWinStreak || 0,
+        score: stat.score || 0
+      }));
+
+      const createdStatistics = this.repository.create(statisticsToCreate);
+      const savedStatistics = await this.repository.save(createdStatistics);
+      
+      return Success.create(savedStatistics);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  static async findByUserId(userId: string): Promise<Either<Errors, Statistic | null>> {
+    try {
+      const statistic = await this.repository.findOne({
+        where: { userId },
+        relations: ['user', 'attempts']
+      });
       return Success.create(statistic);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async countDocuments(conditions: IStatisticConditions): Promise<Either<Errors, number>> {
+  static async updateGameResult(userId: string, won: boolean, scoreIncrement: number): Promise<Either<Errors, Statistic | null>> {
     try {
-      const queryBuilder = this.repository.createQueryBuilder('statistic');
+      const statistic = await this.repository.findOne({ where: { userId } });
       
-      if (conditions.wordId) {
-        queryBuilder.andWhere('statistic.wordId = :wordId', { wordId: conditions.wordId });
+      if (!statistic) {
+        return Failure.create(Errors.NOT_FOUND);
       }
-      
-      if (conditions.userId) {
-        queryBuilder.andWhere('statistic.userId = :userId', { userId: conditions.userId });
+
+      const updateData: IStatisticUpdate = {
+        gamesPlayed: statistic.gamesPlayed + 1,
+        score: statistic.score + scoreIncrement
+      };
+
+      if (won) {
+        updateData.gamesWon = statistic.gamesWon + 1;
+        updateData.winStreak = statistic.winStreak + 1;
+        updateData.bestWinStreak = Math.max(statistic.bestWinStreak, updateData.winStreak);
+      } else {
+        updateData.gamesLost = statistic.gamesLost + 1;
+        updateData.winStreak = 0;
       }
+
+      await this.repository.update(statistic.id, updateData);
       
-      if (conditions.type) {
-        queryBuilder.andWhere('statistic.type = :type', { type: conditions.type });
-      }
+      const updatedStatistic = await this.repository.findOne({
+        where: { id: statistic.id },
+        relations: ['user', 'attempts']
+      });
       
-      if (conditions.createdAt) {
-        const { gte, lt } = conditions.createdAt;
-        
-        if (gte) {
-          queryBuilder.andWhere('statistic.createdAt >= :gte', { gte });
-        }
-        
-        if (lt) {
-          queryBuilder.andWhere('statistic.createdAt < :lt', { lt });
-        }
-      }
-      
-      const count = await queryBuilder.getCount();
-      return Success.create(count);
+      return Success.create(updatedStatistic);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async insertMany(statistics: Partial<Statistic>[]): Promise<Either<Errors, Statistic[]>> {
+  static async resetStreak(userId: string): Promise<Either<Errors, void>> {
     try {
-      const entities = this.repository.create(statistics);
-      const savedEntities = await this.repository.save(entities);
-      return Success.create(savedEntities);
+      await this.repository.update({ userId }, { winStreak: 0 });
+      return Success.create(undefined);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  static async findTopScores(limit: number = 10): Promise<Either<Errors, Statistic[]>> {
+    try {
+      const statistics = await this.repository.find({
+        relations: ['user'],
+        order: { score: 'DESC' },
+        take: limit
+      });
+      return Success.create(statistics);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

@@ -12,9 +12,9 @@
     "format": "prettier . --write",
     "seed": "ts-node src/seeders/word.ts",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
-    "db:migrate:generate": "pnpm run typeorm -- migration:generate ./src/migrations/Init -d ./src/data-source.ts",
-    "db:migrate:run": "pnpm run typeorm -- migration:run -d ./src/data-source.ts",
-    "db:migrate:revert": "pnpm run typeorm -- migration:revert -d ./src/data-source.ts"
+    "migration:generate": "cross-env NODE_ENV=development ts-node -r dotenv/config ./node_modules/typeorm/cli.js -d ./src/config/db/data-source.ts migration:generate ./src/config/db/migrations/default",
+    "migration:run": "cross-env NODE_ENV=development ts-node -r dotenv/config ./node_modules/typeorm/cli.js -d ./src/config/db/data-source.ts migration:run",
+    "migration:revert": "cross-env NODE_ENV=development ts-node -r dotenv/config ./node_modules/typeorm/cli.js -d ./src/config/db/data-source.ts migration:revert"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "cron": "^4.3.0",
+    "cross-env": "^10.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "handlebars": "^4.7.8",

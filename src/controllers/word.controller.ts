@@ -3,6 +3,7 @@ import z from "zod";
 import { Response } from "express";
 import { badRequest, notFound, ok, serverError } from "../utils/http-status";
 import { StatisticRepository } from "../repositories/statistic.repository";
+import { AttemptRepository } from "../repositories/attempt.repository";
 import { ATTEMPT_PENALTY, BASE_SCORE, EStatistics } from "../constants/statistic";
 import { WordRepository } from "../repositories/word.repository";
 import { UsedWordRepository } from "../repositories/used_word.repository";
@@ -94,42 +95,54 @@ class WordController {
       }
 
       if(todaysWord.isSuccess() && todaysWord.value?.word === attempt) {
-        await StatisticRepository.create({
-          wordId: todaysWord.value.id,
-          attempt: attempt,
+        // Buscar ou criar statistic do usuário
+        let statisticResult = await StatisticRepository.findByUserId(id);
+        
+        if(statisticResult.isFailure() || !statisticResult.value) {
+          statisticResult = await StatisticRepository.create(id);
+        }
+
+        if(statisticResult.isFailure()) {
+          badRequest(res, "Error creating user statistics");
+          return;
+        }
+
+        const statistic = statisticResult.value!;
+
+        // Criar attempt
+        await AttemptRepository.create({
           userId: id,
-          type: EStatistics.CORRECT
+          statisticId: statistic.id,
+          wordId: todaysWord.value.id,
+          result: EStatistics.CORRECT
         });
     
+        // Contar tentativas incorretas de hoje
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const incorrectAttemptsResult = await StatisticRepository.countDocuments({
+        const incorrectAttemptsResult = await AttemptRepository.countDocuments({
           userId: id,
           createdAt: {
             gte: today,
             lt: tomorrow,
           },
-          type: EStatistics.INCORRECT
-        })
+          result: EStatistics.INCORRECT
+        });
     
         if(incorrectAttemptsResult.isFailure()) {
           badRequest(res, "Error calculating new score")
           return;
         }
 
-        const score = BASE_SCORE - (ATTEMPT_PENALTY * incorrectAttemptsResult.value)
+        const scoreCalculated = BASE_SCORE - (ATTEMPT_PENALTY * incorrectAttemptsResult.value);
 
-        const updateUserResult = await UserRepository.updateScore(id, score);
+        // Atualizar estatísticas do usuário
+        await StatisticRepository.updateGameResult(id, true, scoreCalculated);
 
-        if(updateUserResult.isFailure()) {
-          badRequest(res, "Error updating score")
-          return;
-        }
-
-        ok(res)
+        ok(res, { score: scoreCalculated });
         return;
       }
 
@@ -167,11 +180,26 @@ class WordController {
       }
 
       if(todaysWordResult.isSuccess() && todaysWordResult.value.word !== attempt) {
-        await StatisticRepository.create({
-          attempt: attempt,
-          wordId: todaysWordResult.value.id,
-          type: EStatistics.INCORRECT,
+        // Buscar ou criar statistic do usuário
+        let statisticResult = await StatisticRepository.findByUserId(id);
+        
+        if(statisticResult.isFailure() || !statisticResult.value) {
+          statisticResult = await StatisticRepository.create(id);
+        }
+
+        if(statisticResult.isFailure()) {
+          badRequest(res, "Error creating user statistics");
+          return;
+        }
+
+        const statistic = statisticResult.value!;
+
+        // Criar attempt
+        await AttemptRepository.create({
           userId: id,
+          statisticId: statistic.id,
+          wordId: todaysWordResult.value.id,
+          result: EStatistics.INCORRECT
         });
     
         ok(res)
@@ -223,6 +251,9 @@ class WordController {
         userId: id,
         wordId: todaysWordResult.value?.wordId!
       })
+
+      // Resetar streak quando pular
+      await StatisticRepository.resetStreak(id);
 
       ok(res);
       
