@@ -134,7 +134,6 @@ class AuthController {
         return;
       }
 
-      // Criar estatística inicial para o novo usuário
       const newUser = newUserResult.value;
       await StatisticRepository.create(newUser.id);
 
@@ -163,7 +162,6 @@ class AuthController {
 
       const {username, avatar} = userResult.value;
 
-      // Buscar estatísticas do usuário
       let score = 0;
       const statisticResult = await StatisticRepository.findByUserId(id);
       

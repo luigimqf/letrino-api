@@ -95,7 +95,6 @@ class WordController {
       }
 
       if(todaysWord.isSuccess() && todaysWord.value?.word === attempt) {
-        // Buscar ou criar statistic do usuário
         let statisticResult = await StatisticRepository.findByUserId(id);
         
         if(statisticResult.isFailure() || !statisticResult.value) {
@@ -109,7 +108,6 @@ class WordController {
 
         const statistic = statisticResult.value!;
 
-        // Criar attempt
         await AttemptRepository.create({
           userId: id,
           statisticId: statistic.id,
@@ -117,7 +115,6 @@ class WordController {
           result: EStatistics.CORRECT
         });
     
-        // Contar tentativas incorretas de hoje
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
@@ -139,7 +136,6 @@ class WordController {
 
         const scoreCalculated = BASE_SCORE - (ATTEMPT_PENALTY * incorrectAttemptsResult.value);
 
-        // Atualizar estatísticas do usuário
         await StatisticRepository.updateGameResult(id, true, scoreCalculated);
 
         ok(res, { score: scoreCalculated });
@@ -180,7 +176,6 @@ class WordController {
       }
 
       if(todaysWordResult.isSuccess() && todaysWordResult.value.word !== attempt) {
-        // Buscar ou criar statistic do usuário
         let statisticResult = await StatisticRepository.findByUserId(id);
         
         if(statisticResult.isFailure() || !statisticResult.value) {
@@ -194,7 +189,6 @@ class WordController {
 
         const statistic = statisticResult.value!;
 
-        // Criar attempt
         await AttemptRepository.create({
           userId: id,
           statisticId: statistic.id,
@@ -252,7 +246,6 @@ class WordController {
         wordId: todaysWordResult.value?.wordId!
       })
 
-      // Resetar streak quando pular
       await StatisticRepository.resetStreak(id);
 
       ok(res);

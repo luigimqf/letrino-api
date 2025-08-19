@@ -74,7 +74,6 @@ class LeaderboardController {
         return;
       }
 
-      // Buscar posição do usuário no ranking geral
       const allStatisticsResult = await StatisticRepository.findTopScores(1000); // ou implementar método específico
       
       if(allStatisticsResult.isSuccess()) {

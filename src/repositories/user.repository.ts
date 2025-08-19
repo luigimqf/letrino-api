@@ -99,10 +99,8 @@ export class UserRepository {
     }
   }
 
-  // Método legado - agora o score está na entidade Statistic
   static async updateScore(id: string, scoreIncrement: number): Promise<Either<Errors, User | null>> {
     try {
-      // Redirecionar para StatisticRepository se necessário
       const user = await this.repository.findOne({ where: { id } });
       return Success.create(user);
     } catch (error) {

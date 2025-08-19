@@ -20,7 +20,6 @@ export const createSkippedStatistics = async () => {
     if(skippedAttemptDocuments.isSuccess() && skippedAttemptDocuments.value.length > 0) {
       
       for (const skippedAttempt of skippedAttemptDocuments.value) {
-        // Buscar ou criar statistic do usuário
         let statisticResult = await StatisticRepository.findByUserId(skippedAttempt.userId);
         
         if(statisticResult.isFailure() || !statisticResult.value) {
@@ -28,7 +27,6 @@ export const createSkippedStatistics = async () => {
         }
 
         if(statisticResult.isSuccess() && statisticResult.value) {
-          // Criar attempt como SKIPPED
           await AttemptRepository.create({
             userId: skippedAttempt.userId,
             statisticId: statisticResult.value.id,
@@ -36,7 +34,6 @@ export const createSkippedStatistics = async () => {
             result: EStatistics.SKIPPED
           });
 
-          // Atualizar estatísticas (jogo perdido por skip)
           await StatisticRepository.updateGameResult(skippedAttempt.userId, false, 0);
         }
       }
