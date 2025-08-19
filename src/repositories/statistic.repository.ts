@@ -76,7 +76,7 @@ export class StatisticRepository {
     }
   }
 
-  static async updateGameResult(userId: string, won: boolean, scoreIncrement: number): Promise<Either<Errors, Statistic | null>> {
+  static async updateGameResult({userId, won, scoreIncrement}: {userId: string, won: boolean, scoreIncrement: number}): Promise<Either<Errors, Statistic | null>> {
     try {
       const statistic = await this.repository.findOne({ where: { userId } });
       

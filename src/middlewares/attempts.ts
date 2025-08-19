@@ -42,7 +42,7 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
       result: EStatistics.INCORRECT,
     })
 
-    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 5) {
+    if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 6) {
       badRequest(res, Errors.ALREADY_FAILED)
       return;
     }

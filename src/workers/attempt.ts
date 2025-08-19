@@ -34,7 +34,11 @@ export const createSkippedStatistics = async () => {
             result: EStatistics.SKIPPED
           });
 
-          await StatisticRepository.updateGameResult(skippedAttempt.userId, false, 0);
+          await StatisticRepository.updateGameResult({
+            userId: skippedAttempt.userId,
+            won: false,
+            scoreIncrement: 0
+          });
         }
       }
 

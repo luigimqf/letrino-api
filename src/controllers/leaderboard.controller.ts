@@ -110,7 +110,11 @@ class LeaderboardController {
       const { id } = req.params;
       const { score } = req.body;
       
-      const updateResult = await StatisticRepository.updateGameResult(id, true, score);
+      const updateResult = await StatisticRepository.updateGameResult({
+        userId: id,
+        won: true,
+        scoreIncrement: score
+      });
 
       if(updateResult.isFailure()) {
         notFound(res, updateResult.error);
