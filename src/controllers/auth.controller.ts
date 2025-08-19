@@ -2,7 +2,6 @@ import {Response} from 'express';
 import {z} from 'zod';
 import bcrypt from 'bcryptjs';
 import { Errors } from '../constants/error';
-import { schemaValidator } from '../utils/validator';
 import { badRequest, found, notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { Jwt } from '../utils/jwt';
@@ -14,6 +13,7 @@ import fs from "fs"
 import path from 'path';
 import { AuthenticateRequest } from '../types';
 import { Success } from '../constants/success';
+import { Validate } from '../utils/validator';
 
 const createUserSchema = z.object({
   username: z
@@ -27,7 +27,7 @@ const createUserSchema = z.object({
   password: z.string({
     message: 'Password must be a string'
   }).nonempty("password is required")
-})
+});
 
 const loginSchema = z.object({
   email: z.string({
@@ -36,250 +36,242 @@ const loginSchema = z.object({
   password: z.string({
     message: Errors.REQUIRED_PASSWORD
   })
-})
+});
 
-const refreshTokenSchema = z.string({
-  message: Errors.REQUIRED_REFRESH_TOKEN
-}).nonempty(Errors.REQUIRED_REFRESH_TOKEN);
+const refreshTokenSchema = z.object({
+  refresh_token: z.string({
+    message: Errors.REQUIRED_REFRESH_TOKEN
+  }).nonempty(Errors.REQUIRED_REFRESH_TOKEN)
+});
 
-const passwordSchema = z.string({
-  message: Errors.REQUIRED_PASSWORD
-}).nonempty(Errors.REQUIRED_PASSWORD)
+const passwordResetSchema = z.object({
+  token: z.string().nonempty('Token is required'),
+  newPassword: z.string({
+    message: Errors.REQUIRED_PASSWORD
+  }).nonempty(Errors.REQUIRED_PASSWORD)
+});
 
-const emailSchema = z.string({message: Errors.REQUIRED_EMAIL}).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL);
+const emailSchema = z.object({
+  email: z.string({
+    message: Errors.REQUIRED_EMAIL
+  }).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL)
+});
 
-export async function signIn(req: AuthenticateRequest, res: Response) {
-  try {
-    const schemaResult = schemaValidator(loginSchema, req.body);
+class AuthController {
+  @Validate({body: loginSchema})
+  async signIn(req: AuthenticateRequest, res: Response) {
+    try {
+      const { email, password } = req.body;
+      const userResult = await UserRepository.findOneBy({
+        email
+      });
 
-    if(schemaResult.isFailure()) {
-      badRequest(res, schemaResult.error);
-      return;
-    }
+      if(userResult.isFailure() || !userResult.value) {
+        notFound(res, Errors.NOT_FOUND_USER);
+        return;
+      }
+
+      const {username, password: userPassword,score, avatar} = userResult.value
+
+      const isPasswordValid = bcrypt.compareSync(password, userPassword);
+
+      if (!isPasswordValid) {
+        badRequest(res, Errors.INVALID_CREDENTIALS);
+        return;
+      }
+
+      const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id});
+
+      const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id}, WEEK_IN_SECONDS);
     
-    const { email, password } = schemaResult.value;
-    const userResult = await UserRepository.findOneBy({
-      email
-    });
-
-    if(userResult.isFailure() || !userResult.value) {
-      notFound(res, Errors.NOT_FOUND_USER);
-      return;
+      ok(res,{
+        token,
+        refresh_token: refreshToken,
+        user: {
+          avatar,
+          username,
+          score
+        }
+      })
+    } catch (error) {
+      serverError(res);
     }
+  }
 
-    const {username, password: userPassword,score, avatar} = userResult.value
+  @Validate({body: createUserSchema})
+  async signUp(req: AuthenticateRequest, res: Response) {
+    try {
+      const {email, password, username} = req.body;
 
-    const isPasswordValid = bcrypt.compareSync(password, userPassword);
+      const usedEmailResult = await UserRepository.findOneBy({
+        email
+      });
 
-    if (!isPasswordValid) {
-      badRequest(res, Errors.INVALID_CREDENTIALS);
-      return;
+      if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
+        found(res, Errors.FOUND_EMAIL);
+        return;
+      }
+      
+      const usernameResult = await UserRepository.findOneBy({
+        username
+      });
+
+      if(usernameResult.isSuccess() && usernameResult.value?.id) {
+        found(res, Errors.FOUND_USERNAME);
+        return;
+      }
+
+      const hash = bcrypt.hashSync(password, 10);
+
+      const newUserResult = await UserRepository.create({
+        username,
+        email,
+        password: hash,
+      });
+
+      if(newUserResult.isFailure()) {
+        serverError(res, newUserResult.error);
+        return;
+      }
+
+      ok(res, null, Success.USER_CREATED);
+
+    } catch (error) {
+      serverError(res, Errors.SERVER_ERROR);
     }
+  }
 
-    const token = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id});
+  async getUserData(req: AuthenticateRequest, res: Response) {
+    try {
+      const id = req.userId;
 
-    const refreshToken = Jwt.sign({email: userResult.value?.email, id: userResult.value?.id}, WEEK_IN_SECONDS);
-  
-    ok(res,{
-      token,
-      refresh_token: refreshToken,
-      user: {
+      if(!id) {
+        badRequest(res, Errors.UNAUTHORIZED);
+        return;
+      }
+
+      const userResult = await UserRepository.findById(id);
+
+      if(userResult.isFailure() || !userResult.value.id) {
+        notFound(res, Errors.NOT_FOUND_USER);
+        return 
+      }
+
+      const {username,score,avatar} = userResult.value;
+
+      ok(res, {
         avatar,
         username,
         score
+      })
+    } catch (error) {
+      serverError(res)
+    }
+  }
+
+  @Validate({body: refreshTokenSchema})
+  async refreshToken(req: AuthenticateRequest, res: Response) {
+    try {
+      const { refresh_token } = req.body;
+
+      const jwtResult = Jwt.verify(refresh_token);
+
+      if(jwtResult.isFailure()) {
+        badRequest(res, Errors.INVALID_TOKEN);
+        return;
       }
-    })
-  } catch (error) {
-    serverError(res);
+
+      const id = jwtResult.value;
+      const newToken = Jwt.sign({id});
+      const newRefreshToken = Jwt.sign({id}, WEEK_IN_SECONDS);
+
+      ok(res, {
+        success: true,
+        token: newToken,
+        refresh_token: newRefreshToken
+      })
+      return;
+      
+    } catch (error) {
+      serverError(res);
+    }
+  }
+
+  @Validate({body: passwordResetSchema})
+  async refreshPassword(req: AuthenticateRequest, res: Response) {
+    try {
+      const { token, newPassword } = req.body;
+
+      const decodedResult = Jwt.verify(token)
+
+      if(decodedResult.isFailure()) {
+        badRequest(res, Errors.INVALID_TOKEN)
+        return;
+      }
+
+      const updateResult = await UserRepository.update(decodedResult.value.id, {
+        password: bcrypt.hashSync(newPassword, 10)
+      });
+
+      if(updateResult.isFailure()) {
+        notFound(res, Errors.NOT_FOUND)
+        return;
+      }
+
+      ok(res, null, Success.PASSWORD_RESET);
+    } catch (error) {
+      serverError(res, Errors.SERVER_ERROR)
+    }
+  }
+
+  @Validate({body: emailSchema})
+  async forgotPassword(req: AuthenticateRequest, res: Response) {
+    try {
+      const { email } = req.body;
+
+      const userResult = await UserRepository.findOneBy({
+        email
+      })
+
+      if(userResult.isFailure() || !userResult.value?.id) {
+        notFound(res, Errors.NOT_FOUND)
+        return;
+      }
+
+      const token = Jwt.sign({id: userResult.value?.id}, HOUR_IN_SECONDS);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: env.EMAIL_USER,
+          pass: env.EMAIL_PASSWORD
+        },
+      })
+
+      const emailSource = fs.readFileSync(path.join(__dirname, "../views/forgot-password.hbs"), "utf8")
+      const template = Handlebars.compile(emailSource);
+      const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}?token=${token}`})
+
+      await transporter.sendMail({
+        to: userResult.value.email,
+        subject: "Password Reset",
+        html
+      })
+
+      ok(res, null, Success.PASSWORD_RESET_REQUESTED);
+
+      return;
+    } catch (error) {
+      serverError(res)
+    }
   }
 }
 
-export async function signUp(req: AuthenticateRequest, res: Response) {
-  try {
-    const bodyResult = schemaValidator(createUserSchema, req.body);
+const authController = new AuthController();
 
-    if(bodyResult.isFailure()) {
-      badRequest(res, bodyResult.error);
-      return;
-    }
-
-    const {email, password, username} = bodyResult.value;
-
-    const usedEmailResult = await UserRepository.findOneBy({
-      email
-    });
-
-    if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
-      found(res, Errors.FOUND_EMAIL);
-      return;
-    }
-    
-    const usernameResult = await UserRepository.findOneBy({
-      username
-    });
-
-    if(usernameResult.isSuccess() && usernameResult.value?.id) {
-      found(res, Errors.FOUND_USERNAME);
-      return;
-    }
-
-    const hash = bcrypt.hashSync(password, 10);
-
-    const newUserResult = await UserRepository.create({
-      username,
-      email,
-      password: hash,
-    });
-
-    if(newUserResult.isFailure()) {
-      serverError(res, newUserResult.error);
-      return;
-    }
-
-    ok(res, null, Success.USER_CREATED);
-
-  } catch (error) {
-    serverError(res, Errors.SERVER_ERROR);
-  }
-};
-
-export async function getUserData(req: AuthenticateRequest, res: Response) {
-  try {
-    const id = req.userId;
-
-    if(!id) {
-      badRequest(res, Errors.UNAUTHORIZED);
-      return;
-    }
-
-    const userResult = await UserRepository.findById(id);
-
-    if(userResult.isFailure() || !userResult.value.id) {
-      notFound(res, Errors.NOT_FOUND_USER);
-      return 
-    }
-
-    const {username,score,avatar} = userResult.value;
-
-    ok(res, {
-      avatar,
-      username,
-      score
-    })
-  } catch (error) {
-    serverError(res)
-  }
-}
-
-export async function refreshToken(req: AuthenticateRequest, res: Response) {
-  try {
-    const schemaResult = schemaValidator(refreshTokenSchema, req.body.refresh_token);
-
-    if (schemaResult.isFailure()) {
-      badRequest(res, schemaResult.error);
-      return;
-    }
-
-    const refreshToken = schemaResult.value;
-
-    const jwtResult = Jwt.verify(refreshToken);
-
-    if(jwtResult.isFailure()) {
-      badRequest(res, Errors.INVALID_TOKEN);
-      return;
-    }
-
-    const id = jwtResult.value;
-    const newToken = Jwt.sign({id});
-    const newRefreshToken = Jwt.sign({id}, WEEK_IN_SECONDS);
-
-    ok(res, {
-      success: true,
-      token: newToken,
-      refresh_token: newRefreshToken
-    })
-    return;
-    
-  } catch (error) {
-    serverError(res);
-  }
-}
-
-export async function refreshPassword(req: AuthenticateRequest, res: Response) {
-  try {
-    const { token, newPassword } = req.body;
-
-    const passwordResult = schemaValidator(passwordSchema, newPassword);
-
-    if(passwordResult.isFailure()) {
-      badRequest(res, passwordResult.error)
-      return;
-    }
-
-    const decodedResult = Jwt.verify(token)
-
-    if(decodedResult.isFailure()) {
-      badRequest(res, Errors.INVALID_TOKEN)
-      return;
-    }
-
-    const updateResult = await UserRepository.update(decodedResult.value.id, {
-      password: bcrypt.hashSync(newPassword, 10)
-    });
-
-    if(updateResult.isFailure()) {
-      notFound(res, Errors.NOT_FOUND)
-      return;
-    }
-
-    ok(res, null, Success.PASSWORD_RESET);
-  } catch (error) {
-    serverError(res, Errors.SERVER_ERROR)
-  }
-}
-
-export async function forgotPassword(req: AuthenticateRequest, res: Response) {
-  try {
-    const emailResult = schemaValidator(emailSchema, req.body.email);
-
-    if(emailResult.isFailure()){
-      badRequest(res, emailResult.error);
-      return;
-    }
-
-    const userResult = await UserRepository.findOneBy({
-      email: emailResult.value
-    })
-
-    if(userResult.isFailure() || !userResult.value?.id) {
-      notFound(res, Errors.NOT_FOUND)
-      return;
-    }
-
-    const token = Jwt.sign({id: userResult.value?.id}, HOUR_IN_SECONDS);
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: env.EMAIL_USER,
-        pass: env.EMAIL_PASSWORD
-      },
-    })
-
-    const emailSource = fs.readFileSync(path.join(__dirname, "../views/forgot-password.hbs"), "utf8")
-    const template = Handlebars.compile(emailSource);
-    const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}?token=${token}`})
-
-    await transporter.sendMail({
-      to: userResult.value.email,
-      subject: "Password Reset",
-      html
-    })
-
-    ok(res, null, Success.PASSWORD_RESET_REQUESTED);
-
-    return;
-  } catch (error) {
-    serverError(res)
-  }
-}
+export const signIn = authController.signIn.bind(authController);
+export const signUp = authController.signUp.bind(authController);
+export const getUserData = authController.getUserData.bind(authController);
+export const refreshToken = authController.refreshToken.bind(authController);
+export const refreshPassword = authController.refreshPassword.bind(authController);
+export const forgotPassword = authController.forgotPassword.bind(authController);

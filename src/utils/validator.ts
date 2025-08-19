@@ -3,6 +3,7 @@ import z from "zod";
 import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "./either";
 import { Request, Response, NextFunction } from "express";
+import { badRequest } from "./http-status";
 
 interface ValidationSchema {
   body?: z.ZodType<any>;
@@ -22,9 +23,7 @@ export function Validate(schemas: ValidationSchema) {
 
         return originalMethod.call(this, req, res, next);
       } catch (error) {
-        return res.status(400).json({
-          error: error instanceof z.ZodError ? error.issues[0].message : Errors.SERVER_ERROR
-        });
+        return badRequest(res, error instanceof z.ZodError ? error.issues[0].message : Errors.SERVER_ERROR);
       }
     }
     return descriptor;
