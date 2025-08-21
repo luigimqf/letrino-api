@@ -31,13 +31,15 @@ class LeaderboardController {
       const leaderboard = statisticsResult.value ?? [];
 
       const leaderboardFormatted = leaderboard.map((statistic, index) => {
-        const { user, score } = statistic;
+        const { user, score, gamesPlayed, gamesWon } = statistic;
+        const winRate = gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(2) : "0.00";
 
         return {
           avatar: user.avatar,
           username: user.username,
           score,
-          position: index + 1
+          position: index + 1,
+          winRate: parseFloat(winRate)
         }
       });
 
@@ -79,6 +81,9 @@ class LeaderboardController {
       
       if(allStatisticsResult.isSuccess()) {
         const userPosition = allStatisticsResult.value.findIndex((s) => s.userId === id) + 1;
+        const userTotalGames = userStatistic.value.gamesPlayed || 0;
+        const userWinRate = userTotalGames > 0 ? 
+          ((userStatistic.value.gamesWon / userTotalGames) * 100).toFixed(2) : "0.00";
 
         const responseWithUser = {
           ...response,
@@ -86,7 +91,8 @@ class LeaderboardController {
             avatar: user.value.avatar,
             username: user.value.username,
             score: userStatistic.value.score,
-            position: userPosition || 'Unranked'
+            position: userPosition || 'Unranked',
+            winRate: parseFloat(userWinRate)
           }
         }
 
