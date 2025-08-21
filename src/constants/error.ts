@@ -24,5 +24,6 @@ export enum Errors {
   INCORRECT_ATTEMPT = 'The attempt is incorrect',
   CORRECT_ATTEMPT = 'The attempt is correct',
   ALREADY_GOT_RIGHT = "You have already correct today's word",
-  ALREADY_FAILED = "You have already used all attempts"
+  ALREADY_FAILED = "You have already used all attempts",
+  NOT_IMPLEMENTED = 'This feature is not implemented yet',
 }
