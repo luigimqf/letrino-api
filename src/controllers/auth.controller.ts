@@ -15,6 +15,7 @@ import path from 'path';
 import { AuthenticateRequest } from '../types';
 import { Success } from '../constants/success';
 import { Validate } from '../utils/validator';
+import { getRandomAvatar } from '../constants/avatar';
 
 const createUserSchema = z.object({
   username: z
@@ -140,6 +141,7 @@ class AuthController {
         username,
         email,
         passwordHash: hash,
+        avatar: getRandomAvatar(),
       });
 
       if(newUserResult.isFailure()) {
