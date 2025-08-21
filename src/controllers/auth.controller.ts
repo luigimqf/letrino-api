@@ -64,7 +64,13 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const userResult = await UserRepository.findOneBy({
-        email
+        where: { email },
+        relations: ['statistic'],
+        select: {
+          statistic: {
+            score: true
+          }
+        }
       });
 
       if(userResult.isFailure() || !userResult.value) {
@@ -72,7 +78,7 @@ class AuthController {
         return;
       }
 
-      const {username, passwordHash: userPassword, avatar, id} = userResult.value
+      const {id, username, passwordHash: userPassword, avatar, statistic} = userResult.value
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -89,7 +95,8 @@ class AuthController {
         refresh_token: refreshToken,
         user: {
           avatar,
-          username
+          username,
+          score: statistic?.score || 0,
         }
       });
     } catch (error) {
@@ -104,7 +111,7 @@ class AuthController {
       const {email, password, username} = req.body;
 
       const usedEmailResult = await UserRepository.findOneBy({
-        email
+        where: { email },
       });
 
       if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
@@ -113,7 +120,7 @@ class AuthController {
       }
       
       const usernameResult = await UserRepository.findOneBy({
-        username
+        where: { username },
       });
 
       if(usernameResult.isSuccess() && usernameResult.value?.id) {
@@ -240,7 +247,7 @@ class AuthController {
       const { email } = req.body;
 
       const userResult = await UserRepository.findOneBy({
-        email
+        where: { email },
       })
 
       if(userResult.isFailure() || !userResult.value?.id) {

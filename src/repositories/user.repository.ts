@@ -3,6 +3,7 @@ import { Errors } from "../constants/error";
 import { Either, Failure, Success } from "../utils/either";
 import { IUser } from "../config/models/user.model";
 import { User } from "../config/db/entity";
+import { FindOneOptions } from "typeorm";
 
 interface IFindAll {
   sort?: { [key: string]: 'ASC' | 'DESC' };
@@ -75,9 +76,9 @@ export class UserRepository {
     }
   }
 
-  static async findOneBy(conditions: Partial<User>): Promise<Either<Errors, User | null>> {
+  static async findOneBy(options: FindOneOptions<User>): Promise<Either<Errors, User | null>> {
     try {
-      const user = await this.repository.findOne({ where: conditions });
+      const user = await this.repository.findOne(options);
       return Success.create(user);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
