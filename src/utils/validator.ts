@@ -20,7 +20,9 @@ export function Validate(schemas: ValidationSchema) {
         if (schemas.body) {
           const bodyValidation = schemas.body.safeParse(req.body);
           if (!bodyValidation.success) {
-            return badRequest(res, bodyValidation.error.issues[0].message);
+            return badRequest(res, {
+              message: bodyValidation.error.issues[0].message,
+            });
           }
           req.body = bodyValidation.data;
         }
@@ -28,7 +30,9 @@ export function Validate(schemas: ValidationSchema) {
         if (schemas.query) {
           const queryValidation = schemas.query.safeParse(req.query);
           if (!queryValidation.success) {
-            return badRequest(res, queryValidation.error.issues[0].message);
+            return badRequest(res, {
+              message: queryValidation.error.issues[0].message,
+            });
           }
           req.query = queryValidation.data;
         }
@@ -36,14 +40,18 @@ export function Validate(schemas: ValidationSchema) {
         if (schemas.params) {
           const paramsValidation = schemas.params.safeParse(req.params);
           if (!paramsValidation.success) {
-            return badRequest(res, paramsValidation.error.issues[0].message);
+            return badRequest(res, {
+              message: paramsValidation.error.issues[0].message,
+            });
           }
           req.params = paramsValidation.data;
         }
 
         return await originalMethod.call(this, req, res, next);
       } catch (error) {
-        return badRequest(res, error instanceof z.ZodError ? error.issues[0].message : Errors.SERVER_ERROR);
+        return badRequest(res, {
+          message: error instanceof Error ? error.message : Errors.SERVER_ERROR,
+        });
       }
     };
 

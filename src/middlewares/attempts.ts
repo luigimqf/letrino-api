@@ -1,7 +1,7 @@
 import {Response, NextFunction} from 'express';
 import { AttemptRepository } from '../repositories/attempt.repository';
-import { badRequest } from '../utils/http-status';
-import { Errors } from '../constants/error';
+import { badRequest, serverError, unauthorized } from '../utils/http-status';
+import { ErrorCode, Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
 import { AuthenticateRequest } from '../types';
 
@@ -10,7 +10,7 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
     const id = req.userId;
 
     if(!id) {
-      badRequest(res, Errors.UNAUTHORIZED)
+      unauthorized(res)
       return;
     }
 
@@ -29,7 +29,10 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
     });
 
     if(correctAttempsResult.isSuccess() && correctAttempsResult.value > 0){
-      badRequest(res, Errors.ALREADY_GOT_RIGHT)
+      badRequest(res, {
+        message: Errors.ALREADY_GOT_RIGHT,
+        code: ErrorCode.ALREADY_GOT_RIGHT
+      })
       return;
     }
 
@@ -43,13 +46,16 @@ export async function checkAttempts(req: AuthenticateRequest,res:Response,next: 
     })
 
     if(failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 6) {
-      badRequest(res, Errors.ALREADY_FAILED)
+      badRequest(res, {
+        message: Errors.ALREADY_FAILED,
+        code: ErrorCode.ALREADY_FAILED
+      })
       return;
     }
 
     next()
   } catch (error) {
-    badRequest(res,Errors.SERVER_ERROR)
+    serverError(res)
     return;
   }
 }

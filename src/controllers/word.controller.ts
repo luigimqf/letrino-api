@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import z from "zod";
 import { Response } from "express";
-import { badRequest, notFound, ok, serverError } from "../utils/http-status";
+import { badRequest, notFound, ok, serverError, unauthorized } from "../utils/http-status";
 import { StatisticRepository } from "../repositories/statistic.repository";
 import { AttemptRepository } from "../repositories/attempt.repository";
 import { ATTEMPT_SCORES, BONUS_SCORES, HIGH_WIN_RATE_THRESHOLD, EStatistics } from "../constants/statistic";
 import { WordRepository } from "../repositories/word.repository";
 import { UsedWordRepository } from "../repositories/used_word.repository";
-import { Errors } from "../constants/error";
+import { ErrorCode, Errors } from "../constants/error";
 import { SkippedAttemptRepository } from "../repositories/skipped_attempt.repository";
 import { AuthenticateRequest } from "../types";
 import { IUsedWord } from "../config/models/used_word.model";
@@ -73,7 +73,7 @@ class WordController {
       const id = req.userId;
 
       if(!id) {
-        badRequest(res, Errors.UNAUTHORIZED);
+        unauthorized(res);
         return;
       }
 
@@ -82,14 +82,17 @@ class WordController {
       const wordIdResult = await UsedWordRepository.findTodaysWord();
 
       if(wordIdResult.isFailure()) {
-        notFound(res, Errors.NOT_FOUND);
+        notFound(res);
         return;
       }
 
       const todaysWord = await WordRepository.find(wordIdResult.value?.wordId!);
 
       if(todaysWord.isFailure() || (todaysWord.isSuccess() && !todaysWord.value.id)){
-        notFound(res, Errors.NOT_FOUND_WORD)
+        notFound(res, {
+          message: Errors.NOT_FOUND_WORD,
+          code: ErrorCode.NOT_FOUND_WORD
+        })
         return;
       }
 
@@ -101,7 +104,10 @@ class WordController {
         }
 
         if(statisticResult.isFailure()) {
-          badRequest(res, "Error creating user statistics");
+          badRequest(res, {
+            message: Errors.CREATE_USER_STATISTIC_FAILED,
+            code: ErrorCode.CREATE_USER_STATISTIC_FAILED
+          });
           return;
         }
 
@@ -129,7 +135,10 @@ class WordController {
         });
     
         if(incorrectAttemptsResult.isFailure()) {
-          badRequest(res, "Error calculating new score")
+          badRequest(res, {
+            message: Errors.CALCULATE_NEW_SCORE_FAILED,
+            code: ErrorCode.CALCULATE_NEW_SCORE_FAILED
+          })
           return;
         }
 
@@ -174,7 +183,10 @@ class WordController {
         return;
       }
 
-      badRequest(res, Errors.INCORRECT_ATTEMPT)
+      badRequest(res, {
+        message: Errors.INCORRECT_ATTEMPT,
+        code: ErrorCode.INCORRECT_ATTEMPT
+      })
       
     } catch (error) {
       serverError(res);
@@ -187,7 +199,7 @@ class WordController {
       const id = req.userId;
 
       if(!id) {
-        badRequest(res, Errors.UNAUTHORIZED);
+        unauthorized(res);
         return;
       }
 
@@ -203,7 +215,10 @@ class WordController {
       const todaysWordResult = await WordRepository.find(todaysWordId.value?.wordId!);
 
       if(todaysWordResult.isFailure() || (todaysWordResult.isSuccess() && !todaysWordResult.value.id)){
-        notFound(res, Errors.NOT_FOUND_WORD)
+        notFound(res, {
+          message: Errors.NOT_FOUND_WORD,
+          code: ErrorCode.NOT_FOUND_WORD
+        })
         return;
       }
 
@@ -215,7 +230,10 @@ class WordController {
         }
 
         if(statisticResult.isFailure()) {
-          badRequest(res, "Error creating user statistics");
+          badRequest(res, {
+            message: Errors.CREATE_USER_STATISTIC_FAILED,
+            code: ErrorCode.CREATE_USER_STATISTIC_FAILED
+          });
           return;
         }
 
@@ -243,7 +261,10 @@ class WordController {
         });
 
         if(incorrectAttemptsResult.isFailure()) {
-          badRequest(res, "Error calculating attempts")
+          badRequest(res, {
+            message: Errors.CALCULATE_ATTEMPTS_FAILED,
+            code: ErrorCode.CALCULATE_ATTEMPTS_FAILED
+          })
           return;
         }
 
@@ -270,7 +291,10 @@ class WordController {
         return;
       }
 
-      badRequest(res, Errors.CORRECT_ATTEMPT)
+      badRequest(res, {
+        message: Errors.CORRECT_ATTEMPT,
+        code: ErrorCode.CORRECT_ATTEMPT
+      })
       
     } catch (error) {
       serverError(res);
@@ -282,7 +306,7 @@ class WordController {
       const id = req.userId;
 
       if(!id) {
-        badRequest(res, Errors.UNAUTHORIZED)
+        unauthorized(res)
         return;
       }
 
@@ -300,14 +324,20 @@ class WordController {
       })
 
       if(todaySkippedResult.isSuccess() && todaySkippedResult.value?.id) {
-        badRequest(res,"Skipped Document found")
+        badRequest(res, {
+          message: Errors.SKIPPED_ATTEMPT_DOC,
+          code: ErrorCode.SKIPPED_ATTEMPT_DOC
+        })
         return;
       }
 
       const todaysWordResult = await UsedWordRepository.findTodaysWord();
 
       if(todaysWordResult.isFailure() || !todaysWordResult.value?.id) {
-        notFound(res, Errors.NOT_FOUND_WORD)
+        notFound(res, {
+          message: Errors.NOT_FOUND_WORD,
+          code: ErrorCode.NOT_FOUND_WORD
+        })
         return;
       }
 
@@ -330,7 +360,7 @@ class WordController {
       const id = req.userId;
 
       if(!id) {
-        badRequest(res, Errors.UNAUTHORIZED)
+        unauthorized(res)
         return;
       }
 
@@ -339,7 +369,10 @@ class WordController {
       })
 
       if(deleteDocResult.isFailure() || (deleteDocResult.isSuccess() && !deleteDocResult.value?.id)) {
-        notFound(res, Errors.NOT_FOUND_DOCUMENT)
+        notFound(res, {
+          message: Errors.NOT_FOUND_DOCUMENT,
+          code: ErrorCode.NOT_FOUND_DOCUMENT
+        })
         return;
       }
 

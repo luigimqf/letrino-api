@@ -1,6 +1,6 @@
 import { Response } from 'express'
 import z from 'zod';
-import { Errors } from '../constants/error';
+import { ErrorCode, Errors } from '../constants/error';
 import { notFound, ok, serverError } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { StatisticRepository } from '../repositories/statistic.repository';
@@ -24,7 +24,7 @@ class LeaderboardController {
       const statisticsResult = await StatisticRepository.findTopScores(10);
 
       if(statisticsResult.isFailure()) {
-        notFound(res, statisticsResult.error);
+        notFound(res);
         return;
       }
       
@@ -117,7 +117,10 @@ class LeaderboardController {
       });
 
       if(updateResult.isFailure()) {
-        notFound(res, updateResult.error);
+        serverError(res, {
+          message: Errors.UPDATE_SCORE_FAILED,
+          code: ErrorCode.UPDATE_SCORE_FAILED
+        });
         return;
       }
       

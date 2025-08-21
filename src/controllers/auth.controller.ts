@@ -1,8 +1,8 @@
 import {Response} from 'express';
 import {z} from 'zod';
 import bcrypt from 'bcryptjs';
-import { Errors } from '../constants/error';
-import { badRequest, found, notFound, ok, serverError } from '../utils/http-status';
+import { ErrorCode, Errors } from '../constants/error';
+import { badRequest, found, notFound, ok, serverError, unauthorized } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { StatisticRepository } from '../repositories/statistic.repository';
 import { Jwt } from '../utils/jwt';
@@ -74,7 +74,7 @@ class AuthController {
       });
 
       if(userResult.isFailure() || !userResult.value) {
-        notFound(res, Errors.NOT_FOUND_USER);
+        notFound(res);
         return;
       }
 
@@ -83,7 +83,7 @@ class AuthController {
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
       if (!isPasswordValid) {
-        badRequest(res, Errors.INVALID_CREDENTIALS);
+        badRequest(res, {message: Errors.INVALID_CREDENTIALS, code: ErrorCode.INVALID_CREDENTIALS});
         return;
       }
 
@@ -115,7 +115,10 @@ class AuthController {
       });
 
       if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
-        found(res, Errors.FOUND_EMAIL);
+        found(res, {
+          message: Errors.FOUND_EMAIL,
+          code: ErrorCode.FOUND_EMAIL
+        });
         return;
       }
       
@@ -124,7 +127,10 @@ class AuthController {
       });
 
       if(usernameResult.isSuccess() && usernameResult.value?.id) {
-        found(res, Errors.FOUND_USERNAME);
+        found(res, {
+          message: Errors.FOUND_USERNAME,
+          code: ErrorCode.FOUND_USERNAME
+        });
         return;
       }
 
@@ -137,17 +143,17 @@ class AuthController {
       });
 
       if(newUserResult.isFailure()) {
-        serverError(res, newUserResult.error);
+        serverError(res);
         return;
       }
 
       const newUser = newUserResult.value;
       await StatisticRepository.create(newUser.id);
 
-      ok(res, null, Success.USER_CREATED);
+      ok(res);
 
     } catch (error) {
-      serverError(res, Errors.SERVER_ERROR);
+      serverError(res);
     }
   }
 
@@ -156,14 +162,17 @@ class AuthController {
       const id = req.userId;
 
       if(!id) {
-        badRequest(res, Errors.UNAUTHORIZED);
+        unauthorized(res);
         return;
       }
 
       const userResult = await UserRepository.findById(id);
 
       if(userResult.isFailure() || !userResult.value.id) {
-        notFound(res, Errors.NOT_FOUND_USER);
+        notFound(res, {
+          message: Errors.NOT_FOUND_USER,
+          code: ErrorCode.NOT_FOUND_USER
+        });
         return 
       }
 
@@ -194,7 +203,10 @@ class AuthController {
       const jwtResult = Jwt.verify(refresh_token);
 
       if(jwtResult.isFailure()) {
-        badRequest(res, Errors.INVALID_TOKEN);
+        unauthorized(res, {
+          message: Errors.INVALID_TOKEN,
+          code: ErrorCode.INVALID_TOKEN
+        });
         return;
       }
 
@@ -222,7 +234,10 @@ class AuthController {
       const decodedResult = Jwt.verify(token)
 
       if(decodedResult.isFailure()) {
-        badRequest(res, Errors.INVALID_TOKEN)
+        unauthorized(res, {
+          message: Errors.INVALID_TOKEN,
+          code: ErrorCode.INVALID_TOKEN
+        });
         return;
       }
 
@@ -231,13 +246,13 @@ class AuthController {
       });
 
       if(updateResult.isFailure()) {
-        notFound(res, Errors.NOT_FOUND)
+        notFound(res)
         return;
       }
 
-      ok(res, null, Success.PASSWORD_RESET);
+      ok(res);
     } catch (error) {
-      serverError(res, Errors.SERVER_ERROR)
+      serverError(res)
     }
   }
 
@@ -251,7 +266,7 @@ class AuthController {
       })
 
       if(userResult.isFailure() || !userResult.value?.id) {
-        notFound(res, Errors.NOT_FOUND)
+        notFound(res)
         return;
       }
 
@@ -275,7 +290,7 @@ class AuthController {
         html
       })
 
-      ok(res, null, Success.PASSWORD_RESET_REQUESTED);
+      ok(res);
 
       return;
     } catch (error) {
