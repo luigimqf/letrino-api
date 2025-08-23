@@ -30,6 +30,10 @@ function setupRoutes(app: Express) {
     res.send('Hello World!');
   });
 
+  app.get('/crash', async (req, res) => {
+    throw new Error('Crash test');
+  });
+
   app.post('/', async (_, res) => {
     try {
       res.status(200).json('Alive');
