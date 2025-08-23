@@ -100,7 +100,7 @@ class AuthController {
         return;
       }
 
-      const { id, passwordHash: userPassword } = userResult.value;
+      const { id, passwordHash: userPassword, username } = userResult.value;
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
@@ -118,6 +118,7 @@ class AuthController {
       ok(res, {
         token,
         refresh_token: refreshToken,
+        username,
       });
     } catch (error) {
       console.error('SignIn error:', error);
