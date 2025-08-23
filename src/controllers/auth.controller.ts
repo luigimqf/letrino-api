@@ -1,16 +1,23 @@
-import {Response} from 'express';
-import {z} from 'zod';
+import { Response } from 'express';
+import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { ErrorCode, Errors } from '../constants/error';
-import { badRequest, found, notFound, ok, serverError, unauthorized } from '../utils/http-status';
+import {
+  badRequest,
+  found,
+  notFound,
+  ok,
+  serverError,
+  unauthorized,
+} from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { StatisticRepository } from '../repositories/statistic.repository';
 import { Jwt } from '../utils/jwt';
 import { HOUR_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer';
 import { env } from '../config/enviroment';
 import Handlebars from 'handlebars';
-import fs from "fs"
+import fs from 'fs';
 import path from 'path';
 import { AuthenticateRequest } from '../types';
 import { Success } from '../constants/success';
@@ -20,47 +27,58 @@ import { getRandomAvatar } from '../constants/avatar';
 const createUserSchema = z.object({
   username: z
     .string()
-    .min(5, {message: "Must have at least 5 characteres"})
+    .min(5, { message: 'Must have at least 5 characteres' })
     .regex(/^[a-zA-Z0-9]+$/, {
       message: 'Only alphanumeric characters without spaces are allowed',
     })
-    .nonempty("Username is required"),
+    .nonempty('Username is required'),
   email: z.string().email('Email is invalid'),
-  password: z.string({
-    message: 'Password must be a string'
-  }).nonempty("password is required")
+  password: z
+    .string({
+      message: 'Password must be a string',
+    })
+    .nonempty('password is required'),
 });
 
 const loginSchema = z.object({
-  email: z.string({
-    message: Errors.REQUIRED_EMAIL
-  }).email(Errors.INVALID_EMAIL),
+  email: z
+    .string({
+      message: Errors.REQUIRED_EMAIL,
+    })
+    .email(Errors.INVALID_EMAIL),
   password: z.string({
-    message: Errors.REQUIRED_PASSWORD
-  })
+    message: Errors.REQUIRED_PASSWORD,
+  }),
 });
 
 const refreshTokenSchema = z.object({
-  refresh_token: z.string({
-    message: Errors.REQUIRED_REFRESH_TOKEN
-  }).nonempty(Errors.REQUIRED_REFRESH_TOKEN)
+  refresh_token: z
+    .string({
+      message: Errors.REQUIRED_REFRESH_TOKEN,
+    })
+    .nonempty(Errors.REQUIRED_REFRESH_TOKEN),
 });
 
 const passwordResetSchema = z.object({
   token: z.string().nonempty('Token is required'),
-  newPassword: z.string({
-    message: Errors.REQUIRED_PASSWORD
-  }).nonempty(Errors.REQUIRED_PASSWORD)
+  newPassword: z
+    .string({
+      message: Errors.REQUIRED_PASSWORD,
+    })
+    .nonempty(Errors.REQUIRED_PASSWORD),
 });
 
 const emailSchema = z.object({
-  email: z.string({
-    message: Errors.REQUIRED_EMAIL
-  }).email(Errors.INVALID_EMAIL).nonempty(Errors.REQUIRED_EMAIL)
+  email: z
+    .string({
+      message: Errors.REQUIRED_EMAIL,
+    })
+    .email(Errors.INVALID_EMAIL)
+    .nonempty(Errors.REQUIRED_EMAIL),
 });
 
 class AuthController {
-  @Validate({body: loginSchema})
+  @Validate({ body: loginSchema })
   async signIn(req: AuthenticateRequest, res: Response) {
     try {
       const { email, password } = req.body;
@@ -69,36 +87,37 @@ class AuthController {
         relations: ['statistic'],
         select: {
           statistic: {
-            score: true
-          }
-        }
+            score: true,
+          },
+        },
       });
 
-      if(userResult.isFailure() || !userResult.value) {
-        notFound(res);
+      if (userResult.isFailure() || !userResult.value) {
+        notFound(res, {
+          message: Errors.USER_NOT_FOUND,
+          code: ErrorCode.USER_NOT_FOUND,
+        });
         return;
       }
 
-      const {id, username, passwordHash: userPassword, avatar, statistic} = userResult.value
+      const { id, passwordHash: userPassword } = userResult.value;
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 
       if (!isPasswordValid) {
-        badRequest(res, {message: Errors.INVALID_CREDENTIALS, code: ErrorCode.INVALID_CREDENTIALS});
+        badRequest(res, {
+          message: Errors.INVALID_CREDENTIALS,
+          code: ErrorCode.INVALID_CREDENTIALS,
+        });
         return;
       }
 
-      const token = Jwt.sign({email, id}, HOUR_IN_SECONDS);
-      const refreshToken = Jwt.sign({email, id}, WEEK_IN_SECONDS);
-    
+      const token = Jwt.sign({ email, id }, HOUR_IN_SECONDS);
+      const refreshToken = Jwt.sign({ email, id }, WEEK_IN_SECONDS);
+
       ok(res, {
         token,
         refresh_token: refreshToken,
-        user: {
-          avatar,
-          username,
-          score: statistic?.score || 0,
-        }
       });
     } catch (error) {
       console.error('SignIn error:', error);
@@ -106,31 +125,31 @@ class AuthController {
     }
   }
 
-  @Validate({body: createUserSchema})
+  @Validate({ body: createUserSchema })
   async signUp(req: AuthenticateRequest, res: Response) {
     try {
-      const {email, password, username} = req.body;
+      const { email, password, username } = req.body;
 
       const usedEmailResult = await UserRepository.findOneBy({
         where: { email },
       });
 
-      if(usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
+      if (usedEmailResult.isSuccess() && usedEmailResult.value?.id) {
         found(res, {
           message: Errors.FOUND_EMAIL,
-          code: ErrorCode.FOUND_EMAIL
+          code: ErrorCode.FOUND_EMAIL,
         });
         return;
       }
-      
+
       const usernameResult = await UserRepository.findOneBy({
         where: { username },
       });
 
-      if(usernameResult.isSuccess() && usernameResult.value?.id) {
+      if (usernameResult.isSuccess() && usernameResult.value?.id) {
         found(res, {
           message: Errors.FOUND_USERNAME,
-          code: ErrorCode.FOUND_USERNAME
+          code: ErrorCode.FOUND_USERNAME,
         });
         return;
       }
@@ -144,7 +163,7 @@ class AuthController {
         avatar: getRandomAvatar(),
       });
 
-      if(newUserResult.isFailure()) {
+      if (newUserResult.isFailure()) {
         serverError(res);
         return;
       }
@@ -153,7 +172,6 @@ class AuthController {
       await StatisticRepository.create(newUser.id);
 
       ok(res);
-
     } catch (error) {
       serverError(res);
     }
@@ -163,140 +181,144 @@ class AuthController {
     try {
       const id = req.userId;
 
-      if(!id) {
+      if (!id) {
         unauthorized(res);
         return;
       }
 
       const userResult = await UserRepository.findById(id);
 
-      if(userResult.isFailure() || !userResult.value.id) {
+      if (userResult.isFailure() || !userResult.value.id) {
         notFound(res, {
-          message: Errors.NOT_FOUND_USER,
-          code: ErrorCode.NOT_FOUND_USER
+          message: Errors.USER_NOT_FOUND,
+          code: ErrorCode.USER_NOT_FOUND,
         });
-        return 
+        return;
       }
 
-      const {username, avatar} = userResult.value;
+      const { username, avatar } = userResult.value;
 
       let score = 0;
       const statisticResult = await StatisticRepository.findByUserId(id);
-      
-      if(statisticResult.isSuccess() && statisticResult.value) {
+
+      if (statisticResult.isSuccess() && statisticResult.value) {
         score = statisticResult.value.score;
       }
 
       ok(res, {
         avatar,
         username,
-        score
-      })
+        score,
+      });
     } catch (error) {
-      serverError(res)
+      serverError(res);
     }
   }
 
-  @Validate({body: refreshTokenSchema})
+  @Validate({ body: refreshTokenSchema })
   async refreshToken(req: AuthenticateRequest, res: Response) {
     try {
       const { refresh_token } = req.body;
 
       const jwtResult = Jwt.verify(refresh_token);
 
-      if(jwtResult.isFailure()) {
+      if (jwtResult.isFailure()) {
         unauthorized(res, {
           message: Errors.INVALID_TOKEN,
-          code: ErrorCode.INVALID_TOKEN
+          code: ErrorCode.INVALID_TOKEN,
         });
         return;
       }
 
       const id = jwtResult.value;
-      const newToken = Jwt.sign({id});
-      const newRefreshToken = Jwt.sign({id}, WEEK_IN_SECONDS);
+      const newToken = Jwt.sign({ id });
+      const newRefreshToken = Jwt.sign({ id }, WEEK_IN_SECONDS);
 
       ok(res, {
         success: true,
         token: newToken,
-        refresh_token: newRefreshToken
-      })
+        refresh_token: newRefreshToken,
+      });
       return;
-      
     } catch (error) {
       serverError(res);
     }
   }
 
-  @Validate({body: passwordResetSchema})
+  @Validate({ body: passwordResetSchema })
   async refreshPassword(req: AuthenticateRequest, res: Response) {
     try {
       const { token, newPassword } = req.body;
 
-      const decodedResult = Jwt.verify(token)
+      const decodedResult = Jwt.verify(token);
 
-      if(decodedResult.isFailure()) {
+      if (decodedResult.isFailure()) {
         unauthorized(res, {
           message: Errors.INVALID_TOKEN,
-          code: ErrorCode.INVALID_TOKEN
+          code: ErrorCode.INVALID_TOKEN,
         });
         return;
       }
 
       const updateResult = await UserRepository.update(decodedResult.value.id, {
-        passwordHash: bcrypt.hashSync(newPassword, 10)
+        passwordHash: bcrypt.hashSync(newPassword, 10),
       });
 
-      if(updateResult.isFailure()) {
-        notFound(res)
+      if (updateResult.isFailure()) {
+        notFound(res);
         return;
       }
 
       ok(res);
     } catch (error) {
-      serverError(res)
+      serverError(res);
     }
   }
 
-  @Validate({body: emailSchema})
+  @Validate({ body: emailSchema })
   async forgotPassword(req: AuthenticateRequest, res: Response) {
     try {
       const { email } = req.body;
 
       const userResult = await UserRepository.findOneBy({
         where: { email },
-      })
+      });
 
-      if(userResult.isFailure() || !userResult.value?.id) {
-        notFound(res)
+      if (userResult.isFailure() || !userResult.value?.id) {
+        notFound(res);
         return;
       }
 
-      const token = Jwt.sign({id: userResult.value?.id}, HOUR_IN_SECONDS);
+      const token = Jwt.sign({ id: userResult.value?.id }, HOUR_IN_SECONDS);
 
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: 'gmail',
         auth: {
           user: env.EMAIL_USER,
-          pass: env.EMAIL_PASSWORD
+          pass: env.EMAIL_PASSWORD,
         },
-      })
+      });
 
-      const emailSource = fs.readFileSync(path.join(__dirname, "../views/forgot-password.hbs"), "utf8")
+      const emailSource = fs.readFileSync(
+        path.join(__dirname, '../views/forgot-password.hbs'),
+        'utf8'
+      );
       const template = Handlebars.compile(emailSource);
-      const html = template({RESET_LINK: `${env.PASSWORD_RESET_URL}?token=${token}`})
+      const html = template({
+        RESET_LINK: `${env.PASSWORD_RESET_URL}?token=${token}`,
+      });
 
       await transporter.sendMail({
         to: userResult.value.email,
-        subject: "Password Reset",
-        html
-      })
+        subject: 'Password Reset',
+        html,
+      });
 
       ok(res);
 
       return;
     } catch (error) {
-      serverError(res)
+      serverError(res);
     }
   }
 }
@@ -307,5 +329,7 @@ export const signIn = authController.signIn.bind(authController);
 export const signUp = authController.signUp.bind(authController);
 export const getUserData = authController.getUserData.bind(authController);
 export const refreshToken = authController.refreshToken.bind(authController);
-export const refreshPassword = authController.refreshPassword.bind(authController);
-export const forgotPassword = authController.forgotPassword.bind(authController);
+export const refreshPassword =
+  authController.refreshPassword.bind(authController);
+export const forgotPassword =
+  authController.forgotPassword.bind(authController);

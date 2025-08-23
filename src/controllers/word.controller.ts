@@ -90,8 +90,8 @@ class WordController {
 
       if(todaysWord.isFailure() || (todaysWord.isSuccess() && !todaysWord.value.id)){
         notFound(res, {
-          message: Errors.NOT_FOUND_WORD,
-          code: ErrorCode.NOT_FOUND_WORD
+          message: Errors.WORD_NOT_FOUND,
+          code: ErrorCode.WORD_NOT_FOUND
         })
         return;
       }
@@ -216,8 +216,8 @@ class WordController {
 
       if(todaysWordResult.isFailure() || (todaysWordResult.isSuccess() && !todaysWordResult.value.id)){
         notFound(res, {
-          message: Errors.NOT_FOUND_WORD,
-          code: ErrorCode.NOT_FOUND_WORD
+          message: Errors.WORD_NOT_FOUND,
+          code: ErrorCode.WORD_NOT_FOUND
         })
         return;
       }
@@ -335,8 +335,8 @@ class WordController {
 
       if(todaysWordResult.isFailure() || !todaysWordResult.value?.id) {
         notFound(res, {
-          message: Errors.NOT_FOUND_WORD,
-          code: ErrorCode.NOT_FOUND_WORD
+          message: Errors.WORD_NOT_FOUND,
+          code: ErrorCode.WORD_NOT_FOUND
         })
         return;
       }
