@@ -189,6 +189,7 @@ class WordController {
           statisticId: statistic.id,
           wordId: todaysWord.value.id,
           result: EStatistics.CORRECT,
+          userInput: attempt,
         });
 
         const today = new Date();
@@ -333,6 +334,7 @@ class WordController {
           statisticId: statistic.id,
           wordId: todaysWordResult.value.id,
           result: EStatistics.INCORRECT,
+          userInput: attempt,
         });
 
         const today = new Date();

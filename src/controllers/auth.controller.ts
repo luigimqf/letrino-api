@@ -184,44 +184,6 @@ class AuthController {
     }
   }
 
-  async getUserData(req: AuthenticateRequest, res: Response) {
-    try {
-      const id = req.userId;
-
-      if (!id) {
-        unauthorized(res);
-        return;
-      }
-
-      const userResult = await UserRepository.findById(id);
-
-      if (userResult.isFailure() || !userResult.value.id) {
-        notFound(res, {
-          message: Errors.USER_NOT_FOUND,
-          code: ErrorCode.USER_NOT_FOUND,
-        });
-        return;
-      }
-
-      const { username, avatar } = userResult.value;
-
-      let score = 0;
-      const statisticResult = await StatisticRepository.findByUserId(id);
-
-      if (statisticResult.isSuccess() && statisticResult.value) {
-        score = statisticResult.value.score;
-      }
-
-      ok(res, {
-        avatar,
-        username,
-        score,
-      });
-    } catch (error) {
-      serverError(res);
-    }
-  }
-
   @Validate({ body: refreshTokenSchema })
   async refreshToken(req: AuthenticateRequest, res: Response) {
     try {
@@ -334,7 +296,6 @@ const authController = new AuthController();
 
 export const signIn = authController.signIn.bind(authController);
 export const signUp = authController.signUp.bind(authController);
-export const getUserData = authController.getUserData.bind(authController);
 export const refreshToken = authController.refreshToken.bind(authController);
 export const refreshPassword =
   authController.refreshPassword.bind(authController);

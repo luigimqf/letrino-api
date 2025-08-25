@@ -4,7 +4,6 @@ import {
   refreshToken,
   refreshPassword,
   signUp,
-  getUserData,
 } from '../controllers/auth.controller';
 import { getLeaderboard } from '../controllers/leaderboard.controller';
 import { Express } from 'express';
@@ -19,6 +18,8 @@ import {
 } from '../controllers/word.controller';
 import { checkAttempts } from '../middlewares/attempts';
 import { getStatistics } from '../controllers/statistic.controller';
+import { getUserData } from '../controllers/user.controller';
+import { getUserAttempts } from '../controllers/attempt.controller';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto
@@ -51,6 +52,8 @@ function setupRoutes(app: Express) {
   app.get('/user-data', authenticate, getUserData);
 
   app.get('/user-statistic', authenticate, getStatistics);
+
+  app.get('/user-attempts', authenticate, getUserAttempts);
 
   app.post('/refresh-token', refreshToken);
 
