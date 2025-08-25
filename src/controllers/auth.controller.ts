@@ -100,7 +100,13 @@ class AuthController {
         return;
       }
 
-      const { id, passwordHash: userPassword, username } = userResult.value;
+      const {
+        id,
+        passwordHash: userPassword,
+        username,
+        avatar,
+        statistic,
+      } = userResult.value;
 
       const isPasswordValid = bcrypt.compareSync(password, userPassword);
 

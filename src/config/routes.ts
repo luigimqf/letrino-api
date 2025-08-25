@@ -18,7 +18,7 @@ import {
   attemptSuccess,
 } from '../controllers/word.controller';
 import { checkAttempts } from '../middlewares/attempts';
-import { env } from './enviroment';
+import { getStatistics } from '../controllers/statistic.controller';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto
@@ -49,6 +49,8 @@ function setupRoutes(app: Express) {
   app.post('/sign-up', signUp);
 
   app.get('/user-data', authenticate, getUserData);
+
+  app.get('/user-statistic', authenticate, getStatistics);
 
   app.post('/refresh-token', refreshToken);
 
