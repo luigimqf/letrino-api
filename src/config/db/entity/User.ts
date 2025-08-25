@@ -1,36 +1,49 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm'
-import { Statistic } from './Statistic'
-import { Attempt } from './Attempt'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  OneToOne,
+  ManyToMany,
+} from 'typeorm';
+import { Statistic } from './Statistic';
+import { Attempt } from './Attempt';
+import { UsedWord } from './UsedWord';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
-  username: string
+  username: string;
 
-  @Column({ 
-    type: 'varchar', 
-    default: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jade'
+  @Column({
+    type: 'varchar',
+    default: 'https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jade',
   })
-  avatar: string
+  avatar: string;
 
   @Column({ type: 'varchar', unique: true })
-  email: string
+  email: string;
 
   @Column({ type: 'varchar' })
-  passwordHash: string
+  passwordHash: string;
 
   @OneToOne(() => Statistic, statistic => statistic.user)
-  statistic: Statistic
+  statistic: Statistic;
 
   @OneToMany(() => Attempt, attempt => attempt.user)
-  attempts: Attempt[]
+  attempts: Attempt[];
+
+  @OneToMany(() => UsedWord, usedWord => usedWord.user)
+  usedWords: UsedWord[];
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt: Date;
 }

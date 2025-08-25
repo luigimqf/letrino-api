@@ -1,7 +1,7 @@
-import { AppDataSource } from "../config/db/data-source";
-import { UsedWord, Word } from "../config/db/entity";
-import { Errors } from "../constants/error";
-import { Either, Failure, Success } from "../utils/either";
+import { AppDataSource } from '../config/db/data-source';
+import { UsedWord, Word } from '../config/db/entity';
+import { Errors } from '../constants/error';
+import { Either, Failure, Success } from '../utils/either';
 
 export class WordRepository {
   private static repository = AppDataSource.getRepository(Word);
@@ -21,16 +21,18 @@ export class WordRepository {
     }
   }
 
-  static async findOneRandom(conditions: Partial<Word>): Promise<Either<Errors, Word | null>> {
+  static async findOneRandom(
+    conditions: Partial<Word>
+  ): Promise<Either<Errors, Word | null>> {
     try {
       const queryBuilder = this.repository.createQueryBuilder('word');
-      
+
       Object.entries(conditions).forEach(([key, value]) => {
         queryBuilder.andWhere(`word.${key} = :${key}`, { [key]: value });
       });
-      
+
       queryBuilder.orderBy('RANDOM()').limit(1);
-      
+
       const word = await queryBuilder.getOne();
       return Success.create(word);
     } catch (error) {
@@ -38,23 +40,30 @@ export class WordRepository {
     }
   }
 
-  static async findUnexistedWordIn(excludeIds: string[], size: number = 1, filter?: Partial<Word>): Promise<Either<Errors, Word | null>> {
-    console.log({ excludeIds, size, filter });
+  static async findUnexistedWordIn({
+    excludeIds,
+    size,
+    filter,
+  }: {
+    excludeIds: string[];
+    size?: number;
+    filter?: Partial<Word>;
+  }): Promise<Either<Errors, Word | null>> {
     try {
       const queryBuilder = this.repository.createQueryBuilder('word');
-      
+
       if (excludeIds.length > 0) {
         queryBuilder.where('word.id NOT IN (:...excludeIds)', { excludeIds });
       }
-      
+
       if (filter) {
         Object.entries(filter).forEach(([key, value]) => {
           queryBuilder.andWhere(`word.${key} = :${key}`, { [key]: value });
         });
       }
-      
+
       queryBuilder.orderBy('RANDOM()').limit(size);
-      
+
       const word = await queryBuilder.getOne();
       return Success.create(word);
     } catch (error) {
@@ -90,13 +99,13 @@ export class WordRepository {
       const excludeIds = usedWordIds.map(item => item.usedWord_wordId);
 
       const queryBuilder = this.repository.createQueryBuilder('word');
-      
+
       if (excludeIds.length > 0) {
         queryBuilder.where('word.id NOT IN (:...excludeIds)', { excludeIds });
       }
-      
+
       queryBuilder.orderBy('RANDOM()').limit(1);
-      
+
       const randomWord = await queryBuilder.getOne();
 
       if (!randomWord) {

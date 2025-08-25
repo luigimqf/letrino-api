@@ -1,24 +1,43 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Column } from 'typeorm'
-import { Word } from './Word'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+} from 'typeorm';
+import { Word } from './Word';
+import { User } from './User';
 
 @Entity('used_words')
 export class UsedWord {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
-  @ManyToOne(() => Word, word => word.usedWords)
-  @JoinColumn({ name: 'wordId' })
-  word: Word
+  @ManyToOne(() => User, user => user.usedWords)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
-  wordId: string
+  userId: string;
+
+  @ManyToOne(() => Word, word => word.usedWords, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'wordId' })
+  word: Word;
+
+  @Column()
+  wordId: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  deletedAt?: Date
+  deletedAt?: Date;
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt: Date;
 }

@@ -1,33 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Errors } from "../constants/error";
-import { Either, Failure, Success } from "../utils/either";
-import { UsedWord } from "../config/db/entity";
-import { IsNull } from "typeorm";
-import { AppDataSource } from "../config/db/data-source";
+import { Errors } from '../constants/error';
+import { Either, Failure, Success } from '../utils/either';
+import { UsedWord } from '../config/db/entity';
+import { IsNull } from 'typeorm';
+import { AppDataSource } from '../config/db/data-source';
 
 export class UsedWordRepository {
   private static repository = AppDataSource.getRepository(UsedWord);
 
-  static async find(conditions: Partial<UsedWord> = {}, distinct?: string): Promise<Either<Errors, unknown[] | UsedWord[]>> {
+  static async find(
+    conditions: Partial<UsedWord> = {},
+    distinct?: string
+  ): Promise<Either<Errors, unknown[] | UsedWord[]>> {
     try {
       let result;
-      
+
       if (distinct) {
         const queryBuilder = this.repository.createQueryBuilder('usedWord');
-        
+
         Object.entries(conditions).forEach(([key, value]) => {
           if (value === undefined) {
             queryBuilder.andWhere(`usedWord.${key} IS NULL`);
           } else {
-            queryBuilder.andWhere(`usedWord.${key} = :${key}`, { [key]: value });
+            queryBuilder.andWhere(`usedWord.${key} = :${key}`, {
+              [key]: value,
+            });
           }
         });
-        
-        const rawResult = await queryBuilder.select(`DISTINCT usedWord.${distinct}`).getRawMany();
+
+        const rawResult = await queryBuilder
+          .select(`DISTINCT usedWord.${distinct}`)
+          .getRawMany();
         result = rawResult.map(item => item[`usedWord_${distinct}`]);
       } else {
         const whereConditions: any = {};
-        
+
         Object.entries(conditions).forEach(([key, value]) => {
           if (value === undefined) {
             whereConditions[key] = IsNull();
@@ -35,19 +42,25 @@ export class UsedWordRepository {
             whereConditions[key] = value;
           }
         });
-        
+
         result = await this.repository.find({ where: whereConditions });
       }
-            
+
       return Success.create(result);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async createUsedWord({ wordId }: { wordId: string }): Promise<Either<Errors, UsedWord>> {
+  static async createUsedWord({
+    wordId,
+    id,
+  }: {
+    wordId: string;
+    id: string;
+  }): Promise<Either<Errors, UsedWord>> {
     try {
-      const newUsedWord = this.repository.create({ wordId });
+      const newUsedWord = this.repository.create({ wordId, userId: id });
       const savedUsedWord = await this.repository.save(newUsedWord);
       return Success.create(savedUsedWord);
     } catch (error) {
@@ -55,17 +68,22 @@ export class UsedWordRepository {
     }
   }
 
-  static async findTodaysWord(): Promise<Either<Errors, UsedWord | null>> {
+  static async findUserWord({
+    id,
+  }: {
+    id: string;
+  }): Promise<Either<Errors, UsedWord | null>> {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dayAtStart = new Date();
+      dayAtStart.setHours(0, 0, 0, 0);
+      const dayAtEnd = new Date();
+      dayAtEnd.setHours(23, 59, 59, 999);
 
       const todaysWord = await this.repository
         .createQueryBuilder('usedWord')
-        .where('usedWord.createdAt >= :today', { today })
-        .andWhere('usedWord.createdAt < :tomorrow', { tomorrow })
+        .where('usedWord.userId = :id', { id })
+        .andWhere('usedWord.createdAt >= :dayAtStart', { dayAtStart })
+        .andWhere('usedWord.createdAt < :dayAtEnd', { dayAtEnd })
         .andWhere('usedWord.deletedAt IS NULL')
         .getOne();
 
@@ -75,10 +93,27 @@ export class UsedWordRepository {
     }
   }
 
-  static async countDocuments(conditions?: Partial<UsedWord>): Promise<Either<Errors, number>> {
+  static async findUserUsedWords({
+    id,
+  }: {
+    id: string;
+  }): Promise<Either<Errors, UsedWord[] | null>> {
+    try {
+      const usedWords = await this.repository.find({
+        where: { userId: id, deletedAt: IsNull() },
+      });
+      return Success.create(usedWords);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  static async countDocuments(
+    conditions?: Partial<UsedWord>
+  ): Promise<Either<Errors, number>> {
     try {
       const whereConditions: any = {};
-      
+
       if (conditions) {
         Object.entries(conditions).forEach(([key, value]) => {
           if (value === undefined) {
@@ -88,7 +123,7 @@ export class UsedWordRepository {
           }
         });
       }
-      
+
       const count = await this.repository.count({ where: whereConditions });
       return Success.create(count);
     } catch (error) {
@@ -96,10 +131,13 @@ export class UsedWordRepository {
     }
   }
 
-  static async updateMany(filter: Partial<UsedWord>, updateData: Partial<UsedWord>): Promise<Either<Errors, boolean>> {
+  static async updateMany(
+    filter: Partial<UsedWord>,
+    updateData: Partial<UsedWord>
+  ): Promise<Either<Errors, boolean>> {
     try {
       const whereConditions: any = {};
-      
+
       Object.entries(filter).forEach(([key, value]) => {
         if (value === undefined) {
           whereConditions[key] = IsNull();
@@ -107,9 +145,11 @@ export class UsedWordRepository {
           whereConditions[key] = value;
         }
       });
-      
+
       const result = await this.repository.update(whereConditions, updateData);
-      return Success.create(result.affected !== undefined && result.affected > 0);
+      return Success.create(
+        result.affected !== undefined && result.affected > 0
+      );
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

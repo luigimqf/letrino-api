@@ -1,24 +1,68 @@
-import { UsedWordRepository } from "../repositories/used_word.repository"
-import { WordRepository } from "../repositories/word.repository";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { UsedWordRepository } from '../repositories/used_word.repository';
+import { WordRepository } from '../repositories/word.repository';
+import { AppDataSource } from '../config/db/data-source';
 
 export const updateUsedWords = async () => {
   try {
-    const usedWordResult = await UsedWordRepository.countDocuments({ deletedAt: undefined });
+    const totalWordsResult = await WordRepository.countDocuments();
 
-    const wordsResult = await WordRepository.countDocuments();
-
-    if(usedWordResult.isSuccess() && wordsResult.isSuccess()) {
-      if(usedWordResult.value === wordsResult.value) {
-        await UsedWordRepository.updateMany(
-          { deletedAt: undefined },
-          { deletedAt: new Date() }
-        )
-        console.log(`Updated UsedWords`)
-      }
+    if (totalWordsResult.isFailure()) {
+      console.error('Failed to get total words count');
+      return;
     }
 
-    console.log("updateUsedWords")
+    const totalWords = totalWordsResult.value;
+
+    if (totalWords === 0) {
+      console.log('No words available in database');
+      return;
+    }
+
+    const query = `
+      SELECT 
+        u.id as userId,
+        COUNT(uw.id) as usedWordsCount
+      FROM users u
+      LEFT JOIN used_words uw ON u.id = uw.userId AND uw.deletedAt IS NULL
+      GROUP BY u.id
+      HAVING COUNT(uw.id) >= ?
+    `;
+
+    const usersWithAllWordsUsed = await AppDataSource.query(query, [
+      totalWords,
+    ]);
+
+    if (usersWithAllWordsUsed.length === 0) {
+      console.log('No users have used all available words');
+      return;
+    }
+
+    const userIds = usersWithAllWordsUsed.map((row: any) => row.userId);
+
+    console.log(
+      `Found ${userIds.length} users who have used all ${totalWords} words`
+    );
+
+    const updateResult = await AppDataSource.createQueryBuilder()
+      .update('used_words')
+      .set({ deletedAt: new Date() })
+      .where('userId IN (:...userIds)', { userIds })
+      .andWhere('deletedAt IS NULL')
+      .execute();
+
+    console.log(
+      `Updated ${updateResult.affected} used_words records for ${userIds.length} users`
+    );
+
+    if (userIds.length <= 10) {
+      console.log(`Updated used_words for users: ${userIds.join(', ')}`);
+    } else {
+      console.log(
+        `Updated used_words for ${userIds.length} users (too many to list)`
+      );
+    }
   } catch (error) {
-    console.log(error)
+    console.error('Error in updateUsedWords:', error);
   }
-}
+};
