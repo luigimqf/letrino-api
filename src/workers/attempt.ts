@@ -2,13 +2,12 @@ import { StatisticRepository } from '../repositories/statistic.repository';
 import { AttemptRepository } from '../repositories/attempt.repository';
 import { EStatistics } from '../constants/statistic';
 import { SkippedAttemptRepository } from '../repositories/skipped_attempt.repository';
+import { DateUtils } from '../utils/date';
 
 export const createSkippedStatistics = async () => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = DateUtils.startOfDayUTC();
+    const tomorrow = DateUtils.endOfDayUTC();
 
     const skippedAttemptDocuments = await SkippedAttemptRepository.find({
       createdAt: {

@@ -2,6 +2,7 @@
 import { UsedWordRepository } from '../repositories/used_word.repository';
 import { WordRepository } from '../repositories/word.repository';
 import { AppDataSource } from '../config/db/data-source';
+import { DateUtils } from '../utils/date';
 
 export const updateUsedWords = async () => {
   try {
@@ -46,7 +47,7 @@ export const updateUsedWords = async () => {
 
     const updateResult = await AppDataSource.createQueryBuilder()
       .update('used_words')
-      .set({ deletedAt: new Date() })
+      .set({ deletedAt: DateUtils.now() })
       .where('userId IN (:...userIds)', { userIds })
       .andWhere('deletedAt IS NULL')
       .execute();

@@ -24,6 +24,8 @@ import { AuthenticateRequest } from '../types';
 import { IUsedWord } from '../config/models/used_word.model';
 import { Validate } from '../utils/validator';
 import { Jwt } from '../utils/jwt';
+import { UserRepository } from '../repositories/user.repository';
+import { DateUtils } from '../utils/date';
 
 const wordSchema = z.object({
   attempt: z
@@ -83,6 +85,7 @@ class WordController {
           },
         });
 
+        console.log({ randomWord, usedWords, userWord });
         if (randomWord.isSuccess() && randomWord.value) {
           const { word, isGolden } = randomWord.value;
 
@@ -192,10 +195,8 @@ class WordController {
           userInput: attempt,
         });
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const today = DateUtils.startOfDayUTC();
+        const tomorrow = DateUtils.endOfDayUTC();
 
         const incorrectAttemptsResult = await AttemptRepository.countDocuments({
           userId: id,
@@ -246,8 +247,26 @@ class WordController {
           scoreIncrement: scoreCalculated,
         });
 
+        const updatedStatistic = await StatisticRepository.findByUserId(id);
+        const userResult = await UserRepository.findById(id);
+
+        if (updatedStatistic.isFailure() || userResult.isFailure()) {
+          badRequest(res, {
+            message: Errors.CALCULATE_NEW_SCORE_FAILED,
+            code: ErrorCode.CALCULATE_NEW_SCORE_FAILED,
+          });
+          return;
+        }
+
+        const user = userResult.value!;
+        const finalStatistic = updatedStatistic.value!;
+
         ok(res, {
-          score: scoreCalculated,
+          user: {
+            score: finalStatistic.score,
+            username: user.username,
+            avatar: user.avatar,
+          },
           attempt: currentAttempt,
           bonuses: {
             perfectGame: currentAttempt === 1 ? BONUS_SCORES.PERFECT_GAME : 0,
@@ -256,7 +275,7 @@ class WordController {
                 ? currentStreak >= 10
                   ? BONUS_SCORES.STREAK_5
                   : BONUS_SCORES.STREAK_10
-                : null,
+                : 0,
             highWinRate:
               winRate >= HIGH_WIN_RATE_THRESHOLD && totalGames >= 10
                 ? BONUS_SCORES.HIGH_WIN_RATE
@@ -337,10 +356,8 @@ class WordController {
           userInput: attempt,
         });
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const today = DateUtils.startOfDayUTC();
+        const tomorrow = DateUtils.endOfDayUTC();
 
         const incorrectAttemptsResult = await AttemptRepository.countDocuments({
           userId: id,
@@ -400,10 +417,8 @@ class WordController {
         return;
       }
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = DateUtils.startOfDayUTC();
+      const tomorrow = DateUtils.endOfDayUTC();
 
       const todaySkippedResult = await SkippedAttemptRepository.findOne({
         userId: id,

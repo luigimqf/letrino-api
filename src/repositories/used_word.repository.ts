@@ -4,6 +4,7 @@ import { Either, Failure, Success } from '../utils/either';
 import { UsedWord } from '../config/db/entity';
 import { IsNull } from 'typeorm';
 import { AppDataSource } from '../config/db/data-source';
+import { DateUtils } from '../utils/date';
 
 export class UsedWordRepository {
   private static repository = AppDataSource.getRepository(UsedWord);
@@ -74,10 +75,8 @@ export class UsedWordRepository {
     id: string;
   }): Promise<Either<Errors, UsedWord | null>> {
     try {
-      const dayAtStart = new Date();
-      dayAtStart.setHours(0, 0, 0, 0);
-      const dayAtEnd = new Date();
-      dayAtEnd.setHours(23, 59, 59, 999);
+      const dayAtStart = DateUtils.startOfDayUTC();
+      const dayAtEnd = DateUtils.endOfDayUTC();
 
       const todaysWord = await this.repository
         .createQueryBuilder('usedWord')

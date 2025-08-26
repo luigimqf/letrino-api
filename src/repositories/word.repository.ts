@@ -1,6 +1,7 @@
 import { AppDataSource } from '../config/db/data-source';
 import { UsedWord, Word } from '../config/db/entity';
 import { Errors } from '../constants/error';
+import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 
 export class WordRepository {
@@ -73,10 +74,8 @@ export class WordRepository {
 
   static async findRandom(): Promise<Either<Errors, Word | null>> {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = DateUtils.startOfDayUTC();
+      const tomorrow = DateUtils.endOfDayUTC();
 
       const todaysWord = await this.usedWordRepository
         .createQueryBuilder('usedWord')

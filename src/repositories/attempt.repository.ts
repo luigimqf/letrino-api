@@ -3,6 +3,7 @@ import { AppDataSource } from '../config/db/data-source';
 import { Attempt } from '../config/db/entity/Attempt';
 import { Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
+import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 import { Between, MoreThanOrEqual, LessThan } from 'typeorm';
 
@@ -120,10 +121,8 @@ export class AttemptRepository {
     userId: string
   ): Promise<Either<Errors, Attempt[]>> {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = DateUtils.startOfDayUTC();
+      const tomorrow = DateUtils.endOfDayUTC();
 
       const attempts = await this.repository.find({
         where: {

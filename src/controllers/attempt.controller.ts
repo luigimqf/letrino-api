@@ -24,7 +24,14 @@ class AttemptController {
         return;
       }
 
-      ok(res, { attempts: attemptsResult.value });
+      const formattedAttempts = attemptsResult.value.map(attempt => ({
+        status: attempt.result,
+        userInput: attempt.userInput,
+      }));
+
+      ok(res, {
+        attempts: formattedAttempts,
+      });
     } catch (error) {
       console.error('GetUserAttempts error:', error);
       serverError(res);
