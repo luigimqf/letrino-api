@@ -1,15 +1,19 @@
 export class DateUtils {
-  /**
-   * Cria uma nova data em UTC
-   */
-  static now(): Date {
+  static now() {
     const now = new Date();
-    return new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    return new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds(),
+        now.getUTCMilliseconds()
+      )
+    );
   }
 
-  /**
-   * Cria uma data UTC a partir de componentes
-   */
   static utc(
     year?: number,
     month?: number,
@@ -35,30 +39,46 @@ export class DateUtils {
     );
   }
 
-  /**
-   * Retorna o início do dia em UTC
-   */
-  static startOfDayUTC(date?: Date): Date {
-    const d = date || new Date();
-    const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
-    utcDate.setUTCHours(0, 0, 0, 0);
-    return utcDate;
+  static startOfDayUTC(date = new Date()): Date {
+    return new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
   }
 
-  /**
-   * Retorna o fim do dia em UTC
-   */
-  static endOfDayUTC(date?: Date): Date {
-    const d = date || new Date();
-    const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
-    utcDate.setUTCHours(23, 59, 59, 999);
-    return utcDate;
+  static endOfDayUTC(date = new Date()): Date {
+    return new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
   }
 
-  /**
-   * Converte uma data local para UTC
-   */
-  static toUTC(date: Date): Date {
-    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  static toUtc(input = new Date()) {
+    const date = new Date(input);
+    return new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds(),
+        date.getUTCMilliseconds()
+      )
+    );
   }
 }
