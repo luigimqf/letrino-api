@@ -85,7 +85,6 @@ class WordController {
           },
         });
 
-        console.log({ randomWord, usedWords, userWord });
         if (randomWord.isSuccess() && randomWord.value) {
           const { word, isGolden } = randomWord.value;
 
@@ -102,7 +101,6 @@ class WordController {
           return;
         }
 
-        // Se não encontrou nenhuma palavra disponível
         notFound(res, {
           message: 'No words available',
         });
@@ -110,7 +108,6 @@ class WordController {
       }
 
       // Caso 3: Quando não tiver id (usuário não autenticado)
-      // Apenas sortear uma palavra sem registrar nada
       const randomWord = await WordRepository.findUnexistedWordIn({
         excludeIds: [],
         size: 1,
@@ -128,7 +125,6 @@ class WordController {
         return;
       }
 
-      // Se não conseguiu sortear nenhuma palavra
       notFound(res, {
         message: 'No words available',
       });

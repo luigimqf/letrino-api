@@ -2,7 +2,7 @@
 import { Errors } from '../constants/error';
 import { Either, Failure, Success } from '../utils/either';
 import { UsedWord } from '../config/db/entity';
-import { IsNull } from 'typeorm';
+import { Between, IsNull } from 'typeorm';
 import { AppDataSource } from '../config/db/data-source';
 import { DateUtils } from '../utils/date';
 
@@ -78,13 +78,13 @@ export class UsedWordRepository {
       const dayAtStart = DateUtils.startOfDayUTC();
       const dayAtEnd = DateUtils.endOfDayUTC();
 
-      const todaysWord = await this.repository
-        .createQueryBuilder('usedWord')
-        .where('usedWord.userId = :id', { id })
-        .andWhere('usedWord.createdAt >= :dayAtStart', { dayAtStart })
-        .andWhere('usedWord.createdAt < :dayAtEnd', { dayAtEnd })
-        .andWhere('usedWord.deletedAt IS NULL')
-        .getOne();
+      const todaysWord = await this.repository.findOne({
+        where: {
+          userId: id,
+          createdAt: Between(dayAtStart, dayAtEnd),
+          deletedAt: IsNull(),
+        },
+      });
 
       return Success.create(todaysWord);
     } catch (error) {
