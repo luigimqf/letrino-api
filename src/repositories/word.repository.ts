@@ -1,14 +1,18 @@
-import { AppDataSource } from '../config/db/data-source';
-import { UsedWord, Word } from '../config/db/entity';
+import { In, Not, Repository } from 'typeorm';
+import { Word } from '../config/db/entity';
 import { Errors } from '../constants/error';
-import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 
-export class WordRepository {
-  private static repository = AppDataSource.getRepository(Word);
-  private static usedWordRepository = AppDataSource.getRepository(UsedWord);
+export interface IWordRepository {
+  find(id: string): Promise<Either<Errors, Word>>;
+  findOneRandom(exclude?: string[]): Promise<Either<Errors, Word>>;
+  countDocuments(): Promise<Either<Errors, number>>;
+}
 
-  static async find(id: string): Promise<Either<Errors, Word>> {
+export class WordRepository implements IWordRepository {
+  constructor(private readonly repository: Repository<Word>) {}
+
+  async find(id: string): Promise<Either<Errors, Word>> {
     try {
       const word = await this.repository.findOne({ where: { id } });
 
@@ -22,109 +26,28 @@ export class WordRepository {
     }
   }
 
-  static async findOneRandom(
-    conditions: Partial<Word>
-  ): Promise<Either<Errors, Word | null>> {
+  async findOneRandom(exclude = []): Promise<Either<Errors, Word>> {
     try {
       const queryBuilder = this.repository.createQueryBuilder('word');
 
-      Object.entries(conditions).forEach(([key, value]) => {
-        queryBuilder.andWhere(`word.${key} = :${key}`, { [key]: value });
-      });
-
-      queryBuilder.orderBy('RANDOM()').limit(1);
-
-      const word = await queryBuilder.getOne();
-      return Success.create(word);
-    } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
-    }
-  }
-
-  static async findUnexistedWordIn({
-    excludeIds,
-    size,
-    filter,
-  }: {
-    excludeIds: string[];
-    size?: number;
-    filter?: Partial<Word>;
-  }): Promise<Either<Errors, Word | null>> {
-    try {
-      const queryBuilder = this.repository.createQueryBuilder('word');
-
-      if (excludeIds.length > 0) {
-        queryBuilder.where('word.id NOT IN (:...excludeIds)', { excludeIds });
+      if (exclude.length) {
+        queryBuilder.where('word.id NOT IN (:...exclude)', { exclude });
       }
 
-      if (filter) {
-        Object.entries(filter).forEach(([key, value]) => {
-          queryBuilder.andWhere(`word.${key} = :${key}`, { [key]: value });
-        });
-      }
+      const word = await queryBuilder.orderBy('RANDOM()').limit(1).getOne();
 
-      queryBuilder.orderBy('RANDOM()').limit(size);
-
-      const word = await queryBuilder.getOne();
-      return Success.create(word);
-    } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
-    }
-  }
-
-  static async findRandom(): Promise<Either<Errors, Word | null>> {
-    try {
-      const today = DateUtils.startOfDayUTC();
-      const tomorrow = DateUtils.endOfDayUTC();
-
-      const todaysWord = await this.usedWordRepository
-        .createQueryBuilder('usedWord')
-        .leftJoinAndSelect('usedWord.word', 'word')
-        .where('usedWord.createdAt >= :today', { today })
-        .andWhere('usedWord.createdAt < :tomorrow', { tomorrow })
-        .andWhere('usedWord.deletedAt IS NULL')
-        .getOne();
-
-      if (todaysWord) {
-        return Success.create(todaysWord.word);
-      }
-
-      const usedWordIds = await this.usedWordRepository
-        .createQueryBuilder('usedWord')
-        .select('usedWord.wordId')
-        .where('usedWord.deletedAt IS NULL')
-        .getRawMany();
-
-      const excludeIds = usedWordIds.map(item => item.usedWord_wordId);
-
-      const queryBuilder = this.repository.createQueryBuilder('word');
-
-      if (excludeIds.length > 0) {
-        queryBuilder.where('word.id NOT IN (:...excludeIds)', { excludeIds });
-      }
-
-      queryBuilder.orderBy('RANDOM()').limit(1);
-
-      const randomWord = await queryBuilder.getOne();
-
-      if (!randomWord) {
+      console.log({ word, exclude });
+      if (!word) {
         return Failure.create(Errors.NOT_FOUND);
       }
 
-      const newUsedWord = this.usedWordRepository.create({
-        wordId: randomWord.id,
-      });
-
-      await this.usedWordRepository.save(newUsedWord);
-
-      return Success.create(randomWord);
+      return Success.create(word);
     } catch (error) {
-      console.error(error);
       return Failure.create(Errors.SERVER_ERROR);
     }
   }
 
-  static async countDocuments(): Promise<Either<Errors, number>> {
+  async countDocuments(): Promise<Either<Errors, number>> {
     try {
       const totalWords = await this.repository.count();
       return Success.create(totalWords);

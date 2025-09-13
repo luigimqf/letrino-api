@@ -5,6 +5,9 @@ import { ErrorCode, Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
 import { AuthenticateRequest } from '../types';
 import { DateUtils } from '../utils/date';
+import { AppDataSource } from '../config/db/data-source';
+import { Attempt } from '../config/db/entity';
+import { Between } from 'typeorm';
 
 export async function checkAttempts(
   req: AuthenticateRequest,
@@ -19,10 +22,13 @@ export async function checkAttempts(
       return;
     }
 
+    const attemptRepository = new AttemptRepository(
+      AppDataSource.getRepository(Attempt)
+    );
     const today = DateUtils.startOfDayUTC();
     const tomorrow = DateUtils.endOfDayUTC();
 
-    const correctAttempsResult = await AttemptRepository.countDocuments({
+    const correctAttempsResult = await attemptRepository.countDocuments({
       userId: id,
       createdAt: {
         gte: today,
@@ -39,7 +45,7 @@ export async function checkAttempts(
       return;
     }
 
-    const failedAttemptsResult = await AttemptRepository.countDocuments({
+    const failedAttemptsResult = await attemptRepository.countDocuments({
       userId: id,
       createdAt: {
         gte: today,

@@ -12,7 +12,7 @@ export enum Errors {
   REQUIRED_ID = 'User ID is required',
   WORD_NOT_FOUND = "Today's Word not found",
   USER_NOT_FOUND = 'User not found',
-  NOT_FOUND_DOCUMENT = "Document not found",
+  NOT_FOUND_DOCUMENT = 'Document not found',
   NOT_IMPLEMENTED = 'This feature is not implemented yet',
   NOT_FOUND = 'Not found',
   NO_TOKEN = 'No token provided',
@@ -26,7 +26,7 @@ export enum Errors {
   INCORRECT_ATTEMPT = 'The attempt is incorrect',
   CORRECT_ATTEMPT = 'The attempt is correct',
   ALREADY_GOT_RIGHT = "You have already correct today's word",
-  ALREADY_FAILED = "You have already used all attempts",
+  ALREADY_FAILED = 'You have already used all attempts',
   BAD_REQUEST = 'Bad request',
   CONFLICT = 'Conflict',
   UPDATE_SCORE_FAILED = 'Failed to update score',
@@ -34,6 +34,10 @@ export enum Errors {
   CALCULATE_ATTEMPTS_FAILED = 'Failed to calculate attempts',
   CREATE_USER_STATISTIC_FAILED = 'Failed to create user statistics',
   CALCULATE_NEW_SCORE_FAILED = 'Failed to calculate new score',
+  STATISTIC_NOT_FOUND = 'User statistics not found',
+  ATTEMPTS_NOT_FOUND = 'User attempts not found',
+  LEADERBOARD_NOT_FOUND = 'Leaderboard not found',
+  REFRESH_PASSWORD_FAILED = 'Failed to refresh password',
 }
 
 export enum ErrorCode {
@@ -72,4 +76,8 @@ export enum ErrorCode {
   CALCULATE_ATTEMPTS_FAILED = 'CALCULATE_ATTEMPTS_FAILED',
   CREATE_USER_STATISTIC_FAILED = 'CREATE_USER_STATISTIC_FAILED',
   CALCULATE_NEW_SCORE_FAILED = 'CALCULATE_NEW_SCORE_FAILED',
+  STATISTIC_NOT_FOUND = 'STATISTIC_NOT_FOUND',
+  ATTEMPTS_NOT_FOUND = 'ATTEMPTS_NOT_FOUND',
+  LEADERBOARD_NOT_FOUND = 'LEADERBOARD_NOT_FOUND',
+  REFRESH_PASSWORD_FAILED = 'REFRESH_PASSWORD_FAILED',
 }

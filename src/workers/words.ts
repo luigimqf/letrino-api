@@ -3,10 +3,12 @@ import { UsedWordRepository } from '../repositories/used_word.repository';
 import { WordRepository } from '../repositories/word.repository';
 import { AppDataSource } from '../config/db/data-source';
 import { DateUtils } from '../utils/date';
+import { Word } from '../config/db/entity';
 
 export const updateUsedWords = async () => {
   try {
-    const totalWordsResult = await WordRepository.countDocuments();
+    const repository = new WordRepository(AppDataSource.getRepository(Word));
+    const totalWordsResult = await repository.countDocuments();
 
     if (totalWordsResult.isFailure()) {
       console.error('Failed to get total words count');

@@ -5,6 +5,9 @@ import { notFound, ok, serverError, unauthorized } from '../utils/http-status';
 import { UserRepository } from '../repositories/user.repository';
 import { StatisticRepository } from '../repositories/statistic.repository';
 
+export interface IUserController {
+  getUserData(req: AuthenticateRequest, res: Response): Promise<void>;
+}
 class UserController {
   async getUserData(req: AuthenticateRequest, res: Response) {
     try {

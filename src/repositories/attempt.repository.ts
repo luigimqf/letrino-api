@@ -5,7 +5,18 @@ import { Errors } from '../constants/error';
 import { EStatistics } from '../constants/statistic';
 import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
-import { Between, MoreThanOrEqual, LessThan } from 'typeorm';
+import { Between, MoreThanOrEqual, LessThan, Repository } from 'typeorm';
+
+export interface IAttemptRepository {
+  create(data: IAttemptCreate): Promise<Either<Errors, Attempt>>;
+  findByStatisticId(statisticId: string): Promise<Either<Errors, Attempt[]>>;
+  countIncorrectAttemptsToday(userId: string): Promise<Either<Errors, number>>;
+  countDocuments(
+    conditions: IAttemptConditions
+  ): Promise<Either<Errors, number>>;
+  findTodaysAttempts(userId: string): Promise<Either<Errors, Attempt[]>>;
+  find(conditions: IAttemptConditions): Promise<Either<Errors, Attempt[]>>;
+}
 
 interface IAttemptCreate {
   userId: string;
@@ -28,10 +39,10 @@ interface IAttemptConditions {
   createdAt?: IDateRange;
 }
 
-export class AttemptRepository {
-  private static repository = AppDataSource.getRepository(Attempt);
+export class AttemptRepository implements IAttemptRepository {
+  constructor(private readonly repository: Repository<Attempt>) {}
 
-  static async create({
+  async create({
     userId,
     userInput,
     statisticId,
@@ -53,7 +64,7 @@ export class AttemptRepository {
     }
   }
 
-  static async findByStatisticId(
+  async findByStatisticId(
     statisticId: string
   ): Promise<Either<Errors, Attempt[]>> {
     try {
@@ -68,7 +79,28 @@ export class AttemptRepository {
     }
   }
 
-  static async countDocuments(
+  async countIncorrectAttemptsToday(
+    userId: string
+  ): Promise<Either<Errors, number>> {
+    try {
+      const today = DateUtils.startOfDayUTC();
+      const tomorrow = DateUtils.endOfDayUTC();
+
+      const count = await this.repository.count({
+        where: {
+          userId,
+          result: EStatistics.INCORRECT,
+          createdAt: Between(today, tomorrow),
+        },
+      });
+
+      return Success.create(count);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async countDocuments(
     conditions: IAttemptConditions
   ): Promise<Either<Errors, number>> {
     try {
@@ -117,9 +149,7 @@ export class AttemptRepository {
     }
   }
 
-  static async findTodaysAttempts(
-    userId: string
-  ): Promise<Either<Errors, Attempt[]>> {
+  async findTodaysAttempts(userId: string): Promise<Either<Errors, Attempt[]>> {
     try {
       const today = DateUtils.startOfDayUTC();
       const tomorrow = DateUtils.endOfDayUTC();
@@ -142,7 +172,7 @@ export class AttemptRepository {
     }
   }
 
-  static async find(
+  async find(
     conditions: IAttemptConditions
   ): Promise<Either<Errors, Attempt[]>> {
     try {

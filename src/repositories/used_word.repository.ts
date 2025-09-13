@@ -2,14 +2,33 @@
 import { Errors } from '../constants/error';
 import { Either, Failure, Success } from '../utils/either';
 import { UsedWord } from '../config/db/entity';
-import { Between, IsNull } from 'typeorm';
-import { AppDataSource } from '../config/db/data-source';
+import { Between, IsNull, Repository } from 'typeorm';
 import { DateUtils } from '../utils/date';
 
-export class UsedWordRepository {
-  private static repository = AppDataSource.getRepository(UsedWord);
+export interface IUsedWordRepository {
+  find(
+    conditions?: Partial<UsedWord>,
+    distinct?: string
+  ): Promise<Either<Errors, unknown[] | UsedWord[]>>;
+  createUsedWord(data: {
+    wordId: string;
+    id: string;
+  }): Promise<Either<Errors, UsedWord>>;
+  findUserWord(id: string): Promise<Either<Errors, UsedWord | null>>;
+  findUserUsedWords(id: string): Promise<Either<Errors, UsedWord[]>>;
+  countDocuments(
+    conditions?: Partial<UsedWord>
+  ): Promise<Either<Errors, number>>;
+  updateMany(
+    filter: Partial<UsedWord>,
+    updateData: Partial<UsedWord>
+  ): Promise<Either<Errors, boolean>>;
+}
 
-  static async find(
+export class UsedWordRepository implements IUsedWordRepository {
+  constructor(private readonly repository: Repository<UsedWord>) {}
+
+  async find(
     conditions: Partial<UsedWord> = {},
     distinct?: string
   ): Promise<Either<Errors, unknown[] | UsedWord[]>> {
@@ -53,7 +72,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async createUsedWord({
+  async createUsedWord({
     wordId,
     id,
   }: {
@@ -69,11 +88,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async findUserWord({
-    id,
-  }: {
-    id: string;
-  }): Promise<Either<Errors, UsedWord | null>> {
+  async findUserWord(id: string): Promise<Either<Errors, UsedWord | null>> {
     try {
       const dayAtStart = DateUtils.startOfDayUTC();
       const dayAtEnd = DateUtils.endOfDayUTC();
@@ -92,11 +107,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async findUserUsedWords({
-    id,
-  }: {
-    id: string;
-  }): Promise<Either<Errors, UsedWord[] | null>> {
+  async findUserUsedWords(id: string): Promise<Either<Errors, UsedWord[]>> {
     try {
       const usedWords = await this.repository.find({
         where: { userId: id, deletedAt: IsNull() },
@@ -107,7 +118,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async countDocuments(
+  async countDocuments(
     conditions?: Partial<UsedWord>
   ): Promise<Either<Errors, number>> {
     try {
@@ -130,7 +141,7 @@ export class UsedWordRepository {
     }
   }
 
-  static async updateMany(
+  async updateMany(
     filter: Partial<UsedWord>,
     updateData: Partial<UsedWord>
   ): Promise<Either<Errors, boolean>> {

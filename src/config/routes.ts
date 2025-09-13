@@ -10,16 +10,25 @@ import { Express } from 'express';
 import { authenticate } from '../middlewares/authenticate';
 import { sentryUserContext } from '../middlewares/sentry';
 import {
-  getWord,
   attemptFail,
   registerSkippedAttemp,
   deleteSkippedAttempDocument,
-  attemptSuccess,
 } from '../controllers/word.controller';
 import { checkAttempts } from '../middlewares/attempts';
-import { getStatistics } from '../controllers/statistic.controller';
-import { getUserData } from '../controllers/user.controller';
-import { getUserAttempts } from '../controllers/attempt.controller';
+import { createUserFactory } from '../factories/create-user.factory';
+import { getUserDataFactory } from '../factories/get-user-data.factory';
+import { signInFactory } from '../factories/sign-in.factory';
+import { getUserStatisticFactory } from '../factories/get-user-statistic.factory';
+import { getUserAttemptsFactory } from '../factories/get-user-attempts.factory';
+import { getRandomWordFactory } from '../factories/get-random-word.factory';
+import { registerSuccessAttemptFactory } from '../factories/register-success-attempt.factory';
+import { registerFailedAttemptFactory } from '../factories/register-failed-attempt.factory';
+import { registerSkippedAttemptFactory } from '../factories/register-skipped-attempt.factory';
+import { deleteSkippedAttemptFactory } from '../factories/delete-skipped-attempt.factory';
+import { getLeaderboardFactory } from '../factories/get-leaderboard.factory';
+import { refreshTokenFactory } from '../controllers/refresh-token.controller';
+import { forgotPasswordFactory } from '../factories/forgot-password.factory';
+import { refreshPasswordFactory } from '../factories/refresh-password.factory';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto
@@ -45,49 +54,67 @@ function setupRoutes(app: Express) {
   });
 
   //----------- Auth Routes ------------//
-  app.post('/sign-in', signIn);
+  app.post('/sign-in', (req, res) => signInFactory().handle(req, res));
 
-  app.post('/sign-up', signUp);
+  app.post('/sign-up', (req, res) => createUserFactory().handle(req, res));
 
-  app.get('/user-data', authenticate, getUserData);
+  app.get('/user-data', authenticate, (req, res) =>
+    getUserDataFactory().handle(req, res)
+  );
 
-  app.get('/user-statistic', authenticate, getStatistics);
+  app.get('/user-statistic', authenticate, (req, res) =>
+    getUserStatisticFactory().handle(req, res)
+  );
 
-  app.get('/user-attempts', authenticate, getUserAttempts);
+  app.get('/user-attempts', authenticate, (req, res) =>
+    getUserAttemptsFactory().handle(req, res)
+  );
 
-  app.post('/refresh-token', refreshToken);
+  app.post('/refresh-token', (req, res) =>
+    refreshTokenFactory().handle(req, res)
+  );
 
-  app.post('/forgot-password', forgotPassword);
+  app.post('/forgot-password', (req, res) =>
+    forgotPasswordFactory().handle(req, res)
+  );
 
-  app.post('/refresh-password', refreshPassword);
+  app.post('/refresh-password', (req, res) =>
+    refreshPasswordFactory().handle(req, res)
+  );
 
   //----------- Word Routes ------------//
 
-  app.get('/word', getWord);
+  app.get('/word', (req, res) => getRandomWordFactory().handle(req, res));
 
   //----------- Statistics Routes ------------//
 
-  app.post('/attempt/success', authenticate, checkAttempts, attemptSuccess);
+  app.post('/attempt/success', authenticate, checkAttempts, (req, res) =>
+    registerSuccessAttemptFactory().handle(req, res)
+  );
 
-  app.post('/attempt/fail', authenticate, checkAttempts, attemptFail);
+  app.post('/attempt/fail', authenticate, checkAttempts, (req, res) =>
+    registerFailedAttemptFactory().handle(req, res)
+  );
 
   app.post(
     '/attempt/skipped/register',
     authenticate,
     checkAttempts,
-    registerSkippedAttemp
+    (req, res) => registerSkippedAttemptFactory().handle(req, res)
   );
 
   app.delete(
     '/attempt/skipped/delete',
     authenticate,
     checkAttempts,
-    deleteSkippedAttempDocument
+    (req, res) => deleteSkippedAttemptFactory().handle(req, res)
   );
 
   //----------- LeaderBoard Routes ------------//
 
-  app.get('/leaderboard', getLeaderboard);
+  app.get('/leaderboard', (req, res) =>
+    getLeaderboardFactory().handle(req, res)
+  );
 }
 
 export default setupRoutes;

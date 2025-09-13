@@ -1,7 +1,24 @@
+import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/db/data-source';
 import { Statistic } from '../config/db/entity';
 import { Errors } from '../constants/error';
 import { Either, Failure, Success } from '../utils/either';
+
+export interface IStatisticRepository {
+  create(userId: string): Promise<Either<Errors, Statistic>>;
+  insertMany(
+    statistics: IStatisticBulkCreate[]
+  ): Promise<Either<Errors, Statistic[]>>;
+  findByUserId(userId: string): Promise<Either<Errors, Statistic | null>>;
+  updateGameResult(params: {
+    userId: string;
+    won: boolean;
+    scoreIncrement: number;
+  }): Promise<Either<Errors, Statistic | null>>;
+  resetStreak(userId: string): Promise<Either<Errors, void>>;
+  findTopScores(limit?: number): Promise<Either<Errors, Statistic[]>>;
+  findAllScoresOrdered(): Promise<Either<Errors, Statistic[]>>;
+}
 
 interface IStatisticUpdate {
   gamesPlayed?: number;
@@ -22,10 +39,10 @@ interface IStatisticBulkCreate {
   score?: number;
 }
 
-export class StatisticRepository {
-  private static repository = AppDataSource.getRepository(Statistic);
+export class StatisticRepository implements IStatisticRepository {
+  constructor(private readonly repository: Repository<Statistic>) {}
 
-  static async create(userId: string): Promise<Either<Errors, Statistic>> {
+  async create(userId: string): Promise<Either<Errors, Statistic>> {
     try {
       const statistic = this.repository.create({
         userId,
@@ -43,7 +60,7 @@ export class StatisticRepository {
     }
   }
 
-  static async insertMany(
+  async insertMany(
     statistics: IStatisticBulkCreate[]
   ): Promise<Either<Errors, Statistic[]>> {
     try {
@@ -66,13 +83,19 @@ export class StatisticRepository {
     }
   }
 
-  static async findByUserId(
+  async findByUserId(
     userId: string
   ): Promise<Either<Errors, Statistic | null>> {
     try {
       const statistic = await this.repository.findOne({
         where: { userId },
         relations: ['user', 'attempts'],
+        select: {
+          user: {
+            avatar: true,
+            username: true,
+          },
+        },
       });
       return Success.create(statistic);
     } catch (error) {
@@ -80,7 +103,7 @@ export class StatisticRepository {
     }
   }
 
-  static async updateGameResult({
+  async updateGameResult({
     userId,
     won,
     scoreIncrement,
@@ -126,7 +149,7 @@ export class StatisticRepository {
     }
   }
 
-  static async resetStreak(userId: string): Promise<Either<Errors, void>> {
+  async resetStreak(userId: string): Promise<Either<Errors, void>> {
     try {
       await this.repository.update({ userId }, { winStreak: 0 });
       return Success.create(undefined);
@@ -135,7 +158,7 @@ export class StatisticRepository {
     }
   }
 
-  static async findTopScores(
+  async findTopScores(
     limit: number = 10
   ): Promise<Either<Errors, Statistic[]>> {
     try {
@@ -150,7 +173,7 @@ export class StatisticRepository {
     }
   }
 
-  static async findAllScoresOrdered(): Promise<Either<Errors, Statistic[]>> {
+  async findAllScoresOrdered(): Promise<Either<Errors, Statistic[]>> {
     try {
       const statistics = await this.repository.find({
         relations: ['user'],
