@@ -20,10 +20,10 @@ export interface IAttemptRepository {
 
 interface IAttemptCreate {
   userId: string;
-  statisticId: string;
+  matchId: string;
   wordId: string;
   result: EStatistics;
-  userInput: string;
+  userInput?: string;
 }
 
 interface IDateRange {
@@ -45,14 +45,14 @@ export class AttemptRepository implements IAttemptRepository {
   async create({
     userId,
     userInput,
-    statisticId,
+    matchId,
     wordId,
     result,
   }: IAttemptCreate): Promise<Either<Errors, Attempt>> {
     try {
       const attempt = this.repository.create({
         userId,
-        statisticId,
+        matchId,
         wordId,
         result,
         userInput,
@@ -64,12 +64,10 @@ export class AttemptRepository implements IAttemptRepository {
     }
   }
 
-  async findByStatisticId(
-    statisticId: string
-  ): Promise<Either<Errors, Attempt[]>> {
+  async findByStatisticId(matchId: string): Promise<Either<Errors, Attempt[]>> {
     try {
       const attempts = await this.repository.find({
-        where: { statisticId },
+        where: { matchId },
         relations: ['user', 'word', 'statistic'],
         order: { createdAt: 'ASC' },
       });

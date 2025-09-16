@@ -50,6 +50,7 @@ async function sendEmailAlert(subject: string, body: unknown) {
 }
 
 async function notifyAndExit(err: unknown, source: string) {
+  if (process.env.NODE_ENV === 'development') return;
   try {
     const info = crashInfo(err);
     const subject = `[ALERT] ${process.env.APP_NAME || 'my-app'} crashed (${source})`;

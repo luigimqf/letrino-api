@@ -36,7 +36,6 @@ export class WordRepository implements IWordRepository {
 
       const word = await queryBuilder.orderBy('RANDOM()').limit(1).getOne();
 
-      console.log({ word, exclude });
       if (!word) {
         return Failure.create(Errors.NOT_FOUND);
       }

@@ -1,5 +1,7 @@
+import { Match } from '../config/db/entity';
 import { ErrorCode } from '../constants/error';
-import { IStatisticRepository } from '../repositories/statistic.repository';
+import { EGameStatus } from '../constants/game';
+import { IMatchRepository } from '../repositories/match.repository';
 import { Either, Failure, Success } from '../utils/either';
 
 export interface IGetUserStatisticUseCase {
@@ -16,17 +18,22 @@ interface IUserStatistic {
 }
 
 export class GetUserStatisticUseCase implements IGetUserStatisticUseCase {
-  constructor(private statisticRepository: IStatisticRepository) {}
+  constructor(private matchRepository: IMatchRepository) {}
 
   async execute(id: string): Promise<Either<ErrorCode, IUserStatistic>> {
-    const statistic = await this.statisticRepository.findByUserId(id);
+    const matches = await this.matchRepository.findAllByUserId(id);
 
-    if (statistic.isFailure() || !statistic.value) {
-      return Failure.create(ErrorCode.STATISTIC_NOT_FOUND);
+    if (matches.isFailure() || !matches.value) {
+      return Failure.create(ErrorCode.MATCHES_NOT_FOUND);
     }
 
-    const { gamesPlayed, gamesWon, winStreak, bestWinStreak, score } =
-      statistic.value;
+    const gamesPlayed = matches.value.length;
+    const gamesWon = matches.value.filter(
+      match => match.result === EGameStatus.SUCCESS
+    ).length;
+    const score = matches.value.reduce((acc, match) => acc + match.score, 0);
+
+    const { bestWinStreak, winStreak } = this.calculateWinStreak(matches.value);
 
     const winPercentage =
       gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(2) : '0.00';
@@ -39,5 +46,44 @@ export class GetUserStatisticUseCase implements IGetUserStatisticUseCase {
       score,
       winPercentage: parseFloat(winPercentage),
     });
+  }
+
+  private calculateWinStreak(matches: Match[]) {
+    if (matches.length === 0) {
+      return {
+        bestWinStreak: 0,
+        winStreak: 0,
+      };
+    }
+
+    const sortedMatches = matches.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+    let bestWinStreak = 0;
+    let currentWinStreak = 0;
+
+    for (const match of sortedMatches) {
+      if (match.result === EGameStatus.SUCCESS) {
+        currentWinStreak++;
+        bestWinStreak = Math.max(bestWinStreak, currentWinStreak);
+      } else {
+        currentWinStreak = 0;
+      }
+    }
+
+    let winStreak = 0;
+
+    for (let i = sortedMatches.length - 1; i >= 0; i--) {
+      if (sortedMatches[i].result === EGameStatus.SUCCESS) {
+        winStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      bestWinStreak,
+      winStreak,
+    };
   }
 }

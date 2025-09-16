@@ -5,13 +5,24 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  OneToOne,
-  ManyToMany,
 } from 'typeorm';
-import { Statistic } from './Statistic';
 import { Attempt } from './Attempt';
 import { UsedWord } from './UsedWord';
+import { Match } from './Match';
 
+export interface IUser {
+  id: string;
+  username: string;
+  avatar: string;
+  email: string;
+  passwordHash: string;
+  attempts: Attempt[];
+  usedWords: UsedWord[];
+  matches: Match[];
+  gamePlayedId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -32,14 +43,14 @@ export class User {
   @Column({ type: 'varchar' })
   passwordHash: string;
 
-  @OneToOne(() => Statistic, statistic => statistic.user)
-  statistic: Statistic;
-
   @OneToMany(() => Attempt, attempt => attempt.user)
   attempts: Attempt[];
 
   @OneToMany(() => UsedWord, usedWord => usedWord.user)
   usedWords: UsedWord[];
+
+  @OneToMany(() => Match, match => match.user)
+  matches: Match[];
 
   @CreateDateColumn()
   createdAt: Date;

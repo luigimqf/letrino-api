@@ -1,0 +1,289 @@
+import { Attempt } from '../config/db/entity';
+import { IMatch, Match } from '../config/db/entity/Match';
+import { ErrorCode, Errors } from '../constants/error';
+import { EGameStatus } from '../constants/game';
+import { DateUtils } from '../utils/date';
+import { Either, Failure, Success } from '../utils/either';
+import { Between, Repository } from 'typeorm';
+
+export interface IMatchRepository {
+  create(data: ICreateMatchDTO): Promise<Either<Errors, Match>>;
+  update({
+    id,
+    data,
+  }: {
+    id: string;
+    data: Partial<IMatch>;
+  }): Promise<Either<Errors, Match>>;
+  findByUserId(userId: string): Promise<Either<Errors, Match>>;
+  findTodaysMatch(userId: string): Promise<Either<Errors, Match | null>>;
+  findAllByUserId(userId: string): Promise<Either<Errors, Match[]>>;
+  getStats(userId: string): Promise<Either<Errors, IStats>>;
+  getTopScores(limit: number): Promise<Either<ErrorCode, ILeaderboardStats[]>>;
+  getLeaderboardEntry(userId: string): Promise<Either<ErrorCode, IUserStats>>;
+}
+
+interface IStats {
+  totalMatches: number;
+  totalWins: number;
+  winRate: number;
+  bestWinStreak: number;
+  currentWinStreak: number;
+  score: number;
+}
+
+interface ILeaderboardStats {
+  userId: string;
+  avatar: string;
+  username: string;
+  totalScore: number;
+  totalGames: number;
+  gamesWon: number;
+  winRate: number;
+}
+
+interface IUserStats extends ILeaderboardStats {
+  position: number;
+}
+
+interface ICreateMatchDTO {
+  attempts?: Attempt[];
+  userId: string;
+  wordId: string;
+  score?: number;
+  result?: EGameStatus;
+}
+
+export class MatchRepository implements IMatchRepository {
+  constructor(private readonly repository: Repository<Match>) {}
+
+  async create({
+    userId,
+    attempts,
+    score,
+    wordId,
+    result,
+  }: ICreateMatchDTO): Promise<Either<Errors, Match>> {
+    try {
+      const newMatch = this.repository.create({
+        userId,
+        attempts,
+        score,
+        wordId,
+        result,
+      });
+      const savedMatch = await this.repository.save(newMatch);
+      return Success.create(savedMatch);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async update({
+    id,
+    data,
+  }: {
+    id: string;
+    data: Partial<IMatch>;
+  }): Promise<Either<Errors, Match>> {
+    try {
+      const existingMatch = await this.repository.findOneBy({ id });
+
+      console.log('Existing Match:', existingMatch);
+      if (!existingMatch) {
+        return Failure.create(Errors.NOT_FOUND);
+      }
+
+      const updateResult = await this.repository.update(id, data);
+
+      console.log('Update Result:', updateResult);
+      if (updateResult.affected === 0) {
+        return Failure.create(Errors.SERVER_ERROR);
+      }
+      const updatedMatch = await this.repository.findOneBy({ id });
+
+      console.log('Updated Match:', updatedMatch);
+      if (!updatedMatch) {
+        return Failure.create(Errors.SERVER_ERROR);
+      }
+
+      return Success.create(updatedMatch);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async findTodaysMatch(userId: string): Promise<Either<Errors, Match | null>> {
+    try {
+      const startOfDay = DateUtils.startOfDayUTC();
+      const endOfDay = DateUtils.endOfDayUTC();
+
+      const match = await this.repository.findOne({
+        where: {
+          userId,
+          createdAt: Between(startOfDay, endOfDay),
+        },
+      });
+
+      if (!match) {
+        return Failure.create(Errors.MATCH_NOT_FOUND);
+      }
+
+      return Success.create(match || null);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async findByUserId(userId: string): Promise<Either<Errors, Match>> {
+    try {
+      const match = await this.repository.findOneBy({ userId });
+      if (!match) {
+        return Failure.create(Errors.MATCH_NOT_FOUND);
+      }
+      return Success.create(match);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async findAllByUserId(userId: string): Promise<Either<Errors, Match[]>> {
+    try {
+      const matches = await this.repository.findBy({ userId });
+      if (!matches || matches.length === 0) {
+        return Failure.create(Errors.MATCHES_NOT_FOUND);
+      }
+      return Success.create(matches);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async getStats(userId: string): Promise<Either<Errors, IStats>> {
+    try {
+      const matches = await this.repository.findBy({ userId });
+      if (!matches || matches.length === 0) {
+        return Failure.create(Errors.MATCHES_NOT_FOUND);
+      }
+
+      const score = matches.reduce((acc, match) => acc + match.score, 0);
+      const totalMatches = matches.length;
+      const totalWins = matches.filter(
+        match => match.result === EGameStatus.SUCCESS
+      ).length;
+      const winRate = totalMatches
+        ? parseFloat(((totalWins / totalMatches) * 100).toFixed(2))
+        : 0;
+
+      const sortedMatches = matches.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      let bestWinStreak = 0;
+      let currentWinStreak = 0;
+
+      for (const match of sortedMatches) {
+        if (match.result === EGameStatus.SUCCESS) {
+          currentWinStreak++;
+          bestWinStreak = Math.max(bestWinStreak, currentWinStreak);
+        } else {
+          currentWinStreak = 0;
+        }
+      }
+
+      let winStreak = 0;
+
+      for (let i = sortedMatches.length - 1; i >= 0; i--) {
+        if (sortedMatches[i].result === EGameStatus.SUCCESS) {
+          winStreak++;
+        } else {
+          break;
+        }
+      }
+
+      return Success.create({
+        score,
+        totalMatches,
+        totalWins,
+        winRate,
+        bestWinStreak,
+        currentWinStreak: winStreak,
+      });
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async getTopScores(
+    limit: number
+  ): Promise<Either<ErrorCode, ILeaderboardStats[]>> {
+    try {
+      const result = await this.repository
+        .createQueryBuilder('match')
+        .select([
+          'match.userId as userId',
+          'user.avatar as avatar',
+          'user.username as username',
+          'SUM(match.score) as totalScore',
+          'COUNT(match.id) as totalGames',
+          'SUM(CASE WHEN match.result = :winStatus THEN 1 ELSE 0 END) as gamesWon',
+          '(SUM(CASE WHEN match.result = :winStatus THEN 1 ELSE 0 END) * 100.0 / COUNT(match.id)) as winRate',
+        ])
+        .innerJoin('match.user', 'user')
+        .setParameter('winStatus', EGameStatus.SUCCESS)
+        .groupBy('match.userId, user.avatar, user.username')
+        .orderBy('totalScore', 'DESC')
+        .limit(limit)
+        .getRawMany();
+
+      return Success.create(result);
+    } catch (error) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+  }
+
+  async getLeaderboardEntry(
+    userId: string
+  ): Promise<Either<ErrorCode, IUserStats>> {
+    try {
+      const userStatsResult = await this.repository
+        .createQueryBuilder('match')
+        .select([
+          'match.userId as userId',
+          'user.avatar as avatar',
+          'user.username as username',
+          'SUM(match.score) as totalScore',
+          'COUNT(match.id) as totalGames',
+          'SUM(CASE WHEN match.result = :winStatus THEN 1 ELSE 0 END) as gamesWon',
+          '(SUM(CASE WHEN match.result = :winStatus THEN 1 ELSE 0 END) * 100.0 / COUNT(match.id)) as winRate',
+        ])
+        .innerJoin('match.user', 'user')
+        .where('match.userId = :userId', { userId })
+        .setParameter('winStatus', EGameStatus.SUCCESS)
+        .groupBy('match.userId, user.avatar, user.username')
+        .getRawOne();
+
+      if (!userStatsResult) {
+        return Failure.create(ErrorCode.USER_NOT_FOUND);
+      }
+
+      const positionResult = await this.repository
+        .createQueryBuilder('match')
+        .select(['match.userId as userId', 'SUM(match.score) as totalScore'])
+        .groupBy('match.userId')
+        .orderBy('totalScore', 'DESC')
+        .getRawMany();
+
+      const userPosition =
+        positionResult.findIndex(entry => entry.userId === userId) + 1;
+
+      const userStats: IUserStats = {
+        ...userStatsResult,
+        position: userPosition,
+      };
+
+      return Success.create(userStats);
+    } catch (error) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+  }
+}

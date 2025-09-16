@@ -7,10 +7,21 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { EStatistics } from '../../../constants/statistic';
 import { User } from './User';
+import { Match } from './Match';
 import { Word } from './Word';
-import { Statistic } from './Statistic';
+import { EStatistics } from '../../../constants/statistic';
+
+export interface IAttempt {
+  id: string;
+  userId: string;
+  gamePlayedId: string;
+  wordId: string;
+  userInput: string;
+  result: EStatistics;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Entity('attempts')
 export class Attempt {
@@ -24,12 +35,12 @@ export class Attempt {
   @Column()
   userId: string;
 
-  @ManyToOne(() => Statistic, statistic => statistic.attempts)
-  @JoinColumn({ name: 'statisticId' })
-  statistic: Statistic;
+  @ManyToOne(() => Match, match => match.attempts)
+  @JoinColumn({ name: 'matchId' })
+  match: Match;
 
   @Column()
-  statisticId: string;
+  matchId: string;
 
   @ManyToOne(() => Word, word => word.attempts)
   @JoinColumn({ name: 'wordId' })
@@ -38,7 +49,7 @@ export class Attempt {
   @Column()
   wordId: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true, default: null })
   userInput: string;
 
   @Column({

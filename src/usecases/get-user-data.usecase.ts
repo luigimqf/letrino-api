@@ -1,5 +1,5 @@
 import { ErrorCode } from '../constants/error';
-import { IStatisticRepository } from '../repositories/statistic.repository';
+import { IMatchRepository } from '../repositories/match.repository';
 import { IUserRepository } from '../repositories/user.repository';
 import { Either, Failure, Success } from '../utils/either';
 
@@ -14,7 +14,7 @@ export interface IGetUserDataUsecase {
 export class GetUserDataUseCase implements IGetUserDataUsecase {
   constructor(
     private userRepository: IUserRepository,
-    private statisticRepository: IStatisticRepository
+    private matchRepository: IMatchRepository
   ) {}
 
   async execute(
@@ -30,13 +30,13 @@ export class GetUserDataUseCase implements IGetUserDataUsecase {
 
     const { username, avatar } = user.value;
 
-    let score = 0;
+    const matches = await this.matchRepository.findAllByUserId(id);
 
-    const statistic = await this.statisticRepository.findByUserId(id);
-
-    if (statistic.isSuccess() && statistic.value) {
-      score = statistic.value.score;
+    if (matches.isFailure() || !matches.value) {
+      return Failure.create(ErrorCode.MATCHES_NOT_FOUND);
     }
+
+    const score = matches.value.reduce((acc, match) => acc + match.score, 0);
 
     return Success.create({ username, avatar, score });
   }

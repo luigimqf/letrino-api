@@ -10,6 +10,15 @@ import {
 import { Word } from './Word';
 import { User } from './User';
 
+export interface IUsedWord {
+  id: string;
+  wordId: string;
+  userId: string;
+  deletedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Entity('used_words')
 export class UsedWord {
   @PrimaryGeneratedColumn('uuid')

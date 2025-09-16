@@ -80,7 +80,13 @@ export class UsedWordRepository implements IUsedWordRepository {
     id: string;
   }): Promise<Either<Errors, UsedWord>> {
     try {
-      const newUsedWord = this.repository.create({ wordId, userId: id });
+      const now = DateUtils.now();
+      const newUsedWord = this.repository.create({
+        wordId,
+        userId: id,
+        createdAt: now,
+        updatedAt: now,
+      });
       const savedUsedWord = await this.repository.save(newUsedWord);
       return Success.create(savedUsedWord);
     } catch (error) {

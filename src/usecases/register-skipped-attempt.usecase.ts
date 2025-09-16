@@ -1,6 +1,6 @@
 import { ErrorCode } from '../constants/error';
+import { IMatchRepository } from '../repositories/match.repository';
 import { ISkippedAttemptRepository } from '../repositories/skipped_attempt.repository';
-import { IStatisticRepository } from '../repositories/statistic.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
 import { Either, Failure, Success } from '../utils/either';
 
@@ -13,8 +13,7 @@ export class RegisterSkippedAttemptUseCase
 {
   constructor(
     private skippedAttemptRepository: ISkippedAttemptRepository,
-    private usedWordRepository: IUsedWordRepository,
-    private statisticRepository: IStatisticRepository
+    private usedWordRepository: IUsedWordRepository
   ) {}
 
   async execute(id: string): Promise<Either<ErrorCode, null>> {
@@ -39,11 +38,6 @@ export class RegisterSkippedAttemptUseCase
     });
 
     if (skippedAttempt.isFailure() || !skippedAttempt.value) {
-      return Failure.create(ErrorCode.SERVER_ERROR);
-    }
-
-    const resetStreakResult = await this.statisticRepository.resetStreak(id);
-    if (resetStreakResult.isFailure()) {
       return Failure.create(ErrorCode.SERVER_ERROR);
     }
 

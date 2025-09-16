@@ -1,4 +1,5 @@
 import { ErrorCode } from '../constants/error';
+import { EGameStatus } from '../constants/game';
 import {
   ATTEMPT_SCORES,
   BONUS_SCORES,
@@ -6,9 +7,8 @@ import {
   HIGH_WIN_RATE_THRESHOLD,
 } from '../constants/statistic';
 import { IAttemptRepository } from '../repositories/attempt.repository';
-import { IStatisticRepository } from '../repositories/statistic.repository';
+import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
-import { IUserRepository } from '../repositories/user.repository';
 import { IWordRepository } from '../repositories/word.repository';
 import { Either, Failure, Success } from '../utils/either';
 
@@ -36,7 +36,7 @@ export class RegisterSuccessAttemptUseCase
 {
   constructor(
     private attemptRepository: IAttemptRepository,
-    private statisticRepository: IStatisticRepository,
+    private matchRepository: IMatchRepository,
     private usedWordRepository: IUsedWordRepository,
     private wordRepository: IWordRepository
   ) {}
@@ -60,21 +60,19 @@ export class RegisterSuccessAttemptUseCase
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
     }
 
+    const userMatchResult = await this.matchRepository.findByUserId(id);
+
+    if (userMatchResult.isFailure()) {
+      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
+    }
+
     if (word.value.word !== attempt) {
       return Failure.create(ErrorCode.INCORRECT_ATTEMPT);
     }
 
-    const statistic = await this.statisticRepository.findByUserId(id);
-
-    if (statistic.isFailure() || !statistic.value) {
-      return Failure.create(ErrorCode.STATISTIC_NOT_FOUND);
-    }
-
-    const statisticData = statistic.value!;
-
     const attemptResult = await this.attemptRepository.create({
       userId: id,
-      statisticId: statisticData.id,
+      matchId: userMatchResult.value.id,
       wordId: word.value.id,
       result: EStatistics.CORRECT,
       userInput: attempt,
@@ -102,29 +100,41 @@ export class RegisterSuccessAttemptUseCase
       scoreCalculated += BONUS_SCORES.PERFECT_GAME;
     }
 
-    const currentStreak = statisticData.winStreak + 1;
-    if (currentStreak >= 10) {
+    const statsResult = await this.matchRepository.getStats(id);
+
+    if (statsResult.isFailure() || !statsResult.value) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+
+    const { totalMatches, currentWinStreak, winRate } = statsResult.value;
+
+    const attempts = await this.attemptRepository.findTodaysAttempts(id);
+
+    if (attempts.isFailure()) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+
+    if (currentWinStreak >= 10) {
       scoreCalculated += BONUS_SCORES.STREAK_10;
-    } else if (currentStreak >= 5) {
+    } else if (currentWinStreak >= 5) {
       scoreCalculated += BONUS_SCORES.STREAK_5;
     }
 
-    const totalGames = statisticData.gamesPlayed + 1;
-    const totalWins = statisticData.gamesWon + 1;
-    const winRate = totalWins / totalGames;
-
-    if (winRate >= HIGH_WIN_RATE_THRESHOLD && totalGames >= 10) {
+    if (winRate >= HIGH_WIN_RATE_THRESHOLD && totalMatches >= 10) {
       scoreCalculated += BONUS_SCORES.HIGH_WIN_RATE;
     }
 
-    const updatedStatistic = await this.statisticRepository.updateGameResult({
-      userId: id,
-      won: true,
-      scoreIncrement: scoreCalculated,
+    const updateMatchResult = await this.matchRepository.update({
+      id: userMatchResult.value.id,
+      data: {
+        score: scoreCalculated,
+        result: EGameStatus.SUCCESS,
+        attempts: attempts.value,
+      },
     });
 
-    if (updatedStatistic.isFailure()) {
-      return Failure.create(ErrorCode.SERVER_ERROR);
+    if (updateMatchResult.isFailure() || !updateMatchResult.value) {
+      return Failure.create(ErrorCode.MATCH_UPDATE_FAILED);
     }
 
     return Success.create({
@@ -132,13 +142,13 @@ export class RegisterSuccessAttemptUseCase
       bonuses: {
         perfectGame: currentAttempt === 1 ? BONUS_SCORES.PERFECT_GAME : 0,
         streak:
-          currentStreak >= 5
-            ? currentStreak >= 10
+          currentWinStreak >= 5
+            ? currentWinStreak >= 10
               ? BONUS_SCORES.STREAK_5
               : BONUS_SCORES.STREAK_10
             : 0,
         highWinRate:
-          winRate >= HIGH_WIN_RATE_THRESHOLD && totalGames >= 10
+          winRate >= HIGH_WIN_RATE_THRESHOLD && totalMatches >= 10
             ? BONUS_SCORES.HIGH_WIN_RATE
             : 0,
       },

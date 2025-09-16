@@ -1,7 +1,8 @@
 import { ErrorCode } from '../constants/error';
+import { EGameStatus } from '../constants/game';
 import { EStatistics } from '../constants/statistic';
 import { IAttemptRepository } from '../repositories/attempt.repository';
-import { IStatisticRepository } from '../repositories/statistic.repository';
+import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
 import { IWordRepository } from '../repositories/word.repository';
 import { Either, Failure, Success } from '../utils/either';
@@ -27,7 +28,7 @@ export class RegisterFailedAttemptUseCase
 {
   constructor(
     private attemptRepository: IAttemptRepository,
-    private statisticRepository: IStatisticRepository,
+    private matchRepository: IMatchRepository,
     private usedWordRepository: IUsedWordRepository,
     private wordRepository: IWordRepository
   ) {}
@@ -39,32 +40,59 @@ export class RegisterFailedAttemptUseCase
     id: string;
     attempt: string;
   }): Promise<Either<ErrorCode, ISuccessReturn>> {
-    const usedWord = await this.usedWordRepository.findUserWord(id);
+    const userUsedWord = await this.usedWordRepository.findUserWord(id);
 
-    if (usedWord.isFailure() || !usedWord.value) {
-      return Failure.create(ErrorCode.WORD_NOT_FOUND);
+    if (userUsedWord.isFailure() || !userUsedWord.value) {
+      return Failure.create(ErrorCode.USED_WORDS_NOT_FOUND);
     }
 
-    const word = await this.wordRepository.find(usedWord?.value?.wordId || '');
+    const word = await this.wordRepository.find(
+      userUsedWord?.value?.wordId || ''
+    );
 
     if (word.isFailure() || !word.value) {
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
     }
 
+    const userMatchResult = await this.matchRepository.findByUserId(id);
+
+    if (userMatchResult.isFailure()) {
+      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
+    }
+
     if (word.value.word === attempt) {
-      return Failure.create(ErrorCode.CORRECT_ATTEMPT);
+      return Failure.create(ErrorCode.BAD_REQUEST);
     }
 
-    const statistic = await this.statisticRepository.findByUserId(id);
-    if (statistic.isFailure() || !statistic.value) {
-      return Failure.create(ErrorCode.STATISTIC_NOT_FOUND);
+    const incorrectAttemptResult =
+      await this.attemptRepository.countIncorrectAttemptsToday(id);
+
+    if (incorrectAttemptResult.isFailure()) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
 
-    const statisticData = statistic.value!;
+    const totalIncorrectAttempts = incorrectAttemptResult.value!;
+
+    if (totalIncorrectAttempts < 5) {
+      const attemptResult = await this.attemptRepository.create({
+        userId: id,
+        matchId: userMatchResult.value.id,
+        wordId: word.value.id,
+        result: EStatistics.INCORRECT,
+        userInput: attempt,
+      });
+
+      if (attemptResult.isFailure() || !attemptResult.value) {
+        return Failure.create(ErrorCode.SERVER_ERROR);
+      }
+      return Success.create({
+        attempt: totalIncorrectAttempts + 1,
+      });
+    }
 
     const attemptResult = await this.attemptRepository.create({
       userId: id,
-      statisticId: statisticData.id,
+      matchId: userMatchResult.value.id,
       wordId: word.value.id,
       result: EStatistics.INCORRECT,
       userInput: attempt,
@@ -74,31 +102,25 @@ export class RegisterFailedAttemptUseCase
       return Failure.create(ErrorCode.SERVER_ERROR);
     }
 
-    const incorrectAttemptResult =
-      await this.attemptRepository.countIncorrectAttemptsToday(id);
+    const attempts = await this.attemptRepository.findTodaysAttempts(id);
 
-    if (incorrectAttemptResult.isFailure() || !incorrectAttemptResult.value) {
-      return Failure.create(ErrorCode.SERVER_ERROR);
+    if (attempts.isFailure()) {
+      return Failure.create(ErrorCode.ATTEMPTS_NOT_FOUND);
     }
 
-    const totalIncorrectAttempts = incorrectAttemptResult.value!;
+    const updateMatchResult = await this.matchRepository.update({
+      id: userMatchResult.value.id,
+      data: { attempts: attempts.value, result: EGameStatus.FAILED },
+    });
 
-    if (totalIncorrectAttempts >= 6) {
-      await this.statisticRepository.updateGameResult({
-        userId: id,
-        won: false,
-        scoreIncrement: 0,
-      });
-
-      return Success.create({
-        score: 0,
-        attempt: totalIncorrectAttempts,
-        correctWord: word.value.word,
-      });
+    if (updateMatchResult.isFailure() || !updateMatchResult.value) {
+      return Failure.create(ErrorCode.MATCH_UPDATE_FAILED);
     }
 
     return Success.create({
+      score: 0,
       attempt: totalIncorrectAttempts,
+      correctWord: word.value.word,
     });
   }
 }

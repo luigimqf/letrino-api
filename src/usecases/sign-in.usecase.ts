@@ -32,15 +32,7 @@ export class SignInUseCase implements ISignInUseCase {
       { token: string; refresh_token: string; username: string }
     >
   > {
-    const user = await this.userRepository.findWithRelation({
-      findBy: { email },
-      relations: ['statistic'],
-      select: {
-        statistic: {
-          score: true,
-        },
-      },
-    });
+    const user = await this.userRepository.findOneBy({ email });
 
     if (user.isFailure() || !user.value?.id) {
       return Failure.create(ErrorCode.INVALID_CREDENTIALS);

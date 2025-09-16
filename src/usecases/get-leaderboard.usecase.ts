@@ -1,5 +1,5 @@
 import { ErrorCode } from '../constants/error';
-import { IStatisticRepository } from '../repositories/statistic.repository';
+import { IMatchRepository } from '../repositories/match.repository';
 import { IUserRepository } from '../repositories/user.repository';
 import { Either, Failure, Success } from '../utils/either';
 
@@ -21,82 +21,68 @@ interface ILeaderboardEntry {
 }
 
 export class GetLeaderboardUseCase implements IGetLeaderboardUsecase {
-  constructor(
-    private statisticRepository: IStatisticRepository,
-    private userRepository: IUserRepository
-  ) {}
+  constructor(private matchRepository: IMatchRepository) {}
 
   async execute(id?: string): Promise<Either<ErrorCode, ILeaderboard>> {
-    const leaderboardResult = await this.statisticRepository.findTopScores(10);
+    try {
+      const leaderboardResult = await this.matchRepository.getTopScores(10);
 
-    if (leaderboardResult.isFailure()) {
+      if (leaderboardResult.isFailure()) {
+        return Failure.create(ErrorCode.LEADERBOARD_NOT_FOUND);
+      }
+
+      const leaderboardData = leaderboardResult.value ?? [];
+
+      const leaderboard: ILeaderboardEntry[] = leaderboardData.map(
+        (entry, index) => ({
+          avatar: entry.avatar,
+          username: entry.username,
+          score: entry.totalScore,
+          position: index + 1,
+          winRate: parseFloat(entry.winRate.toFixed(2)),
+        })
+      );
+
+      const response: ILeaderboard = { leaderboard };
+
+      if (!id) {
+        return Success.create(response);
+      }
+
+      const userInTop10 = leaderboardData.find(entry => entry.userId === id);
+
+      if (userInTop10) {
+        return Success.create(response);
+      }
+
+      const userEntryResult =
+        await this.matchRepository.getLeaderboardEntry(id);
+
+      if (userEntryResult.isFailure() || !userEntryResult.value) {
+        return Success.create(response);
+      }
+
+      const userData = userEntryResult.value;
+
+      const userStatsResult = await this.matchRepository.getStats(id);
+
+      if (userStatsResult.isFailure() || !userStatsResult.value) {
+        return Success.create(response);
+      }
+
+      const userStats = userStatsResult.value;
+
+      response.user = {
+        avatar: userData.avatar,
+        username: userData.username,
+        score: userStats.score,
+        position: userData.position,
+        winRate: parseFloat(userStats.winRate.toFixed(2)),
+      };
+
+      return Success.create(response);
+    } catch (error) {
       return Failure.create(ErrorCode.LEADERBOARD_NOT_FOUND);
     }
-
-    const leaderboardData = leaderboardResult.value ?? [];
-
-    const leaderboard: ILeaderboardEntry[] = leaderboardData.map(
-      (statistic, index) => {
-        const { user, score, gamesPlayed, gamesWon } = statistic;
-        const winRate =
-          gamesPlayed > 0
-            ? ((gamesWon / gamesPlayed) * 100).toFixed(2)
-            : '0.00';
-
-        return {
-          avatar: user.avatar,
-          username: user.username,
-          score,
-          position: index + 1,
-          winRate: parseFloat(winRate),
-        };
-      }
-    );
-
-    const response: ILeaderboard = { leaderboard };
-
-    if (!id) {
-      return Success.create(response);
-    }
-
-    const userResult = await this.userRepository.findById(id);
-    const userStatisticResult = await this.statisticRepository.findByUserId(id);
-    const isUserInTop10 = leaderboardData.find(s => s.userId === id);
-
-    if (
-      userResult.isFailure() ||
-      !userResult.value ||
-      userStatisticResult.isFailure() ||
-      !userStatisticResult.value ||
-      isUserInTop10
-    ) {
-      return Success.create(response);
-    }
-
-    const allStatisticsResult =
-      await this.statisticRepository.findAllScoresOrdered();
-
-    if (allStatisticsResult.isFailure() || !allStatisticsResult.value) {
-      return Success.create(response);
-    }
-
-    const userPosition =
-      allStatisticsResult.value?.findIndex(s => s.userId === id) ?? -1;
-    const userTotalGames = userStatisticResult.value?.gamesPlayed ?? 0;
-    const userGamesWon = userStatisticResult.value?.gamesWon ?? 0;
-    const userWinRate =
-      userTotalGames > 0
-        ? ((userGamesWon / userTotalGames) * 100).toFixed(2)
-        : '0.00';
-
-    response.user = {
-      avatar: userResult.value?.avatar ?? '',
-      username: userResult.value?.username ?? '',
-      score: userStatisticResult.value?.score ?? 0,
-      position: userPosition + 1,
-      winRate: parseFloat(userWinRate),
-    };
-
-    return Success.create(response);
   }
 }

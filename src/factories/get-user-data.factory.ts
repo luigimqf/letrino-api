@@ -1,19 +1,19 @@
 import { AppDataSource } from '../config/db/data-source';
-import { Statistic, User } from '../config/db/entity';
+import { Match, User } from '../config/db/entity';
 import { IController } from '../controllers/create-user.controller';
 import { GetUserDataController } from '../controllers/get-user-data.controller';
-import { StatisticRepository } from '../repositories/statistic.repository';
+import { MatchRepository } from '../repositories/match.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { GetUserDataUseCase } from '../usecases/get-user-data.usecase';
 
 export const getUserDataFactory = (): IController => {
   const userRepository = new UserRepository(AppDataSource.getRepository(User));
-  const staticticRepository = new StatisticRepository(
-    AppDataSource.getRepository(Statistic)
+  const matchRepository = new MatchRepository(
+    AppDataSource.getRepository(Match)
   );
   const getUserDataUsecase = new GetUserDataUseCase(
     userRepository,
-    staticticRepository
+    matchRepository
   );
   const getUserDataController = new GetUserDataController(getUserDataUsecase);
   return getUserDataController;

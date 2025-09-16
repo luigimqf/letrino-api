@@ -1,24 +1,37 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Column } from 'typeorm'
-import { User } from './User'
-import { Word } from './Word'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Column,
+} from 'typeorm';
+
+export interface ISkippedAttempt {
+  id: string;
+  wordId: string;
+  userId: string;
+  deletedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Entity('skipped_attempts')
 export class SkippedAttempt {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id: string;
 
   @Column()
-  wordId: string
+  wordId: string;
 
   @Column()
-  userId: string
+  userId: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  deletedAt?: Date
+  deletedAt?: Date;
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt: Date;
 }
