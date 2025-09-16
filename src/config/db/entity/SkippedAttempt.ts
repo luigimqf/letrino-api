@@ -5,6 +5,7 @@ import {
   UpdateDateColumn,
   Column,
 } from 'typeorm';
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 export interface ISkippedAttempt {
   id: string;
@@ -29,9 +30,9 @@ export class SkippedAttempt {
   @Column({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

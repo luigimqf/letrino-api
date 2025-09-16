@@ -9,6 +9,7 @@ import {
 import { Attempt } from './Attempt';
 import { UsedWord } from './UsedWord';
 import { Match } from './Match';
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 export interface IUser {
   id: string;
@@ -52,9 +53,9 @@ export class User {
   @OneToMany(() => Match, match => match.user)
   matches: Match[];
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

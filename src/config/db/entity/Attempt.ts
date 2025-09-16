@@ -11,17 +11,7 @@ import { User } from './User';
 import { Match } from './Match';
 import { Word } from './Word';
 import { EStatistics } from '../../../constants/statistic';
-
-export interface IAttempt {
-  id: string;
-  userId: string;
-  gamePlayedId: string;
-  wordId: string;
-  userInput: string;
-  result: EStatistics;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 @Entity('attempts')
 export class Attempt {
@@ -58,9 +48,9 @@ export class Attempt {
   })
   result: EStatistics;
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

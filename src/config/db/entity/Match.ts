@@ -13,6 +13,7 @@ import { User } from './User';
 import { Attempt } from './Attempt';
 import { EGameStatus } from '../../../constants/game';
 import { Word } from './Word';
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 export interface IMatch {
   id: string;
@@ -55,9 +56,9 @@ export class Match {
   @Column({ type: 'enum', enum: EGameStatus })
   result: EGameStatus;
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

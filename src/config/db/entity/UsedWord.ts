@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Word } from './Word';
 import { User } from './User';
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 export interface IUsedWord {
   id: string;
@@ -44,9 +45,9 @@ export class UsedWord {
   @Column({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

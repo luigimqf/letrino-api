@@ -10,6 +10,7 @@ import {
 import { UsedWord } from './UsedWord';
 import { Attempt } from './Attempt';
 import { Match } from './Match';
+import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 
 export interface IWord {
   id: string;
@@ -40,9 +41,9 @@ export class Word {
   @OneToMany(() => Attempt, attempt => attempt.word)
   attempts: Attempt[];
 
-  @CreateDateColumn()
+  @UTCCreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UTCUpdateDateColumn()
   updatedAt: Date;
 }

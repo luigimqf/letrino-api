@@ -1,6 +1,7 @@
 import { User } from '../config/db/entity';
 import { ErrorCode } from '../constants/error';
 import { IUserRepository } from '../repositories/user.repository';
+import { DateUtils } from '../utils/date';
 import { Either, Failure } from '../utils/either';
 import bcrypt from 'bcryptjs';
 

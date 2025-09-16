@@ -4,6 +4,7 @@ import { EGameStatus } from '../constants/game';
 import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
 import { IWordRepository } from '../repositories/word.repository';
+import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 
 export interface IGetRandomWordUseCase {
