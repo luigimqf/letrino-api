@@ -186,7 +186,7 @@ export class MatchRepository implements IMatchRepository {
     limit: number
   ): Promise<Either<ErrorCode, ILeaderboardStats[]>> {
     try {
-      const result = await this.repository
+      const topScoresResult = await this.repository
         .createQueryBuilder('match')
         .select([
           'match.userId as userId',
@@ -204,7 +204,23 @@ export class MatchRepository implements IMatchRepository {
         .limit(limit)
         .getRawMany();
 
-      return Success.create(result);
+      if (!topScoresResult || topScoresResult.length === 0) {
+        return Failure.create(ErrorCode.LEADERBOARD_NOT_FOUND);
+      }
+
+      const leaderboardStats: ILeaderboardStats[] = topScoresResult.map(
+        result => ({
+          userId: result.userId,
+          avatar: result.avatar,
+          username: result.username,
+          totalScore: parseInt(result.totalscore) || 0,
+          totalGames: parseInt(result.totalgames) || 0,
+          gamesWon: parseInt(result.gameswon) || 0,
+          winRate: parseFloat(result.winrate) || 0,
+        })
+      );
+
+      return Success.create(leaderboardStats);
     } catch (error) {
       return Failure.create(ErrorCode.SERVER_ERROR);
     }

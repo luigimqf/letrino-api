@@ -1,18 +1,18 @@
 import { ErrorCode } from '../constants/error';
 import { IMatchRepository } from '../repositories/match.repository';
-import { IUserRepository } from '../repositories/user.repository';
 import { Either, Failure, Success } from '../utils/either';
 
 export interface IGetLeaderboardUsecase {
-  execute(id?: string): Promise<Either<ErrorCode, ILeaderboard>>;
+  execute(id?: string | null): Promise<Either<ErrorCode, ILeaderboard>>;
 }
 
 interface ILeaderboard {
-  leaderboard: ILeaderboardEntry[];
-  user?: ILeaderboardEntry;
+  leaderboard: Omit<ILeaderboardEntry, 'id'>[];
+  user?: Omit<ILeaderboardEntry, 'id'>;
 }
 
 interface ILeaderboardEntry {
+  id: string;
   avatar: string;
   username: string;
   score: number;
@@ -35,6 +35,7 @@ export class GetLeaderboardUseCase implements IGetLeaderboardUsecase {
 
       const leaderboard: ILeaderboardEntry[] = leaderboardData.map(
         (entry, index) => ({
+          id: entry.userId,
           avatar: entry.avatar,
           username: entry.username,
           score: entry.totalScore,
@@ -43,15 +44,13 @@ export class GetLeaderboardUseCase implements IGetLeaderboardUsecase {
         })
       );
 
-      const response: ILeaderboard = { leaderboard };
+      const isUserInTop10 = leaderboard.some(entry => entry.id === id);
 
-      if (!id) {
-        return Success.create(response);
-      }
+      const leaderboardWithoutId = leaderboard.map(({ id, ...rest }) => rest);
 
-      const userInTop10 = leaderboardData.find(entry => entry.userId === id);
+      const response: ILeaderboard = { leaderboard: leaderboardWithoutId };
 
-      if (userInTop10) {
+      if (!id || !isUserInTop10) {
         return Success.create(response);
       }
 

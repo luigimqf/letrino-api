@@ -1,19 +1,6 @@
-import {
-  signIn,
-  forgotPassword,
-  refreshToken,
-  refreshPassword,
-  signUp,
-} from '../controllers/auth.controller';
-import { getLeaderboard } from '../controllers/leaderboard.controller';
 import { Express } from 'express';
 import { authenticate } from '../middlewares/authenticate';
 import { sentryUserContext } from '../middlewares/sentry';
-import {
-  attemptFail,
-  registerSkippedAttemp,
-  deleteSkippedAttempDocument,
-} from '../controllers/word.controller';
 import { checkAttempts } from '../middlewares/attempts';
 import { createUserFactory } from '../factories/create-user.factory';
 import { getUserDataFactory } from '../factories/get-user-data.factory';
@@ -23,8 +10,6 @@ import { getUserAttemptsFactory } from '../factories/get-user-attempts.factory';
 import { getRandomWordFactory } from '../factories/get-random-word.factory';
 import { registerSuccessAttemptFactory } from '../factories/register-success-attempt.factory';
 import { registerFailedAttemptFactory } from '../factories/register-failed-attempt.factory';
-import { registerSkippedAttemptFactory } from '../factories/register-skipped-attempt.factory';
-import { deleteSkippedAttemptFactory } from '../factories/delete-skipped-attempt.factory';
 import { getLeaderboardFactory } from '../factories/get-leaderboard.factory';
 import { refreshTokenFactory } from '../controllers/refresh-token.controller';
 import { forgotPasswordFactory } from '../factories/forgot-password.factory';
@@ -94,20 +79,6 @@ function setupRoutes(app: Express) {
 
   app.post('/attempt/fail', authenticate, checkAttempts, (req, res) =>
     registerFailedAttemptFactory().handle(req, res)
-  );
-
-  app.post(
-    '/attempt/skipped/register',
-    authenticate,
-    checkAttempts,
-    (req, res) => registerSkippedAttemptFactory().handle(req, res)
-  );
-
-  app.delete(
-    '/attempt/skipped/delete',
-    authenticate,
-    checkAttempts,
-    (req, res) => deleteSkippedAttemptFactory().handle(req, res)
   );
 
   //----------- LeaderBoard Routes ------------//
