@@ -17,7 +17,6 @@ export class CreateUserController implements IController {
     const result = await this.createUserUsecase.execute(userData);
 
     if (result.isFailure()) {
-      console.log(result);
       badRequest(res, {
         code: result.error,
         message: Errors[result.error],

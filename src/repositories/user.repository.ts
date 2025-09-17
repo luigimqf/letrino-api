@@ -61,7 +61,6 @@ export class UserRepository implements IUserRepository {
         relations: ['matches'],
       });
 
-      console.log({ user });
       if (!user) {
         return Failure.create(Errors.NOT_FOUND);
       }
