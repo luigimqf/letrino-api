@@ -45,6 +45,7 @@ export enum Errors {
   CREATE_USED_WORD_FAILED = 'Failed to create used word',
   CREATE_ATTEMPT_FAILED = 'Failed to create attempt',
   MATCH_NOT_IN_PROGRESS = 'Match is not in progress',
+  USER_WORD_NOT_FOUND = 'User word not found',
 }
 
 export enum ErrorCode {
@@ -94,4 +95,5 @@ export enum ErrorCode {
   CREATE_USED_WORD_FAILED = 'CREATE_USED_WORD_FAILED',
   CREATE_ATTEMPT_FAILED = 'CREATE_ATTEMPT_FAILED',
   MATCH_NOT_IN_PROGRESS = 'MATCH_NOT_IN_PROGRESS',
+  USER_WORD_NOT_FOUND = 'USER_WORD_NOT_FOUND',
 }

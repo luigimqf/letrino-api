@@ -7,14 +7,14 @@ import { Either, Failure, Success } from '../utils/either';
 import { Between, Repository } from 'typeorm';
 
 export interface IMatchRepository {
-  create(data: ICreateMatchDTO): Promise<Either<Errors, Match>>;
-  findByUserId(userId: string): Promise<Either<Errors, Match>>;
-  findTodaysMatch(userId: string): Promise<Either<Errors, Match | null>>;
-  findAllByUserId(userId: string): Promise<Either<Errors, Match[]>>;
-  getStats(userId: string): Promise<Either<Errors, IStats>>;
+  create(data: ICreateMatchDTO): Promise<Either<ErrorCode, Match>>;
+  findByUserId(userId: string): Promise<Either<ErrorCode, Match>>;
+  findTodaysMatch(userId: string): Promise<Either<ErrorCode, Match | null>>;
+  findAllByUserId(userId: string): Promise<Either<ErrorCode, Match[]>>;
+  getStats(userId: string): Promise<Either<ErrorCode, IStats>>;
   getTopScores(limit: number): Promise<Either<ErrorCode, ILeaderboardStats[]>>;
   getLeaderboardEntry(userId: string): Promise<Either<ErrorCode, IUserStats>>;
-  update(data: IUpdateMatchDTO): Promise<Either<Errors, Match>>;
+  update(data: IUpdateMatchDTO): Promise<Either<ErrorCode, Match>>;
 }
 
 interface IStats {
@@ -66,7 +66,7 @@ export class MatchRepository implements IMatchRepository {
     score,
     wordId,
     result,
-  }: ICreateMatchDTO): Promise<Either<Errors, Match>> {
+  }: ICreateMatchDTO): Promise<Either<ErrorCode, Match>> {
     try {
       const newMatch = this.repository.create({
         userId,
@@ -78,11 +78,13 @@ export class MatchRepository implements IMatchRepository {
       const savedMatch = await this.repository.save(newMatch);
       return Success.create(savedMatch);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 
-  async findTodaysMatch(userId: string): Promise<Either<Errors, Match | null>> {
+  async findTodaysMatch(
+    userId: string
+  ): Promise<Either<ErrorCode, Match | null>> {
     try {
       const startOfDay = DateUtils.startOfDayUTC();
       const endOfDay = DateUtils.endOfDayUTC();
@@ -95,44 +97,44 @@ export class MatchRepository implements IMatchRepository {
       });
 
       if (!match) {
-        return Failure.create(Errors.MATCH_NOT_FOUND);
+        return Failure.create(ErrorCode.MATCH_NOT_FOUND);
       }
 
       return Success.create(match || null);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 
-  async findByUserId(userId: string): Promise<Either<Errors, Match>> {
+  async findByUserId(userId: string): Promise<Either<ErrorCode, Match>> {
     try {
       const match = await this.repository.findOneBy({ userId });
       if (!match) {
-        return Failure.create(Errors.MATCH_NOT_FOUND);
+        return Failure.create(ErrorCode.MATCH_NOT_FOUND);
       }
       return Success.create(match);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 
-  async findAllByUserId(userId: string): Promise<Either<Errors, Match[]>> {
+  async findAllByUserId(userId: string): Promise<Either<ErrorCode, Match[]>> {
     try {
       const matches = await this.repository.findBy({ userId });
       if (!matches || matches.length === 0) {
-        return Failure.create(Errors.MATCHES_NOT_FOUND);
+        return Failure.create(ErrorCode.MATCHES_NOT_FOUND);
       }
       return Success.create(matches);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 
-  async getStats(userId: string): Promise<Either<Errors, IStats>> {
+  async getStats(userId: string): Promise<Either<ErrorCode, IStats>> {
     try {
       const matches = await this.repository.findBy({ userId });
       if (!matches || matches.length === 0) {
-        return Failure.create(Errors.MATCHES_NOT_FOUND);
+        return Failure.create(ErrorCode.MATCHES_NOT_FOUND);
       }
 
       const score = matches.reduce((acc, match) => acc + match.score, 0);
@@ -178,7 +180,7 @@ export class MatchRepository implements IMatchRepository {
         currentWinStreak: winStreak,
       });
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 
@@ -272,7 +274,10 @@ export class MatchRepository implements IMatchRepository {
     }
   }
 
-  async update({ id, data }: IUpdateMatchDTO): Promise<Either<Errors, Match>> {
+  async update({
+    id,
+    data,
+  }: IUpdateMatchDTO): Promise<Either<ErrorCode, Match>> {
     try {
       const match = await this.repository.findOne({
         where: { id },
@@ -280,7 +285,7 @@ export class MatchRepository implements IMatchRepository {
       });
 
       if (!match) {
-        return Failure.create(Errors.MATCH_NOT_FOUND);
+        return Failure.create(ErrorCode.MATCH_NOT_FOUND);
       }
 
       if (data.score !== undefined) {
@@ -296,7 +301,7 @@ export class MatchRepository implements IMatchRepository {
       const updatedMatch = await this.repository.save(match);
       return Success.create(updatedMatch);
     } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
+      return Failure.create(ErrorCode.SERVER_ERROR);
     }
   }
 }

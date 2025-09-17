@@ -1,10 +1,7 @@
 import { IWord } from '../config/models/word.model';
 import { ErrorCode } from '../constants/error';
-import { EGameStatus } from '../constants/game';
-import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
 import { IWordRepository } from '../repositories/word.repository';
-import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 
 export interface IGetRandomWordUseCase {
@@ -15,7 +12,6 @@ export interface IGetRandomWordUseCase {
 
 export class GetRandomWordUseCase implements IGetRandomWordUseCase {
   constructor(
-    private matchRepository: IMatchRepository,
     private wordRepository: IWordRepository,
     private usedWordRepository: IUsedWordRepository
   ) {}
@@ -23,7 +19,9 @@ export class GetRandomWordUseCase implements IGetRandomWordUseCase {
   async execute(
     id: string | null
   ): Promise<Either<ErrorCode, Pick<IWord, 'word' | 'isGolden'>>> {
+    console.log('GetRandomWordUseCase.execute called with id:', id);
     if (id) {
+      console.log('Handling with id:', id);
       return this.handleId(id);
     }
 
@@ -40,13 +38,12 @@ export class GetRandomWordUseCase implements IGetRandomWordUseCase {
   private async handleId(id: string) {
     const userWord = await this.usedWordRepository.findUserWord(id);
 
+    console.log('User word fetched:', userWord);
     if (userWord.isSuccess() && userWord.value) {
       const wordDoc = await this.wordRepository.find(userWord.value.wordId);
 
       if (wordDoc.isSuccess() && wordDoc.value) {
         const { word, isGolden } = wordDoc.value;
-
-        this.createMatch(id, wordDoc.value.id);
 
         return Success.create({ word, isGolden });
       }
@@ -77,23 +74,5 @@ export class GetRandomWordUseCase implements IGetRandomWordUseCase {
     }
 
     return Success.create({ word, isGolden });
-  }
-
-  private async createMatch(id: string, wordId: string) {
-    const existingMatch = await this.matchRepository.findTodaysMatch(id);
-
-    if (existingMatch.isSuccess() && existingMatch.value) {
-      return;
-    }
-
-    const matchResult = await this.matchRepository.create({
-      userId: id,
-      wordId: wordId,
-      result: EGameStatus.IN_PROGRESS,
-    });
-
-    if (matchResult.isFailure() || !matchResult.value) {
-      return Failure.create(ErrorCode.MATCH_CREATE_FAILED);
-    }
   }
 }

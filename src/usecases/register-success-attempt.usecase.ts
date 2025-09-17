@@ -48,26 +48,44 @@ export class RegisterSuccessAttemptUseCase
     id: string;
     attempt: string;
   }): Promise<Either<ErrorCode, ISuccessReturn>> {
-    const userMatchResult = await this.matchRepository.findByUserId(id);
-
-    if (userMatchResult.isFailure()) {
-      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
-    }
-
-    if (userMatchResult.value.result !== EGameStatus.IN_PROGRESS) {
-      return Failure.create(ErrorCode.MATCH_NOT_IN_PROGRESS);
-    }
-
     const usedWord = await this.usedWordRepository.findUserWord(id);
 
     if (usedWord.isFailure() || !usedWord.value) {
-      return Failure.create(ErrorCode.WORD_NOT_FOUND);
+      return Failure.create(ErrorCode.USER_WORD_NOT_FOUND);
     }
 
     const word = await this.wordRepository.find(usedWord?.value?.wordId || '');
 
     if (word.isFailure() || !word.value) {
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
+    }
+
+    let userMatchResult = await this.matchRepository.findByUserId(id);
+
+    if (
+      userMatchResult.isFailure() &&
+      userMatchResult.error === ErrorCode.MATCH_NOT_FOUND
+    ) {
+      const newMatchResult = await this.matchRepository.create({
+        userId: id,
+        score: 0,
+        result: EGameStatus.IN_PROGRESS,
+        wordId: word.value.id,
+      });
+
+      if (newMatchResult.isFailure() || !newMatchResult.value) {
+        return Failure.create(ErrorCode.MATCH_CREATE_FAILED);
+      }
+
+      userMatchResult = Success.create(newMatchResult.value);
+    }
+
+    if (userMatchResult.isFailure()) {
+      return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+
+    if (userMatchResult.value.result !== EGameStatus.IN_PROGRESS) {
+      return Failure.create(ErrorCode.MATCH_NOT_IN_PROGRESS);
     }
 
     if (word.value.word !== attempt) {

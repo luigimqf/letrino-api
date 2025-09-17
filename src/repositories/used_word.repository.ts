@@ -96,6 +96,14 @@ export class UsedWordRepository implements IUsedWordRepository {
       const dayAtStart = DateUtils.startOfDayUTC();
       const dayAtEnd = DateUtils.endOfDayUTC();
 
+      console.log(
+        'Finding user word for id:',
+        id,
+        'between',
+        dayAtStart,
+        'and',
+        dayAtEnd
+      ); // Debugging line
       const todaysWord = await this.repository.findOne({
         where: {
           userId: id,
@@ -104,6 +112,7 @@ export class UsedWordRepository implements IUsedWordRepository {
         },
       });
 
+      console.log('Todays word found:', todaysWord); // Debugging line
       return Success.create(todaysWord);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
