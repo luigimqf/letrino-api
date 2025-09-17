@@ -29,7 +29,7 @@ export class GetUserStatisticUseCase implements IGetUserStatisticUseCase {
 
     const gamesPlayed = matches.value.length;
     const gamesWon = matches.value.filter(
-      match => match.result === EGameStatus.SUCCESS
+      match => match.result === EGameStatus.CORRECT
     ).length;
     const score = matches.value.reduce((acc, match) => acc + match.score, 0);
 
@@ -63,7 +63,7 @@ export class GetUserStatisticUseCase implements IGetUserStatisticUseCase {
     let currentWinStreak = 0;
 
     for (const match of sortedMatches) {
-      if (match.result === EGameStatus.SUCCESS) {
+      if (match.result === EGameStatus.CORRECT) {
         currentWinStreak++;
         bestWinStreak = Math.max(bestWinStreak, currentWinStreak);
       } else {
@@ -74,7 +74,7 @@ export class GetUserStatisticUseCase implements IGetUserStatisticUseCase {
     let winStreak = 0;
 
     for (let i = sortedMatches.length - 1; i >= 0; i--) {
-      if (sortedMatches[i].result === EGameStatus.SUCCESS) {
+      if (sortedMatches[i].result === EGameStatus.CORRECT) {
         winStreak++;
       } else {
         break;

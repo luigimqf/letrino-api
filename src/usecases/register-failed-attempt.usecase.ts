@@ -40,6 +40,16 @@ export class RegisterFailedAttemptUseCase
     id: string;
     attempt: string;
   }): Promise<Either<ErrorCode, ISuccessReturn>> {
+    const userMatchResult = await this.matchRepository.findByUserId(id);
+
+    if (userMatchResult.isFailure()) {
+      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
+    }
+
+    if (userMatchResult.value.result !== EGameStatus.IN_PROGRESS) {
+      return Failure.create(ErrorCode.MATCH_NOT_IN_PROGRESS);
+    }
+
     const userUsedWord = await this.usedWordRepository.findUserWord(id);
 
     if (userUsedWord.isFailure() || !userUsedWord.value) {
@@ -54,12 +64,6 @@ export class RegisterFailedAttemptUseCase
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
     }
 
-    const userMatchResult = await this.matchRepository.findByUserId(id);
-
-    if (userMatchResult.isFailure()) {
-      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
-    }
-
     if (word.value.word === attempt) {
       return Failure.create(ErrorCode.BAD_REQUEST);
     }
@@ -69,25 +73,6 @@ export class RegisterFailedAttemptUseCase
 
     if (incorrectAttemptResult.isFailure()) {
       return Failure.create(ErrorCode.SERVER_ERROR);
-    }
-
-    const totalIncorrectAttempts = incorrectAttemptResult.value!;
-
-    if (totalIncorrectAttempts < 5) {
-      const attemptResult = await this.attemptRepository.create({
-        userId: id,
-        matchId: userMatchResult.value.id,
-        wordId: word.value.id,
-        result: EStatistics.INCORRECT,
-        userInput: attempt,
-      });
-
-      if (attemptResult.isFailure() || !attemptResult.value) {
-        return Failure.create(ErrorCode.SERVER_ERROR);
-      }
-      return Success.create({
-        attempt: totalIncorrectAttempts + 1,
-      });
     }
 
     const attemptResult = await this.attemptRepository.create({
@@ -102,6 +87,14 @@ export class RegisterFailedAttemptUseCase
       return Failure.create(ErrorCode.SERVER_ERROR);
     }
 
+    const totalIncorrectAttempts = incorrectAttemptResult.value!;
+
+    if (totalIncorrectAttempts < 5) {
+      return Success.create({
+        attempt: totalIncorrectAttempts + 1,
+      });
+    }
+
     const attempts = await this.attemptRepository.findTodaysAttempts(id);
 
     if (attempts.isFailure()) {
@@ -110,7 +103,7 @@ export class RegisterFailedAttemptUseCase
 
     const updateMatchResult = await this.matchRepository.update({
       id: userMatchResult.value.id,
-      data: { attempts: attempts.value, result: EGameStatus.FAILED },
+      data: { result: EGameStatus.CORRECT, score: 0 },
     });
 
     if (updateMatchResult.isFailure() || !updateMatchResult.value) {
@@ -119,7 +112,7 @@ export class RegisterFailedAttemptUseCase
 
     return Success.create({
       score: 0,
-      attempt: totalIncorrectAttempts,
+      attempt: attempts.value.length,
       correctWord: word.value.word,
     });
   }

@@ -8,19 +8,13 @@ import { Between, Repository } from 'typeorm';
 
 export interface IMatchRepository {
   create(data: ICreateMatchDTO): Promise<Either<Errors, Match>>;
-  update({
-    id,
-    data,
-  }: {
-    id: string;
-    data: Partial<IMatch>;
-  }): Promise<Either<Errors, Match>>;
   findByUserId(userId: string): Promise<Either<Errors, Match>>;
   findTodaysMatch(userId: string): Promise<Either<Errors, Match | null>>;
   findAllByUserId(userId: string): Promise<Either<Errors, Match[]>>;
   getStats(userId: string): Promise<Either<Errors, IStats>>;
   getTopScores(limit: number): Promise<Either<ErrorCode, ILeaderboardStats[]>>;
   getLeaderboardEntry(userId: string): Promise<Either<ErrorCode, IUserStats>>;
+  update(data: IUpdateMatchDTO): Promise<Either<Errors, Match>>;
 }
 
 interface IStats {
@@ -54,6 +48,15 @@ interface ICreateMatchDTO {
   result?: EGameStatus;
 }
 
+interface IUpdateMatchDTO {
+  id: string;
+  data: {
+    attempts?: Attempt[];
+    score?: number;
+    result?: EGameStatus;
+  };
+}
+
 export class MatchRepository implements IMatchRepository {
   constructor(private readonly repository: Repository<Match>) {}
 
@@ -74,40 +77,6 @@ export class MatchRepository implements IMatchRepository {
       });
       const savedMatch = await this.repository.save(newMatch);
       return Success.create(savedMatch);
-    } catch (error) {
-      return Failure.create(Errors.SERVER_ERROR);
-    }
-  }
-
-  async update({
-    id,
-    data,
-  }: {
-    id: string;
-    data: Partial<IMatch>;
-  }): Promise<Either<Errors, Match>> {
-    try {
-      const existingMatch = await this.repository.findOneBy({ id });
-
-      console.log('Existing Match:', existingMatch);
-      if (!existingMatch) {
-        return Failure.create(Errors.NOT_FOUND);
-      }
-
-      const updateResult = await this.repository.update(id, data);
-
-      console.log('Update Result:', updateResult);
-      if (updateResult.affected === 0) {
-        return Failure.create(Errors.SERVER_ERROR);
-      }
-      const updatedMatch = await this.repository.findOneBy({ id });
-
-      console.log('Updated Match:', updatedMatch);
-      if (!updatedMatch) {
-        return Failure.create(Errors.SERVER_ERROR);
-      }
-
-      return Success.create(updatedMatch);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }
@@ -169,7 +138,7 @@ export class MatchRepository implements IMatchRepository {
       const score = matches.reduce((acc, match) => acc + match.score, 0);
       const totalMatches = matches.length;
       const totalWins = matches.filter(
-        match => match.result === EGameStatus.SUCCESS
+        match => match.result === EGameStatus.CORRECT
       ).length;
       const winRate = totalMatches
         ? parseFloat(((totalWins / totalMatches) * 100).toFixed(2))
@@ -182,7 +151,7 @@ export class MatchRepository implements IMatchRepository {
       let currentWinStreak = 0;
 
       for (const match of sortedMatches) {
-        if (match.result === EGameStatus.SUCCESS) {
+        if (match.result === EGameStatus.CORRECT) {
           currentWinStreak++;
           bestWinStreak = Math.max(bestWinStreak, currentWinStreak);
         } else {
@@ -193,7 +162,7 @@ export class MatchRepository implements IMatchRepository {
       let winStreak = 0;
 
       for (let i = sortedMatches.length - 1; i >= 0; i--) {
-        if (sortedMatches[i].result === EGameStatus.SUCCESS) {
+        if (sortedMatches[i].result === EGameStatus.CORRECT) {
           winStreak++;
         } else {
           break;
@@ -229,7 +198,7 @@ export class MatchRepository implements IMatchRepository {
           '(SUM(CASE WHEN match.result = :winStatus THEN 1 ELSE 0 END) * 100.0 / COUNT(match.id)) as winRate',
         ])
         .innerJoin('match.user', 'user')
-        .setParameter('winStatus', EGameStatus.SUCCESS)
+        .setParameter('winStatus', EGameStatus.CORRECT)
         .groupBy('match.userId, user.avatar, user.username')
         .orderBy('totalScore', 'DESC')
         .limit(limit)
@@ -258,7 +227,7 @@ export class MatchRepository implements IMatchRepository {
         ])
         .innerJoin('match.user', 'user')
         .where('match.userId = :userId', { userId })
-        .setParameter('winStatus', EGameStatus.SUCCESS)
+        .setParameter('winStatus', EGameStatus.CORRECT)
         .groupBy('match.userId, user.avatar, user.username')
         .getRawOne();
 
@@ -284,6 +253,34 @@ export class MatchRepository implements IMatchRepository {
       return Success.create(userStats);
     } catch (error) {
       return Failure.create(ErrorCode.SERVER_ERROR);
+    }
+  }
+
+  async update({ id, data }: IUpdateMatchDTO): Promise<Either<Errors, Match>> {
+    try {
+      const match = await this.repository.findOne({
+        where: { id },
+        relations: ['attempts'],
+      });
+
+      if (!match) {
+        return Failure.create(Errors.MATCH_NOT_FOUND);
+      }
+
+      if (data.score !== undefined) {
+        match.score = data.score;
+      }
+      if (data.result !== undefined) {
+        match.result = data.result;
+      }
+
+      // Não atualize attempts aqui, pois eles já estão sendo criados/gerenciados separadamente
+      // O relacionamento OneToMany cuida da associação automaticamente
+
+      const updatedMatch = await this.repository.save(match);
+      return Success.create(updatedMatch);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
     }
   }
 }

@@ -1,5 +1,5 @@
 export enum EGameStatus {
-  SUCCESS = 'success',
-  FAILED = 'failed',
+  CORRECT = 'correct',
+  INCORRECT = 'incorrect',
   IN_PROGRESS = 'in_progress',
 }

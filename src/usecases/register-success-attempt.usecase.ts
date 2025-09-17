@@ -48,6 +48,16 @@ export class RegisterSuccessAttemptUseCase
     id: string;
     attempt: string;
   }): Promise<Either<ErrorCode, ISuccessReturn>> {
+    const userMatchResult = await this.matchRepository.findByUserId(id);
+
+    if (userMatchResult.isFailure()) {
+      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
+    }
+
+    if (userMatchResult.value.result !== EGameStatus.IN_PROGRESS) {
+      return Failure.create(ErrorCode.MATCH_NOT_IN_PROGRESS);
+    }
+
     const usedWord = await this.usedWordRepository.findUserWord(id);
 
     if (usedWord.isFailure() || !usedWord.value) {
@@ -58,12 +68,6 @@ export class RegisterSuccessAttemptUseCase
 
     if (word.isFailure() || !word.value) {
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
-    }
-
-    const userMatchResult = await this.matchRepository.findByUserId(id);
-
-    if (userMatchResult.isFailure()) {
-      return Failure.create(ErrorCode.MATCH_NOT_FOUND);
     }
 
     if (word.value.word !== attempt) {
@@ -128,8 +132,7 @@ export class RegisterSuccessAttemptUseCase
       id: userMatchResult.value.id,
       data: {
         score: scoreCalculated,
-        result: EGameStatus.SUCCESS,
-        attempts: attempts.value,
+        result: EGameStatus.CORRECT,
       },
     });
 
