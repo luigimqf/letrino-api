@@ -58,9 +58,10 @@ export class UserRepository implements IUserRepository {
     try {
       const user = await this.repository.findOne({
         where: { id },
-        relations: ['statistic'],
+        relations: ['matches'],
       });
 
+      console.log({ user });
       if (!user) {
         return Failure.create(Errors.NOT_FOUND);
       }

@@ -30,13 +30,9 @@ export class GetUserDataUseCase implements IGetUserDataUsecase {
 
     const { username, avatar } = user.value;
 
-    const matches = await this.matchRepository.findAllByUserId(id);
+    const matches = user.value.matches;
 
-    if (matches.isFailure() || !matches.value) {
-      return Failure.create(ErrorCode.MATCHES_NOT_FOUND);
-    }
-
-    const score = matches.value.reduce((acc, match) => acc + match.score, 0);
+    const score = matches.reduce((acc, match) => acc + match.score, 0);
 
     return Success.create({ username, avatar, score });
   }
