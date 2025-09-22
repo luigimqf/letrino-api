@@ -1,9 +1,9 @@
-import { EStatistics } from "../../constants/statistic";
-import { ModelWithTimestamp } from "../../types";
+import { EAttemptStatus } from '../../constants/attempt';
+import { ModelWithTimestamp } from '../../types';
 
 export interface IStatistic extends ModelWithTimestamp {
-  wordId: string,
+  wordId: string;
   attempt: string;
-  userId: string,
-  type: EStatistics
+  userId: string;
+  type: EAttemptStatus;
 }

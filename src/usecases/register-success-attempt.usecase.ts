@@ -3,9 +3,9 @@ import { EGameStatus } from '../constants/game';
 import {
   ATTEMPT_SCORES,
   BONUS_SCORES,
-  EStatistics,
+  EAttemptStatus,
   HIGH_WIN_RATE_THRESHOLD,
-} from '../constants/statistic';
+} from '../constants/attempt';
 import { IAttemptRepository } from '../repositories/attempt.repository';
 import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
@@ -96,7 +96,7 @@ export class RegisterSuccessAttemptUseCase
       userId: id,
       matchId: userMatchResult.value.id,
       wordId: word.value.id,
-      result: EStatistics.CORRECT,
+      result: EAttemptStatus.CORRECT,
       userInput: attempt,
     });
 
@@ -160,6 +160,7 @@ export class RegisterSuccessAttemptUseCase
 
     return Success.create({
       attempt: currentAttempt,
+      newScore: scoreCalculated,
       bonuses: {
         perfectGame: currentAttempt === 1 ? BONUS_SCORES.PERFECT_GAME : 0,
         streak:

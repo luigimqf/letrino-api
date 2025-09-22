@@ -1,4 +1,4 @@
-export enum EStatistics {
+export enum EAttemptStatus {
   CORRECT = 'correct',
   INCORRECT = 'incorrect',
 }

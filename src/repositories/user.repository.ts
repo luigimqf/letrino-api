@@ -3,7 +3,8 @@ import { Errors } from '../constants/error';
 import { Either, Failure, Success } from '../utils/either';
 import { IUser } from '../config/models/user.model';
 import { User } from '../config/db/entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { Between, FindOneOptions, Repository } from 'typeorm';
+import { DateUtils } from '../utils/date';
 
 interface IFindAll {
   sort?: { [key: string]: 'ASC' | 'DESC' };
@@ -13,6 +14,7 @@ interface IFindAll {
 export interface IUserRepository {
   create(data: Partial<IUser>): Promise<Either<Errors, User>>;
   findById(id: string): Promise<Either<Errors, User>>;
+  findUserCreatedToday(): Promise<Either<Errors, User>>;
   findWithRelation({
     findBy,
     relations,
@@ -49,6 +51,27 @@ export class UserRepository implements IUserRepository {
       const savedUser = await this.repository.save(newUser);
 
       return Success.create(savedUser);
+    } catch (error) {
+      return Failure.create(Errors.SERVER_ERROR);
+    }
+  }
+
+  async findUserCreatedToday(): Promise<Either<Errors, User>> {
+    try {
+      const startOfDay = DateUtils.startOfDay();
+      const endOfDay = DateUtils.endOfDay();
+
+      const user = await this.repository.findOne({
+        where: {
+          createdAt: Between(startOfDay, endOfDay),
+        },
+      });
+
+      if (!user) {
+        return Failure.create(Errors.NOT_FOUND);
+      }
+
+      return Success.create(user);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);
     }

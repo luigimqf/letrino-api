@@ -11,4 +11,7 @@ export const AppDataSource = new DataSource({
   migrations: ['src/config/db/migrations/*.ts'],
   subscribers: ['src/config/db/subscribers/*.ts'],
   ssl: env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  extra: {
+    timezone: 'UTC',
+  },
 });

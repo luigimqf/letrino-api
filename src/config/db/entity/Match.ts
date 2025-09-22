@@ -14,6 +14,7 @@ import { Attempt } from './Attempt';
 import { EGameStatus } from '../../../constants/game';
 import { Word } from './Word';
 import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
+import { BaseEntity } from './BaseEntity';
 
 export interface IMatch {
   id: string;
@@ -26,10 +27,7 @@ export interface IMatch {
 }
 
 @Entity('matches')
-export class Match {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Match extends BaseEntity {
   @OneToMany(() => Attempt, attempt => attempt.match, {
     cascade: true,
     onDelete: 'CASCADE',
@@ -55,10 +53,4 @@ export class Match {
 
   @Column({ type: 'enum', enum: EGameStatus })
   result: EGameStatus;
-
-  @UTCCreateDateColumn()
-  createdAt: Date;
-
-  @UTCUpdateDateColumn()
-  updatedAt: Date;
 }

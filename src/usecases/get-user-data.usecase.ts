@@ -1,5 +1,4 @@
 import { ErrorCode } from '../constants/error';
-import { IMatchRepository } from '../repositories/match.repository';
 import { IUserRepository } from '../repositories/user.repository';
 import { Either, Failure, Success } from '../utils/either';
 
@@ -12,10 +11,7 @@ export interface IGetUserDataUsecase {
 }
 
 export class GetUserDataUseCase implements IGetUserDataUsecase {
-  constructor(
-    private userRepository: IUserRepository,
-    private matchRepository: IMatchRepository
-  ) {}
+  constructor(private userRepository: IUserRepository) {}
 
   async execute(
     id: string
@@ -28,12 +24,12 @@ export class GetUserDataUseCase implements IGetUserDataUsecase {
       return Failure.create(ErrorCode.USER_NOT_FOUND);
     }
 
-    const { username, avatar } = user.value;
+    const { username, avatar, id: userId } = user.value;
 
     const matches = user.value.matches;
 
     const score = matches.reduce((acc, match) => acc + match.score, 0);
 
-    return Success.create({ username, avatar, score });
+    return Success.create({ username, avatar, score, id: userId });
   }
 }

@@ -10,14 +10,12 @@ import {
 import { User } from './User';
 import { Match } from './Match';
 import { Word } from './Word';
-import { EStatistics } from '../../../constants/statistic';
+import { EAttemptStatus } from '../../../constants/attempt';
 import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
+import { BaseEntity } from './BaseEntity';
 
 @Entity('attempts')
-export class Attempt {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Attempt extends BaseEntity {
   @ManyToOne(() => User, user => user.attempts)
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -44,13 +42,7 @@ export class Attempt {
 
   @Column({
     type: 'enum',
-    enum: EStatistics,
+    enum: EAttemptStatus,
   })
-  result: EStatistics;
-
-  @UTCCreateDateColumn()
-  createdAt: Date;
-
-  @UTCUpdateDateColumn()
-  updatedAt: Date;
+  result: EAttemptStatus;
 }

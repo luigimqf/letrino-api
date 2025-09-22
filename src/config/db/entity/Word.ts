@@ -11,6 +11,7 @@ import { UsedWord } from './UsedWord';
 import { Attempt } from './Attempt';
 import { Match } from './Match';
 import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
+import { BaseEntity } from './BaseEntity';
 
 export interface IWord {
   id: string;
@@ -22,10 +23,7 @@ export interface IWord {
   updatedAt: Date;
 }
 @Entity('words')
-export class Word {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Word extends BaseEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   word: string;
 
@@ -40,10 +38,4 @@ export class Word {
 
   @OneToMany(() => Attempt, attempt => attempt.word)
   attempts: Attempt[];
-
-  @UTCCreateDateColumn()
-  createdAt: Date;
-
-  @UTCUpdateDateColumn()
-  updatedAt: Date;
 }

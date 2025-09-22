@@ -93,26 +93,15 @@ export class UsedWordRepository implements IUsedWordRepository {
 
   async findUserWord(id: string): Promise<Either<Errors, UsedWord | null>> {
     try {
-      const dayAtStart = DateUtils.startOfDayUTC();
-      const dayAtEnd = DateUtils.endOfDayUTC();
+      const dayAtStart = DateUtils.startOfDay();
+      const dayAtEnd = DateUtils.endOfDay();
 
-      console.log(
-        'Finding user word for id:',
-        id,
-        'between',
-        dayAtStart,
-        'and',
-        dayAtEnd
-      ); // Debugging line
-      const todaysWord = await this.repository.findOne({
-        where: {
-          userId: id,
-          createdAt: Between(dayAtStart, dayAtEnd),
-          deletedAt: IsNull(),
-        },
+      const todaysWord = await this.repository.findOneBy({
+        userId: id,
+        createdAt: Between(dayAtStart, dayAtEnd),
+        deletedAt: IsNull(),
       });
 
-      console.log('Todays word found:', todaysWord); // Debugging line
       return Success.create(todaysWord);
     } catch (error) {
       return Failure.create(Errors.SERVER_ERROR);

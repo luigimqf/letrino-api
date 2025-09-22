@@ -2,7 +2,7 @@ import { User } from '../config/db/entity';
 import { ErrorCode } from '../constants/error';
 import { IUserRepository } from '../repositories/user.repository';
 import { DateUtils } from '../utils/date';
-import { Either, Failure } from '../utils/either';
+import { Either, Failure, Success } from '../utils/either';
 import bcrypt from 'bcryptjs';
 
 export interface ICreateUserUseCase {
@@ -10,9 +10,15 @@ export interface ICreateUserUseCase {
     email: string;
     username: string;
     password: string;
-  }): Promise<Either<ErrorCode, User>>;
+  }): Promise<Either<ErrorCode, ICreateUserReturn>>;
 }
 
+interface ICreateUserReturn {
+  id: string;
+  username: string;
+  avatar: string;
+  email: string;
+}
 export class CreateUserUseCase implements ICreateUserUseCase {
   constructor(private userRepository: IUserRepository) {}
 
@@ -20,7 +26,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
     email: string;
     username: string;
     password: string;
-  }): Promise<Either<ErrorCode, User>> {
+  }): Promise<Either<ErrorCode, ICreateUserReturn>> {
     const { email, username, password } = data;
     const userWithEmail = await this.userRepository.findOneBy({
       email,
@@ -50,6 +56,18 @@ export class CreateUserUseCase implements ICreateUserUseCase {
       return Failure.create(ErrorCode.SERVER_ERROR);
     }
 
-    return newUser;
+    const {
+      username: userUsername,
+      email: userEmail,
+      avatar,
+      id,
+    } = newUser.value;
+
+    return Success.create({
+      id,
+      username: userUsername,
+      avatar,
+      email: userEmail,
+    });
   }
 }

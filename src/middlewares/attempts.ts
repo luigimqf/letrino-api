@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AttemptRepository } from '../repositories/attempt.repository';
 import { badRequest, serverError, unauthorized } from '../utils/http-status';
 import { ErrorCode, Errors } from '../constants/error';
-import { EStatistics } from '../constants/statistic';
+import { EAttemptStatus } from '../constants/attempt';
 import { AuthenticateRequest } from '../types';
 import { DateUtils } from '../utils/date';
 import { AppDataSource } from '../config/db/data-source';
@@ -25,8 +25,8 @@ export async function checkAttempts(
     const attemptRepository = new AttemptRepository(
       AppDataSource.getRepository(Attempt)
     );
-    const today = DateUtils.startOfDayUTC();
-    const tomorrow = DateUtils.endOfDayUTC();
+    const today = DateUtils.startOfDay();
+    const tomorrow = DateUtils.endOfDay();
 
     const correctAttempsResult = await attemptRepository.countDocuments({
       userId: id,
@@ -34,7 +34,7 @@ export async function checkAttempts(
         gte: today,
         lt: tomorrow,
       },
-      result: EStatistics.CORRECT,
+      result: EAttemptStatus.CORRECT,
     });
 
     if (correctAttempsResult.isSuccess() && correctAttempsResult.value > 0) {
@@ -51,7 +51,7 @@ export async function checkAttempts(
         gte: today,
         lt: tomorrow,
       },
-      result: EStatistics.INCORRECT,
+      result: EAttemptStatus.INCORRECT,
     });
 
     if (failedAttemptsResult.isSuccess() && failedAttemptsResult.value >= 6) {

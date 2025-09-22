@@ -2,7 +2,7 @@
 import { AppDataSource } from '../config/db/data-source';
 import { Attempt } from '../config/db/entity/Attempt';
 import { Errors } from '../constants/error';
-import { EStatistics } from '../constants/statistic';
+import { EAttemptStatus } from '../constants/attempt';
 import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 import { Between, MoreThanOrEqual, LessThan, Repository } from 'typeorm';
@@ -22,7 +22,7 @@ interface IAttemptCreate {
   userId: string;
   matchId: string;
   wordId: string;
-  result: EStatistics;
+  result: EAttemptStatus;
   userInput?: string;
 }
 
@@ -35,7 +35,7 @@ interface IAttemptConditions {
   userId?: string;
   wordId?: string;
   statisticId?: string;
-  result?: EStatistics;
+  result?: EAttemptStatus;
   createdAt?: IDateRange;
 }
 
@@ -81,13 +81,13 @@ export class AttemptRepository implements IAttemptRepository {
     userId: string
   ): Promise<Either<Errors, number>> {
     try {
-      const today = DateUtils.startOfDayUTC();
-      const tomorrow = DateUtils.endOfDayUTC();
+      const today = DateUtils.startOfDay();
+      const tomorrow = DateUtils.endOfDay();
 
       const count = await this.repository.count({
         where: {
           userId,
-          result: EStatistics.INCORRECT,
+          result: EAttemptStatus.INCORRECT,
           createdAt: Between(today, tomorrow),
         },
       });
@@ -149,8 +149,8 @@ export class AttemptRepository implements IAttemptRepository {
 
   async findTodaysAttempts(userId: string): Promise<Either<Errors, Attempt[]>> {
     try {
-      const today = DateUtils.startOfDayUTC();
-      const tomorrow = DateUtils.endOfDayUTC();
+      const today = DateUtils.startOfDay();
+      const tomorrow = DateUtils.endOfDay();
 
       const attempts = await this.repository.find({
         where: {

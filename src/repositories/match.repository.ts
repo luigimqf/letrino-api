@@ -86,8 +86,8 @@ export class MatchRepository implements IMatchRepository {
     userId: string
   ): Promise<Either<ErrorCode, Match | null>> {
     try {
-      const startOfDay = DateUtils.startOfDayUTC();
-      const endOfDay = DateUtils.endOfDayUTC();
+      const startOfDay = DateUtils.startOfDay();
+      const endOfDay = DateUtils.endOfDay();
 
       const match = await this.repository.findOne({
         where: {

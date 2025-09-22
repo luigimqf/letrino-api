@@ -19,9 +19,7 @@ export class GetRandomWordUseCase implements IGetRandomWordUseCase {
   async execute(
     id: string | null
   ): Promise<Either<ErrorCode, Pick<IWord, 'word' | 'isGolden'>>> {
-    console.log('GetRandomWordUseCase.execute called with id:', id);
     if (id) {
-      console.log('Handling with id:', id);
       return this.handleId(id);
     }
 
@@ -38,7 +36,6 @@ export class GetRandomWordUseCase implements IGetRandomWordUseCase {
   private async handleId(id: string) {
     const userWord = await this.usedWordRepository.findUserWord(id);
 
-    console.log('User word fetched:', userWord);
     if (userWord.isSuccess() && userWord.value) {
       const wordDoc = await this.wordRepository.find(userWord.value.wordId);
 

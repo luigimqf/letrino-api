@@ -1,6 +1,6 @@
 import { ErrorCode } from '../constants/error';
 import { EGameStatus } from '../constants/game';
-import { EStatistics } from '../constants/statistic';
+import { EAttemptStatus } from '../constants/attempt';
 import { IAttemptRepository } from '../repositories/attempt.repository';
 import { IMatchRepository } from '../repositories/match.repository';
 import { IUsedWordRepository } from '../repositories/used_word.repository';
@@ -97,7 +97,7 @@ export class RegisterFailedAttemptUseCase
       userId: id,
       matchId: userMatchResult.value.id,
       wordId: word.value.id,
-      result: EStatistics.INCORRECT,
+      result: EAttemptStatus.INCORRECT,
       userInput: attempt,
     });
 
@@ -121,7 +121,7 @@ export class RegisterFailedAttemptUseCase
 
     const updateMatchResult = await this.matchRepository.update({
       id: userMatchResult.value.id,
-      data: { result: EGameStatus.CORRECT, score: 0 },
+      data: { result: EGameStatus.INCORRECT, score: 0 },
     });
 
     if (updateMatchResult.isFailure() || !updateMatchResult.value) {

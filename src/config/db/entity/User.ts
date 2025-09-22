@@ -10,6 +10,7 @@ import { Attempt } from './Attempt';
 import { UsedWord } from './UsedWord';
 import { Match } from './Match';
 import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
+import { BaseEntity } from './BaseEntity';
 
 export interface IUser {
   id: string;
@@ -25,10 +26,7 @@ export interface IUser {
   updatedAt: Date;
 }
 @Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   username: string;
 
@@ -52,10 +50,4 @@ export class User {
 
   @OneToMany(() => Match, match => match.user)
   matches: Match[];
-
-  @UTCCreateDateColumn()
-  createdAt: Date;
-
-  @UTCUpdateDateColumn()
-  updatedAt: Date;
 }

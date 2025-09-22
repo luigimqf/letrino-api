@@ -10,6 +10,7 @@ import {
 import { Word } from './Word';
 import { User } from './User';
 import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
+import { BaseEntity } from './BaseEntity';
 
 export interface IUsedWord {
   id: string;
@@ -21,10 +22,7 @@ export interface IUsedWord {
 }
 
 @Entity('used_words')
-export class UsedWord {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class UsedWord extends BaseEntity {
   @ManyToOne(() => User, user => user.usedWords)
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -44,10 +42,4 @@ export class UsedWord {
 
   @Column({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
-
-  @UTCCreateDateColumn()
-  createdAt: Date;
-
-  @UTCUpdateDateColumn()
-  updatedAt: Date;
 }
