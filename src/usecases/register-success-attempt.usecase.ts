@@ -26,7 +26,7 @@ interface ISuccessReturn {
   attempt: number;
   bonuses: {
     perfectGame: number;
-    streak: number;
+    winStreak: number;
     highWinRate: number;
   };
 }
@@ -60,7 +60,7 @@ export class RegisterSuccessAttemptUseCase
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
     }
 
-    let userMatchResult = await this.matchRepository.findByUserId(id);
+    let userMatchResult = await this.matchRepository.findTodaysMatch(id);
 
     if (
       userMatchResult.isFailure() &&
@@ -163,7 +163,7 @@ export class RegisterSuccessAttemptUseCase
       newScore: scoreCalculated,
       bonuses: {
         perfectGame: currentAttempt === 1 ? BONUS_SCORES.PERFECT_GAME : 0,
-        streak:
+        winStreak:
           currentWinStreak >= 5
             ? currentWinStreak >= 10
               ? BONUS_SCORES.STREAK_5

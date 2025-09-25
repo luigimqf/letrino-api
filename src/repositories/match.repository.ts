@@ -9,7 +9,7 @@ import { Between, Repository } from 'typeorm';
 export interface IMatchRepository {
   create(data: ICreateMatchDTO): Promise<Either<ErrorCode, Match>>;
   findByUserId(userId: string): Promise<Either<ErrorCode, Match>>;
-  findTodaysMatch(userId: string): Promise<Either<ErrorCode, Match | null>>;
+  findTodaysMatch(userId: string): Promise<Either<ErrorCode, Match>>;
   findAllByUserId(userId: string): Promise<Either<ErrorCode, Match[]>>;
   getStats(userId: string): Promise<Either<ErrorCode, IStats>>;
   getTopScores(limit: number): Promise<Either<ErrorCode, ILeaderboardStats[]>>;
@@ -82,9 +82,7 @@ export class MatchRepository implements IMatchRepository {
     }
   }
 
-  async findTodaysMatch(
-    userId: string
-  ): Promise<Either<ErrorCode, Match | null>> {
+  async findTodaysMatch(userId: string): Promise<Either<ErrorCode, Match>> {
     try {
       const startOfDay = DateUtils.startOfDay();
       const endOfDay = DateUtils.endOfDay();

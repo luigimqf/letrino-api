@@ -50,12 +50,14 @@ export class RegisterFailedAttemptUseCase
       userUsedWord?.value?.wordId || ''
     );
 
+    console.log({ word });
     if (word.isFailure() || !word.value) {
       return Failure.create(ErrorCode.WORD_NOT_FOUND);
     }
 
-    let userMatchResult = await this.matchRepository.findByUserId(id);
+    let userMatchResult = await this.matchRepository.findTodaysMatch(id);
 
+    console.log({ userMatchResult });
     if (
       userMatchResult.isFailure() &&
       userMatchResult.error === ErrorCode.MATCH_NOT_FOUND
@@ -100,6 +102,8 @@ export class RegisterFailedAttemptUseCase
       result: EAttemptStatus.INCORRECT,
       userInput: attempt,
     });
+
+    console.log({ attemptResult });
 
     if (attemptResult.isFailure() || !attemptResult.value) {
       return Failure.create(ErrorCode.SERVER_ERROR);

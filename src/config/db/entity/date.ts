@@ -7,8 +7,8 @@ export function UTCCreateDateColumn(options?: any) {
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     transformer: {
-      to: (value: Date) => (value ? DateUtils.toUtc(value) : value),
-      from: (value: Date) => (value ? DateUtils.toUtc(value) : value),
+      to: (value: Date) => (value ? DateUtils.toUTC(value) : value),
+      from: (value: Date) => (value ? DateUtils.toUTC(value) : value),
     },
     ...options,
   });
@@ -20,8 +20,8 @@ export function UTCUpdateDateColumn(options?: any) {
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
     transformer: {
-      to: (value: Date) => (value ? DateUtils.toUtc(value) : value),
-      from: (value: Date) => (value ? DateUtils.toUtc(value) : value),
+      to: (value: Date) => (value ? DateUtils.toUTC(value) : value),
+      from: (value: Date) => (value ? DateUtils.toUTC(value) : value),
     },
     ...options,
   });
