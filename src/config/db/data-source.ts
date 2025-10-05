@@ -6,7 +6,7 @@ export const AppDataSource = new DataSource({
   type: 'postgres',
   url: env.DB_URL,
   synchronize: env.NODE_ENV === 'development',
-  logging: env.NODE_ENV === 'development',
+  logging: env.NODE_ENV !== 'production',
   entities: [User, Word, UsedWord, Match, Attempt],
   migrations: ['src/config/db/migrations/*.ts'],
   subscribers: ['src/config/db/subscribers/*.ts'],

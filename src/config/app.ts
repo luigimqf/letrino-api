@@ -1,5 +1,3 @@
-process.env.TZ = 'UTC';
-
 import 'reflect-metadata';
 import { setupCron } from '../workers';
 import setupDatabase from './db';
