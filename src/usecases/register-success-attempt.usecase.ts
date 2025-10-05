@@ -24,7 +24,9 @@ export interface IRegisterSuccessAttemptUseCase {
 
 interface ISuccessReturn {
   attempt: number;
-  bonuses: {
+  totalScore: number;
+  scoreDetails: {
+    attemptScore: number;
     perfectGame: number;
     winStreak: number;
     highWinRate: number;
@@ -160,14 +162,18 @@ export class RegisterSuccessAttemptUseCase
 
     return Success.create({
       attempt: currentAttempt,
-      newScore: scoreCalculated,
-      bonuses: {
+      totalScore: scoreCalculated,
+      scoreDetails: {
+        attemptScore:
+          ATTEMPT_SCORES[
+            Math.min(currentAttempt, 6) as keyof typeof ATTEMPT_SCORES
+          ] || 0,
         perfectGame: currentAttempt === 1 ? BONUS_SCORES.PERFECT_GAME : 0,
         winStreak:
           currentWinStreak >= 5
             ? currentWinStreak >= 10
-              ? BONUS_SCORES.STREAK_5
-              : BONUS_SCORES.STREAK_10
+              ? BONUS_SCORES.STREAK_10
+              : BONUS_SCORES.STREAK_5
             : 0,
         highWinRate:
           winRate >= HIGH_WIN_RATE_THRESHOLD && totalMatches >= 10

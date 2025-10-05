@@ -15,6 +15,7 @@ export class GetRandomWordController implements IController {
   async handle(req: Request, res: Response) {
     const authorizationHeader = req.headers.authorization;
 
+    console.log('Authorization Header:', authorizationHeader);
     const token =
       authorizationHeader && authorizationHeader.startsWith('Bearer ')
         ? authorizationHeader.split(' ')[1]

@@ -1,18 +1,19 @@
-import { env } from "../config/enviroment";
-import { JwtPayloadWithId } from "../types";
+import { env } from '../config/enviroment';
+import { JwtPayloadWithId } from '../types';
 import jwt from 'jsonwebtoken';
-import { Errors } from "../constants/error";
-import { Either, Failure, Success } from "./either";
-import { DAY_IN_SECONDS } from "../constants/time";
+import { ErrorCode, Errors } from '../constants/error';
+import { Either, Failure, Success } from './either';
+import { DAY_IN_SECONDS } from '../constants/time';
 
 export class Jwt {
   static sign(
-    payload: string | Buffer | object, 
-    expiresIn: number = DAY_IN_SECONDS, 
-    args?:jwt.SignOptions): string {
+    payload: string | Buffer | object,
+    expiresIn: number = DAY_IN_SECONDS,
+    args?: jwt.SignOptions
+  ): string {
     return jwt.sign(payload, env.JWT_SECRET, {
       expiresIn,
-      ...args
+      ...args,
     });
   }
 
@@ -22,7 +23,7 @@ export class Jwt {
 
       return Success.create<JwtPayloadWithId>(payload);
     } catch (error) {
-      return Failure.create(Errors.INVALID_TOKEN);
+      return Failure.create(ErrorCode.INVALID_TOKEN);
     }
   }
 }

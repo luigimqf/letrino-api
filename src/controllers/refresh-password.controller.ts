@@ -31,8 +31,10 @@ export class RefreshPasswordController implements IController {
 
     if (decodedResult.isFailure()) {
       serverError(res, {
-        message: Errors.SERVER_ERROR,
-        code: ErrorCode.SERVER_ERROR,
+        message:
+          Errors[decodedResult.error as keyof typeof Errors] ||
+          Errors.SERVER_ERROR,
+        code: decodedResult.error,
       });
       return;
     }
