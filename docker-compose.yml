@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -10,6 +8,8 @@ services:
       POSTGRES_USER: letrino-api
       POSTGRES_PASSWORD: 123
       POSTGRES_DB: letrino
+      TZ: UTC
+      PGTZ: UTC
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

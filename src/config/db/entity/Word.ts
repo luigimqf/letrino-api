@@ -1,16 +1,12 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
   OneToOne,
 } from 'typeorm';
 import { UsedWord } from './UsedWord';
 import { Attempt } from './Attempt';
 import { Match } from './Match';
-import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 import { BaseEntity } from './BaseEntity';
 
 export interface IWord {

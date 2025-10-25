@@ -14,6 +14,7 @@ import { getLeaderboardFactory } from '../factories/get-leaderboard.factory';
 import { refreshTokenFactory } from '../controllers/refresh-token.controller';
 import { forgotPasswordFactory } from '../factories/forgot-password.factory';
 import { refreshPasswordFactory } from '../factories/refresh-password.factory';
+import { AppDataSource } from './db/data-source';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto

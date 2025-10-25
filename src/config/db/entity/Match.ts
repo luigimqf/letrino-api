@@ -1,8 +1,5 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
   Column,
@@ -13,7 +10,6 @@ import { User } from './User';
 import { Attempt } from './Attempt';
 import { EGameStatus } from '../../../constants/game';
 import { Word } from './Word';
-import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 import { BaseEntity } from './BaseEntity';
 
 export interface IMatch {

@@ -1,15 +1,7 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { Attempt } from './Attempt';
 import { UsedWord } from './UsedWord';
 import { Match } from './Match';
-import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 import { BaseEntity } from './BaseEntity';
 
 export interface IUser {

@@ -1,15 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  Column,
-} from 'typeorm';
+import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { Word } from './Word';
 import { User } from './User';
-import { UTCCreateDateColumn, UTCUpdateDateColumn } from './date';
 import { BaseEntity } from './BaseEntity';
 
 export interface IUsedWord {
