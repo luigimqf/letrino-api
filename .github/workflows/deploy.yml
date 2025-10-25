@@ -10,45 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies and build
-        run: |
-          npm ci
-          npm run build
-
-      - name: Define release folder
-        id: vars
-        run: echo "RELEASE_DIR=releases/$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-
-      - name: Upload build to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/*,package.json,package-lock.json"
-          target: "~/projects/letrino-api/${{ env.RELEASE_DIR }}"
-
-      - name: Pull changes from git
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            cd ~/projects/letrino-api
-            git reset --hard
-            git pull origin main
-
-      - name: SSH into EC2 - Install deps & reload PM2
+      - name: Pull changes from git and deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,18 +25,14 @@ jobs:
             
             source ~/.bashrc || source ~/.profile || true
             
-            cd ~/projects/letrino-api/${{ env.RELEASE_DIR }}
-            
-            npm ci --omit=dev
-
             cd ~/projects/letrino-api
-            ln -sfn ${{ env.RELEASE_DIR }} current
-
-            if pm2 list | grep -q server; then
-              pm2 reload ~/projects/letrino-api/current/build/server.js --name server
+            git reset --hard
+            git pull origin main
+            
+            npm ci
+            
+            if pm2 list | grep -q letrino-server; then
+              pm2 reload letrino-server
             else
-              pm2 start ~/projects/letrino-api/current/build/server.js --name server
+              pm2 start "npm start" --name letrino-server
             fi
-
-            cd ~/projects/letrino-api/releases
-            ls -t | tail -n +4 | xargs -r rm -rf
