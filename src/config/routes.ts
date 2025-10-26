@@ -26,6 +26,11 @@ function setupRoutes(app: Express) {
     res.send('Hello World!');
   });
 
+  // app.get('/test', async (req, res) => {
+  //   const response = await AppDataSource.query('SELECT * FROM users;');
+  //   res.json(response);
+  // });
+
   app.get('/crash', async (req, res) => {
     throw new Error('Crash test');
   });
