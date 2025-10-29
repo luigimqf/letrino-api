@@ -1,6 +1,6 @@
 import { Match } from '../config/db/entity';
 import { ErrorCode } from '../constants/error';
-import { EGameStatus } from '../constants/game';
+import { EGameStatus } from '../constants/match';
 import { IMatchRepository } from '../repositories/match.repository';
 import { Either, Failure, Success } from '../utils/either';
 

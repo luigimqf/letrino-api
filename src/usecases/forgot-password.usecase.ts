@@ -8,13 +8,17 @@ import { Either, Failure, Success } from '../utils/either';
 import { Jwt } from '../utils/jwt';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import { ITokenRepository } from '../repositories/token.repository';
 
 export interface IForgotPasswordUsecase {
   execute(email: string): Promise<Either<ErrorCode, null>>;
 }
 
 export class ForgotPasswordUseCase implements IForgotPasswordUsecase {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(
+    private userRepository: IUserRepository,
+    private tokenRepository: ITokenRepository
+  ) {}
 
   async execute(email: string): Promise<Either<ErrorCode, null>> {
     const userResult = await this.userRepository.findOneBy({ email });
@@ -24,6 +28,12 @@ export class ForgotPasswordUseCase implements IForgotPasswordUsecase {
     }
 
     const token = Jwt.sign({ id: userResult.value?.id }, HOUR_IN_SECONDS);
+
+    const tokenResult = await this.tokenRepository.create(token);
+
+    if (tokenResult.isFailure()) {
+      return Failure.create(ErrorCode.TOKEN_CREATION_FAILED);
+    }
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',

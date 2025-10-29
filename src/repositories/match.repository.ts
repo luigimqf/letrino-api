@@ -1,7 +1,7 @@
 import { Attempt } from '../config/db/entity';
 import { IMatch, Match } from '../config/db/entity/Match';
 import { ErrorCode, Errors } from '../constants/error';
-import { EGameStatus } from '../constants/game';
+import { EGameStatus } from '../constants/match';
 import { DateUtils } from '../utils/date';
 import { Either, Failure, Success } from '../utils/either';
 import { Between, Repository } from 'typeorm';

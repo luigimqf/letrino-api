@@ -41,7 +41,8 @@ export class RefreshPasswordController implements IController {
 
     const updateResult = await this.refreshPasswordUsecase.execute(
       decodedResult.value.id,
-      newPassword
+      newPassword,
+      token
     );
 
     if (updateResult.isFailure()) {

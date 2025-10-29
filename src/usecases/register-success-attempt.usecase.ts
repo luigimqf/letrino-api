@@ -1,5 +1,5 @@
 import { ErrorCode } from '../constants/error';
-import { EGameStatus } from '../constants/game';
+import { EGameStatus } from '../constants/match';
 import {
   ATTEMPT_SCORES,
   BONUS_SCORES,

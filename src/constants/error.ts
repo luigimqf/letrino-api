@@ -46,6 +46,8 @@ export enum Errors {
   CREATE_ATTEMPT_FAILED = 'Failed to create attempt',
   MATCH_NOT_IN_PROGRESS = 'Match is not in progress',
   USER_WORD_NOT_FOUND = 'User word not found',
+  TOKEN_CREATION_FAILED = 'Failed to create token',
+  TOKEN_ALREADY_USED = 'Token has already been used',
 }
 
 export enum ErrorCode {
@@ -96,4 +98,6 @@ export enum ErrorCode {
   CREATE_ATTEMPT_FAILED = 'CREATE_ATTEMPT_FAILED',
   MATCH_NOT_IN_PROGRESS = 'MATCH_NOT_IN_PROGRESS',
   USER_WORD_NOT_FOUND = 'USER_WORD_NOT_FOUND',
+  TOKEN_CREATION_FAILED = 'TOKEN_CREATION_FAILED',
+  TOKEN_ALREADY_USED = 'TOKEN_ALREADY_USED',
 }
