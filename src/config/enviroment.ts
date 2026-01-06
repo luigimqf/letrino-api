@@ -10,8 +10,10 @@ const schema = z.object({
   PASSWORD_RESET_URL: z.string(),
   ALLOWED_ORIGIN: z.string(),
   SENTRY_DSN: z.string().optional(),
-  NODE_ENV: z.string().default('development')
-})
+  NODE_ENV: z.string().default('development'),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_REDIRECT_URI: z.string(),
+});
 
 export const env = schema.parse(process.env);
-

@@ -31,8 +31,11 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   passwordHash: string;
+
+  @Column({ nullable: true })
+  externalId: string;
 
   @OneToMany(() => Attempt, attempt => attempt.user)
   attempts: Attempt[];

@@ -14,7 +14,7 @@ import { getLeaderboardFactory } from '../factories/get-leaderboard.factory';
 import { refreshTokenFactory } from '../controllers/refresh-token.controller';
 import { forgotPasswordFactory } from '../factories/forgot-password.factory';
 import { refreshPasswordFactory } from '../factories/refresh-password.factory';
-import { AppDataSource } from './db/data-source';
+import { socialSignInFactory } from '../factories/social-sign-in.factory';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto
@@ -45,6 +45,10 @@ function setupRoutes(app: Express) {
   });
 
   //----------- Auth Routes ------------//
+  app.post('/auth/google', (req, res) =>
+    socialSignInFactory().handle(req, res)
+  );
+
   app.post('/sign-in', (req, res) => signInFactory().handle(req, res));
 
   app.post('/sign-up', (req, res) => createUserFactory().handle(req, res));
