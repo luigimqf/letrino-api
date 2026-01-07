@@ -6,11 +6,29 @@ on:
       - main
 
 jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Build
+        run: npm run build
+
   deploy:
+    needs: build-check
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pull changes from git and deploy
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -21,18 +39,28 @@ jobs:
             
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            
-            source ~/.bashrc || source ~/.profile || true
-            
+
             cd ~/projects/letrino-api
+
+            echo "--- Pulling latest code ---"
             git reset --hard
             git pull origin main
-            
+
+            echo "--- Installing dependencies ---"
             npm ci
-            
+
+            echo "--- Building project ---"
+            npm run build
+
+            echo "--- Running Migrations ---"
+            export NODE_ENV=production
+            npm run migration:production:run
+
+            echo "--- Reloading PM2 ---"
             if pm2 list | grep -q letrino-server; then
-              pm2 reload letrino-server
+              pm2 reload letrino-server --update-env
             else
-              pm2 start "npm start" --name letrino-server
+              pm2 start npm --name "letrino-server" -- run start
             fi
+
+            echo "--- Deploy Success ---"
