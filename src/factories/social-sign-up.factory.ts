@@ -2,24 +2,24 @@ import { OAuth2Client } from 'google-auth-library';
 import { AppDataSource } from '../config/db/data-source';
 import { User } from '../config/db/entity';
 import { IController } from '../controllers/create-user.controller';
-import { SocialSignInController } from '../controllers/social-sign-in.controller';
 import { UserRepository } from '../repositories/user.repository';
-import { SocialSignInUseCase } from '../usecases/social-sign-in.usecase';
 import { env } from '../config/enviroment';
+import { SocialSignUpUseCase } from '../usecases/social-sign-up.usecase';
+import { SocialSignUpController } from '../controllers/social-sign-up.controller';
 
-export const socialSignInFactory = (): IController => {
+export const socialSignUpFactory = (): IController => {
   const authClient = new OAuth2Client(
     env.GOOGLE_CLIENT_ID,
     env.GOOGLE_CLIENT_SECRET,
-    env.GOOGLE_SIGN_IN_REDIRECT_URI
+    env.GOOGLE_SIGN_UP_REDIRECT_URI
   );
   const userRepository = new UserRepository(AppDataSource.getRepository(User));
-  const socialSignInUsecase = new SocialSignInUseCase(
+  const socialSignUpUsecase = new SocialSignUpUseCase(
     userRepository,
     authClient
   );
-  const socialSignInController = new SocialSignInController(
-    socialSignInUsecase
+  const socialSignUpController = new SocialSignUpController(
+    socialSignUpUsecase
   );
-  return socialSignInController;
+  return socialSignUpController;
 };

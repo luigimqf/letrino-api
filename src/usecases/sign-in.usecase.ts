@@ -3,7 +3,7 @@ import { IUserRepository } from '../repositories/user.repository';
 import { Either, Failure, Success } from '../utils/either';
 import bcrypt from 'bcryptjs';
 import { Jwt } from '../utils/jwt';
-import { HOUR_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
+import { DAY_IN_SECONDS, WEEK_IN_SECONDS } from '../constants/time';
 
 export interface ISignInUseCase {
   execute(data: {
@@ -46,7 +46,7 @@ export class SignInUseCase implements ISignInUseCase {
       return Failure.create(ErrorCode.INVALID_CREDENTIALS);
     }
 
-    const token = Jwt.sign({ email, id }, HOUR_IN_SECONDS);
+    const token = Jwt.sign({ email, id }, DAY_IN_SECONDS);
     const refreshToken = Jwt.sign({ email, id }, WEEK_IN_SECONDS);
 
     return Success.create({ token, refresh_token: refreshToken, username });

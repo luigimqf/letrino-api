@@ -7,7 +7,7 @@ export const AppDataSource = new DataSource({
   url: env.DB_URL,
   synchronize: env.NODE_ENV === 'development',
   // synchronize: false,
-  logging: env.NODE_ENV !== 'production',
+  // logging: env.NODE_ENV !== 'production',
   // logging: false,
   entities: [User, Word, UsedWord, Match, Attempt, Token],
   migrations: ['src/config/db/migrations/*.ts'],

@@ -1,4 +1,3 @@
-import { AppDataSource } from '../config/db/data-source';
 import { Errors } from '../constants/error';
 import { Either, Failure, Success } from '../utils/either';
 import { IUser } from '../config/models/user.model';

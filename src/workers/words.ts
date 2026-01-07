@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UsedWordRepository } from '../repositories/used_word.repository';
 import { WordRepository } from '../repositories/word.repository';
 import { AppDataSource } from '../config/db/data-source';
 import { DateUtils } from '../utils/date';

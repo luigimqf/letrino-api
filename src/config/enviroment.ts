@@ -13,7 +13,8 @@ const schema = z.object({
   NODE_ENV: z.string().default('development'),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
-  GOOGLE_REDIRECT_URI: z.string(),
+  GOOGLE_SIGN_IN_REDIRECT_URI: z.string(),
+  GOOGLE_SIGN_UP_REDIRECT_URI: z.string(),
 });
 
 export const env = schema.parse(process.env);

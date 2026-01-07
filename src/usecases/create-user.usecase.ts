@@ -32,7 +32,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
       email,
     });
 
-    if (userWithEmail.isFailure() || userWithEmail.value) {
+    if (userWithEmail.isSuccess() && userWithEmail.value?.id) {
       return Failure.create(ErrorCode.FOUND_EMAIL);
     }
 
@@ -40,7 +40,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
       username,
     });
 
-    if (userWithUsername.isFailure() || userWithUsername.value) {
+    if (userWithUsername.isSuccess() && userWithUsername.value?.id) {
       return Failure.create(ErrorCode.FOUND_USERNAME);
     }
 
