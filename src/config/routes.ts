@@ -16,6 +16,7 @@ import { forgotPasswordFactory } from '../factories/forgot-password.factory';
 import { refreshPasswordFactory } from '../factories/refresh-password.factory';
 import { socialSignInFactory } from '../factories/social-sign-in.factory';
 import { socialSignUpFactory } from '../factories/social-sign-up.factory';
+import { env } from './enviroment';
 
 function setupRoutes(app: Express) {
   // Middleware global do Sentry para contexto
@@ -24,6 +25,7 @@ function setupRoutes(app: Express) {
   //----------- Heath Check ------------//
 
   app.get('/', async (req, res) => {
+    console.log(env.NODE_ENV);
     res.send('Hello World!');
   });
 

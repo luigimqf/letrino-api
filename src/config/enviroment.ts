@@ -2,16 +2,16 @@ import z from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
 
-const envFile = `.env.${process.env.NODE_ENV ?? 'development'}`;
+const nodeEnv = process.env.NODE_ENV ?? 'development';
 
-dotenv.config({
-  path: path.resolve(process.cwd(), envFile),
-});
+const envFile = `.env.${nodeEnv}`;
+
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 const schema = z.object({
   PORT: z.string(),
   DB_URL: z.string(),
-  DB_SSL: z.string(),
+  DB_SSL: z.string().optional(),
   JWT_SECRET: z.string(),
   EMAIL_USER: z.string(),
   EMAIL_PASSWORD: z.string(),
@@ -25,4 +25,11 @@ const schema = z.object({
   GOOGLE_SIGN_UP_REDIRECT_URI: z.string(),
 });
 
-export const env = schema.parse(process.env);
+const _env = schema.safeParse(process.env);
+
+if (_env.success === false) {
+  console.error('❌ Invalid environment variables:', _env.error.format());
+  throw new Error('Invalid environment variables.');
+}
+
+export const env = _env.data;
